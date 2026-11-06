@@ -1,0 +1,15 @@
+{
+  "name": "데스 서바이버: 전설의 귀환",
+  "short_name": "데스 서바이버",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#0d0818",
+  "theme_color": "#1a1030",
+  "lang": "ko",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
