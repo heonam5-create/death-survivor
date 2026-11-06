@@ -6,10 +6,10 @@
 
 /* ------------------------- 난이도 ------------------------- */
 const DIFFS = [
-  { k: 'easy', n: '쉬움', ic: '🌱', col: '#69f0ae', hp: .8, dmg: .77, cnt: 1.02, spd: .98, elite: .8, potT: 26, gold: .8, xp: 1, boss: .85, rescue: .85, pat: 0 },
-  { k: 'normal', n: '보통', ic: '⚔️', col: '#90caf9', hp: 1.05, dmg: 1.23, cnt: 1.39, spd: 1.06, elite: 1.3, potT: 34, gold: 1.1, xp: 1.05, boss: 1.15, rescue: 1, pat: 1 },
-  { k: 'hard', n: '어려움', ic: '🔥', col: '#ffb74d', hp: 1.45, dmg: 1.5, cnt: 1.66, spd: 1.11, elite: 1.65, potT: 44, gold: 1.4, xp: 1.12, boss: 1.4, rescue: 1.12, pat: 2 },
-  { k: 'hell', n: '지옥', ic: '👹', col: '#ff5252', hp: 1.95, dmg: 1.93, cnt: 1.93, spd: 1.18, elite: 2.1, potT: 54, gold: 1.9, xp: 1.25, boss: 1.8, rescue: 1.25, pat: 3 }
+  { k: 'easy', n: '쉬움', ic: '🌱', col: '#69f0ae', hp: .85, dmg: .8, cnt: 1.04, spd: 1, elite: .9, potT: 26, gold: .8, xp: 1, boss: .85, rescue: .85, pat: 0 },
+  { k: 'normal', n: '보통', ic: '⚔️', col: '#90caf9', hp: 1.2, dmg: 1.15, cnt: 1.38, spd: 1.08, elite: 1.45, potT: 34, gold: 1.1, xp: 1.05, boss: 1.15, rescue: 1, pat: 1 },
+  { k: 'hard', n: '어려움', ic: '🔥', col: '#ffb74d', hp: 1.65, dmg: 1.5, cnt: 1.67, spd: 1.13, elite: 1.85, potT: 44, gold: 1.4, xp: 1.12, boss: 1.4, rescue: 1.12, pat: 2 },
+  { k: 'hell', n: '지옥', ic: '👹', col: '#ff5252', hp: 2.3, dmg: 1.9, cnt: 2.0, spd: 1.2, elite: 2.4, potT: 54, gold: 1.9, xp: 1.25, boss: 1.8, rescue: 1.25, pat: 3 }
 ];
 function diffIdx() { const d = save.settings.diff; return d >= 0 && d <= 3 ? d : 1; }
 function DF() { return DIFFS[diffIdx()]; }
@@ -229,7 +229,7 @@ const SPM_LABEL = { rescue: '아군 병사 구출', scrate: '보급품 확보', 
 let allies = [], vehs = [], rescues = [];
 function extStageStart() {
   const n = G.stage;
-  G.diffAcc = [0, 0, 0, 0]; G.veh = null; G.rkit = 0; G.comboCd = 8; G.comboT = {}; G.cmdSpawned = false; G.cmdKilled = false;
+  G.diffAcc = [0, 0, 0, 0]; G.veh = null; G.rkit = 0; G.comboCd = 8; G.acomboT = {}; G.cmdSpawned = false; G.cmdKilled = false;
   G.hpotT = DF().potT * 0.6; G.lastHpot = 0; G.rkitT = 40; G.radio = null; G.stormT = 0; G.stormWarn = 0; G.artT = 0; G.artTick = 0; G.surroundT = 30;
   G.extEvT = rand(55, 70); G.allyRank = 1; G.allyBoost = 1; G.pdps = 40; G.pAcc = 0; G.pdT = 0; G.allyEliteT = 40; G.hold = null; G.rescued = 0; G.vehUsed = 0; G.lungeN = 0; G.spDone = 0;
   allies = []; vehs = []; rescues = [];
@@ -282,8 +282,7 @@ function nearVeh() {
 }
 function rideToggle() {
   if (G.state !== 'play' || P.hp <= 0) return;
-  if (G.veh) { exitVehicle(false); return; }
-  const v = nearVeh(); if (v) boardVehicle(v);
+  if (G.veh) exitVehicle(false); // 탑승은 자동 (버튼 없음)
 }
 function boardVehicle(v) {
   G.veh = v; G.lvAtMount = G.lv; recalc(); P.x = v.x; P.y = v.y; P.r = v.ch.r * 0.8; P.inv = Math.max(P.inv, 0.6);
@@ -311,7 +310,7 @@ function exitVehicle(destroyed) {
     for (let i = 0; i < 26; i++) addPart(P.x, P.y, rand(-260, 260), rand(-260, 120), pick(['#455a64', '#263238', '#ff9800', v.def.col.a]), rand(.5, 1), rand(3, 6), 300);
     toast('💥 탑승 장비 파괴! 자동 하차', 1.6, '#ff8a65');
   } else {
-    v.x = P.x; v.y = P.y; P.x += 30; v.noAuto = true; AU.sfx('clank'); toast('하차 (다시 타려면 탑승 버튼)', 1, '#b0bec5');
+    v.x = P.x; v.y = P.y; P.x += 30; v.noAuto = true; AU.sfx('clank'); toast('하차 (멀어졌다가 다시 다가가면 자동 탑승)', 1.2, '#b0bec5');
   }
   setRideBtn(); setSkillBtn(); setUltBtn();
 }
@@ -369,21 +368,21 @@ function vWeapon(v, key, i, dt) {
   S.cd = W.cd;
   const col = W.col, tier = v.tier || 0;
   switch (key) {
-    case 'mg': { S.alt ^= 1; const nb = tier >= 2 ? 2 : 1; for (let b = 0; b < nb; b++) { const [x, y] = vMuzzle(v, a, (S.alt ? 1 : -1) * (1 + b * 1.6)); const ang = a + rand(-.05, .05) + (b ? (S.alt ? .06 : -.06) : 0); mkProj({ kind: 'tracer', x, y, vx: Math.cos(ang) * 780, vy: Math.sin(ang) * 780, ang, r: 4, dmg: W.dmg * dm / (1 + (nb - 1) * .6), pierce: 2 + (tier >= 3 ? 1 : 0), life: W.range / 780, col, size: 1.1 + tier * .1, kb: 40 }); vFlash(x, y, a, col, 1.2); if (Q.level && Math.random() < .6) addPart(P.x, P.y - 12, rand(-70, 70), rand(-110, -60), '#ffca28', .45, 2, 420); } v.recoil = 2; break; }
-    case 'minigun': { S.spin = Math.min(1, S.spin + 0.06); S.cd = W.cd / (0.3 + 0.7 * S.spin); const [x, y] = vMuzzle(v, a); const ang = a + rand(-.09, .09); mkProj({ kind: 'tracer', x, y, vx: Math.cos(ang) * 820, vy: Math.sin(ang) * 820, ang, r: 4, dmg: W.dmg * dm, pierce: 1, life: W.range / 820, col, size: 1, kb: 25 }); vFlash(x, y, a, col, 1); v.recoil = 1.5; if (Q.level && Math.random() < .5) addPart(P.x, P.y - 10, rand(-60, 60), rand(-100, -50), '#ffca28', .4, 2, 420); break; }
-    case 'rocket': { const nr = 1 + tier; for (let r2 = 0; r2 < nr; r2++) { S.alt ^= 1; const aa = a + (r2 - (nr - 1) / 2) * 0.16; const [x, y] = vMuzzle(v, aa, S.alt ? 1 : -1); mkProj({ kind: 'rocket', x, y, vx: Math.cos(aa) * 200, vy: Math.sin(aa) * 200, ang: aa, acc: 560, r: 6, dmg: W.dmg * dm * (1 + .25 * tier) / nr, pierce: 1, life: 1.3, col, boom: W.boom * (1 + .1 * tier), homing: tier >= 2 ? 2.5 : 0, target: tgt, explodeEnd: 1, size: 1.1 }); vFlash(x, y, aa, '#ffab40', 1.6); } v.recoil = 4; break; }
-    case 'homing': { const K2 = W.k + 2 * tier; for (let k = 0; k < K2; k++) later(k * 0.09, () => { if (G.state !== 'play' || !G.veh) return; const t = (tgt && !tgt.dead) ? tgt : nearest(P.x, P.y, W.range); if (!t) return; const aa = a + (k - 1.5) * 0.45; const [x, y] = vMuzzle(v, aa); mkProj({ kind: 'missile', x, y, vx: Math.cos(aa) * 160, vy: Math.sin(aa) * 160, ang: aa, acc: 520, r: 5, dmg: W.dmg * dm * W.k * (1 + .2 * tier) / K2, pierce: 1, life: 2.2, col, boom: W.boom, homing: 5, target: t, explodeEnd: 1, size: 1 }); AU.sfx('missile', 1.1); }); v.recoil = 2; break; }
-    case 'grenade': { const [x, y] = vMuzzle(v, a); const d = Math.min(W.range, Math.hypot(tgt.x - x, tgt.y - y)); mkProj({ kind: 'grenade', lob: 1, x0: x, y0: y, tx: x + Math.cos(a) * d, ty: y + Math.sin(a) * d, x, y, vx: 0, vy: 0, ang: 0, T: 0.5, tt: 0, r: 0, dmg: W.dmg * dm * (tier ? .75 : 1), life: 9, col, boom: W.boom, cluster: tier ? 2 + tier : 0, size: 1.1 + tier * .1, nohit: 1 }); vFlash(x, y, a, '#c5e1a5', 1.4); v.recoil = 3; break; }
-    case 'shell': { const [x, y] = vMuzzle(v, a); mkProj({ kind: 'cball', x, y, vx: Math.cos(a) * 520, vy: Math.sin(a) * 520, ang: a, r: 9 + tier, dmg: W.dmg * dm * (tier >= 2 ? .8 : 1), pierce: 3, life: W.range / 520, col, boom: W.boom * (1 + .12 * tier), shards: tier >= 2 ? 6 + tier * 2 : 0, shardDmg: W.dmg * dm * .12, explodeEnd: 1, size: 16 + tier * 2, kb: 140 }); vFlash(x, y, a, '#ffab40', 3.2); for (let k = 0; k < 8; k++) addPart(x, y, Math.cos(a + rand(-.8, .8)) * rand(60, 160), Math.sin(a + rand(-.8, .8)) * rand(60, 160), 'rgba(200,200,200,.6)', .6, 5); v.recoil = 9; G.shake = Math.max(G.shake, 4); break; }
-    case 'mortar': { const K3 = W.k + tier; for (let k = 0; k < K3; k++) later(k * 0.2, () => { if (G.state !== 'play' || !G.veh) return; const tx = tgt.x + rand(-60, 60), ty = tgt.y + rand(-60, 60); const [x, y] = vMuzzle(v, -Math.PI / 2); mkProj({ kind: 'shell', lob: 1, x0: x, y0: y, tx, ty, x, y, vx: 0, vy: 0, ang: 0, T: 0.9, tt: 0, r: 0, dmg: W.dmg * dm * W.k * (1 + .2 * tier) / K3, life: 9, col, boom: W.boom, size: 1.2, nohit: 1 }); effects.push({ type: 'target', x: tx, y: ty, r: W.boom * .7, t: 0, dur: .9, col: '#ffcc80' }); vFlash(x, y, -Math.PI / 2, '#ffe0b2', 1.8); AU.sfx('mortar', 1); }); v.recoil = 4; break; }
-    case 'laser': { S.alt ^= 1; const [x, y] = vMuzzle(v, a, S.alt ? 1.6 : -1.6); const nl = tier >= 2 ? 3 : 1; for (let l = 0; l < nl; l++) { const aa = a + (l - (nl - 1) / 2) * .1; const q = mkProj({ kind: 'lbolt', x, y, vx: Math.cos(aa) * 900, vy: Math.sin(aa) * 900, ang: aa, r: 5, dmg: W.dmg * dm * (nl > 1 ? .5 : 1), pierce: 2 + (tier >= 1 ? 2 : 0), life: W.range / 900, col, len: 26 + tier * 6, kb: 25 }); if (tier >= 1 && !l) q.storm = 1; } vFlash(x, y, a, col, 1 + tier * .2); break; }
-    case 'plasma': { const [x, y] = vMuzzle(v, a); const d = Math.min(W.range, Math.hypot(tgt.x - x, tgt.y - y) + 40); mkProj({ kind: 'plasma', x, y, vx: Math.cos(a) * 380, vy: Math.sin(a) * 380, ang: a, r: 10 + tier * 2, dmg: W.dmg * dm, pierce: 999, life: d / 380, col, boom: W.boom * (1 + .15 * tier), shards: tier >= 2 ? 5 + tier : 0, shardDmg: W.dmg * dm * .2, explodeEnd: 1, size: 10 + tier * 2 }); vFlash(x, y, a, col, 2); v.recoil = 4; break; }
-    case 'rail': { const nRail = tier >= 2 ? 3 : 1; const [x1, y1] = vMuzzle(v, a); effects.push({ type: 'charge', t: 0, dur: 0.25, col }); later(0.25, () => { if (G.state !== 'play' || !G.veh) return; for (let rl = 0; rl < nRail; rl++) { const ra = a + (rl - (nRail - 1) / 2) * .12; const [xa, ya] = vMuzzle(v, ra), x2 = xa + Math.cos(ra) * W.range, y2 = ya + Math.sin(ra) * W.range; effects.push({ type: 'rail', x1: xa, y1: ya, x2, y2, w: 12 + tier * 2, col, t: 0, dur: 0.3 }); for (const e of query((xa + x2) / 2, (ya + y2) / 2, W.range / 2 + 10).slice()) if (segDist2(e.x, e.y, xa, ya, x2, y2) < (8 + e.r) ** 2) hitEnemy(e, W.dmg * dm * (nRail > 1 ? .6 : 1), { ap: 0.6, kb: 90, ang: ra, silent: true }); } AU.sfx('rail', 1); v.recoil = 8; G.shake = Math.max(G.shake, 4); }); void x1; break; }
-    case 'tesla': { const [x, y] = vMuzzle(v, a); const ts = nearestK(P.x, P.y, W.range, W.k + tier); for (const t of ts) { const pts = [[x, y], [t.x, t.y]]; hitEnemy(t, W.dmg * dm, { silent: true, stun: 0.15 }); let cur = t; const hit = new Set([t.id]); for (let c = 0; c < 2; c++) { let best = null, bd = 130 * 130; for (const e of query(cur.x, cur.y, 130)) { if (hit.has(e.id)) continue; const dd = (e.x - cur.x) ** 2 + (e.y - cur.y) ** 2; if (dd < bd) { bd = dd; best = e; } } if (!best) break; hit.add(best.id); pts.push([best.x, best.y]); hitEnemy(best, W.dmg * dm * 0.7, { silent: true }); cur = best; } effects.push({ type: 'bolt', pts, t: 0, dur: 0.2, seed: Math.random() * 100, col }); } break; }
-    case 'mlrs': { const list = enemies.filter(e => !e.dead && onScreen(e, -10)); const K4 = W.k + 3 * tier; for (let k = 0; k < K4; k++) later(k * 0.07, () => { if (G.state !== 'play' || !G.veh || !list.length) return; const t = pick(list); if (t.dead) return; const aa = -Math.PI / 2 + rand(-.6, .6); const [x, y] = vMuzzle(v, aa); mkProj({ kind: 'missile', x, y, vx: Math.cos(aa) * 220, vy: Math.sin(aa) * 220, ang: aa, acc: 480, r: 5, dmg: W.dmg * dm * W.k * (1 + .2 * tier) / K4, pierce: 1, life: 2.4, col, boom: W.boom, homing: 4.5, target: t, explodeEnd: 1, size: .9 }); vFlash(x, y, aa, '#ffd180', 1); }); AU.sfx('missile', .8); v.recoil = 3; break; }
+    case 'mg': { S.alt ^= 1; const nb = tier >= 2 ? 3 : 2; for (let b = 0; b < nb; b++) { const [x, y] = vMuzzle(v, a, (S.alt ? 1 : -1) * (1 + b * 1.6)); const ang = a + rand(-.05, .05) + (b ? (S.alt ? .06 : -.06) : 0); mkProj({ kind: 'tracer', x, y, vx: Math.cos(ang) * 780, vy: Math.sin(ang) * 780, ang, r: 4, dmg: W.dmg * dm / (1 + (nb - 1) * .6), pierce: 2 + (tier >= 3 ? 1 : 0), life: W.range / 780, col, size: 1.1 + tier * .1, kb: 40 }); vFlash(x, y, a, col, 1.2); if (Q.level && Math.random() < .6) addPart(P.x, P.y - 12, rand(-70, 70), rand(-110, -60), '#ffca28', .45, 2, 420); } v.recoil = 2; break; }
+    case 'minigun': { S.spin = Math.min(1, S.spin + 0.06); S.cd = W.cd / (0.3 + 0.7 * S.spin); for (let m = -1; m <= 1; m++) { const [x, y] = vMuzzle(v, a, m * 1.4); const ang = a + m * .13 + rand(-.07, .07); mkProj({ kind: 'tracer', x, y, vx: Math.cos(ang) * 820, vy: Math.sin(ang) * 820, ang, r: 4, dmg: W.dmg * dm * .55, pierce: 2, life: W.range / 820, col, size: 1, kb: 25 }); if (m === 0 || Math.random() < .4) vFlash(x, y, ang, col, 1.1); } v.recoil = 1.5; if (Q.level && Math.random() < .5) addPart(P.x, P.y - 10, rand(-60, 60), rand(-100, -50), '#ffca28', .4, 2, 420); break; }
+    case 'rocket': { const nr = 2 + tier; for (let r2 = 0; r2 < nr; r2++) { S.alt ^= 1; const aa = a + (r2 - (nr - 1) / 2) * 0.16; const [x, y] = vMuzzle(v, aa, S.alt ? 1 : -1); mkProj({ kind: 'rocket', x, y, vx: Math.cos(aa) * 200, vy: Math.sin(aa) * 200, ang: aa, acc: 560, r: 6, dmg: W.dmg * dm * (1.35 + .25 * tier) / nr, pierce: 1, life: 1.3, col, boom: W.boom * (1 + .1 * tier), homing: tier >= 2 ? 2.5 : 0, target: tgt, explodeEnd: 1, size: 1.1 }); vFlash(x, y, aa, '#ffab40', 1.6); } v.recoil = 4; break; }
+    case 'homing': { const K2 = W.k + 4 + 2 * tier; for (let k = 0; k < K2; k++) later(k * 0.06, () => { if (G.state !== 'play' || !G.veh) return; const t = (tgt && !tgt.dead) ? tgt : nearest(P.x, P.y, W.range); if (!t) return; const aa = a + (k - 1.5) * 0.45; const [x, y] = vMuzzle(v, aa); mkProj({ kind: 'missile', x, y, vx: Math.cos(aa) * 160, vy: Math.sin(aa) * 160, ang: aa, acc: 520, r: 5, dmg: W.dmg * dm * W.k * (1.35 + .2 * tier) / K2, pierce: 1, life: 2.2, sz2: 1, col, boom: W.boom, homing: 5, target: t, explodeEnd: 1, size: 1 }); AU.sfx('missile', 1.1); }); v.recoil = 2; break; }
+    case 'grenade': { const [x, y] = vMuzzle(v, a); const d = Math.min(W.range, Math.hypot(tgt.x - x, tgt.y - y)); for (let g = -1; g <= 1; g++) mkProj({ kind: 'grenade', lob: 1, x0: x, y0: y, tx: x + Math.cos(a + g * .3) * d, ty: y + Math.sin(a + g * .3) * d, x, y, vx: 0, vy: 0, ang: 0, T: 0.5, tt: 0, r: 0, dmg: W.dmg * dm * (tier ? .75 : 1) * .5, life: 9, col, boom: W.boom, cluster: tier ? 2 + tier : 0, size: 1.1 + tier * .1, nohit: 1 }); vFlash(x, y, a, '#c5e1a5', 1.4); v.recoil = 3; break; }
+    case 'shell': { const [x, y] = vMuzzle(v, a); mkProj({ kind: 'cball', x, y, vx: Math.cos(a) * 520, vy: Math.sin(a) * 520, ang: a, r: 9 + tier, dmg: W.dmg * dm * (tier >= 2 ? .8 : 1), pierce: 3, life: W.range / 520, col, boom: W.boom * (1 + .12 * tier), multi: 4 + tier, shards: tier >= 2 ? 6 + tier * 2 : 0, shardDmg: W.dmg * dm * .12, explodeEnd: 1, size: 16 + tier * 2, kb: 140 }); vFlash(x, y, a, '#ffab40', 3.2); for (let k = 0; k < 8; k++) addPart(x, y, Math.cos(a + rand(-.8, .8)) * rand(60, 160), Math.sin(a + rand(-.8, .8)) * rand(60, 160), 'rgba(200,200,200,.6)', .6, 5); v.recoil = 9; G.shake = Math.max(G.shake, 4); break; }
+    case 'mortar': { const K3 = W.k + 2 + tier; for (let k = 0; k < K3; k++) later(k * 0.2, () => { if (G.state !== 'play' || !G.veh) return; const tx = tgt.x + rand(-60, 60), ty = tgt.y + rand(-60, 60); const [x, y] = vMuzzle(v, -Math.PI / 2); mkProj({ kind: 'shell', lob: 1, x0: x, y0: y, tx, ty, x, y, vx: 0, vy: 0, ang: 0, T: 0.9, tt: 0, r: 0, dmg: W.dmg * dm * W.k * (1.3 + .2 * tier) / K3, life: 9, col, boom: W.boom, size: 1.2, nohit: 1 }); effects.push({ type: 'target', x: tx, y: ty, r: W.boom * .7, t: 0, dur: .9, col: '#ffcc80' }); vFlash(x, y, -Math.PI / 2, '#ffe0b2', 1.8); AU.sfx('mortar', 1); }); v.recoil = 4; break; }
+    case 'laser': { S.alt ^= 1; const [x, y] = vMuzzle(v, a, S.alt ? 1.6 : -1.6); const nl = tier >= 2 ? 4 : 2; S.pc = (S.pc || 0) + 1; if (S.pc % 4 === 0) mkProj({ kind: 'plasma', x, y, vx: Math.cos(a) * 420, vy: Math.sin(a) * 420, ang: a, r: 9, dmg: W.dmg * dm * 2.2, pierce: 999, life: Math.min(W.range, Math.hypot(tgt.x - x, tgt.y - y) + 30) / 420, col: '#ff4081', boom: 46, shock: 70, explodeEnd: 1, size: 9 }); for (let l = 0; l < nl; l++) { const aa = a + (l - (nl - 1) / 2) * .1; const q = mkProj({ kind: 'lbolt', x, y, vx: Math.cos(aa) * 900, vy: Math.sin(aa) * 900, ang: aa, r: 5, dmg: W.dmg * dm * (1.3 / nl), pierce: 2 + (tier >= 1 ? 2 : 0), life: W.range / 900, col, len: 26 + tier * 6, kb: 25 }); if (tier >= 1 && !l) q.storm = 1; } vFlash(x, y, a, col, 1 + tier * .2); break; }
+    case 'plasma': { const [x, y] = vMuzzle(v, a); const d = Math.min(W.range, Math.hypot(tgt.x - x, tgt.y - y) + 40); mkProj({ kind: 'plasma', x, y, vx: Math.cos(a) * 380, vy: Math.sin(a) * 380, ang: a, r: 10 + tier * 2, dmg: W.dmg * dm, pierce: 999, life: d / 380, col, boom: W.boom * (1.2 + .15 * tier), shock: 110 + tier * 15, shards: tier >= 2 ? 5 + tier : 0, shardDmg: W.dmg * dm * .2, explodeEnd: 1, size: 10 + tier * 2 }); vFlash(x, y, a, col, 2); v.recoil = 4; break; }
+    case 'rail': { const nRail = tier >= 2 ? 3 : 2; const [x1, y1] = vMuzzle(v, a); effects.push({ type: 'charge', t: 0, dur: 0.25, col }); later(0.25, () => { if (G.state !== 'play' || !G.veh) return; for (let rl = 0; rl < nRail; rl++) { const ra = a + (rl - (nRail - 1) / 2) * .12; const [xa, ya] = vMuzzle(v, ra), x2 = xa + Math.cos(ra) * W.range, y2 = ya + Math.sin(ra) * W.range; effects.push({ type: 'rail', x1: xa, y1: ya, x2, y2, w: 12 + tier * 2, col, t: 0, dur: 0.3 }); for (const e of query((xa + x2) / 2, (ya + y2) / 2, W.range / 2 + 10).slice()) if (segDist2(e.x, e.y, xa, ya, x2, y2) < (8 + e.r) ** 2) hitEnemy(e, W.dmg * dm * (1.3 / nRail), { ap: 0.6, kb: 90, ang: ra, silent: true }); if (Q.level && fxOk()) effects.push({ type: 'ering', x: x2, y: y2, r: 30, t: 0, dur: .3, col }); } AU.sfx('rail', 1); v.recoil = 8; G.shake = Math.max(G.shake, 4); }); void x1; break; }
+    case 'tesla': { const [x, y] = vMuzzle(v, a); const ts = nearestK(P.x, P.y, W.range, W.k + 2 + tier); for (const t of ts) { const pts = [[x, y], [t.x, t.y]]; hitEnemy(t, W.dmg * dm, { silent: true, stun: 0.15 }); let cur = t; const hit = new Set([t.id]); for (let c = 0; c < 3; c++) { let best = null, bd = 140 * 140; for (const e of query(cur.x, cur.y, 130)) { if (hit.has(e.id)) continue; const dd = (e.x - cur.x) ** 2 + (e.y - cur.y) ** 2; if (dd < bd) { bd = dd; best = e; } } if (!best) break; hit.add(best.id); pts.push([best.x, best.y]); hitEnemy(best, W.dmg * dm * 0.7, { silent: true }); cur = best; } effects.push({ type: 'bolt', pts, t: 0, dur: 0.2, seed: Math.random() * 100, col }); } break; }
+    case 'mlrs': { const list = enemies.filter(e => !e.dead && onScreen(e, -10)); const K4 = Math.round((W.k + 3 * tier) * 1.25); for (let k = 0; k < K4; k++) later(k * 0.07, () => { if (G.state !== 'play' || !G.veh || !list.length) return; const t = pick(list); if (t.dead) return; const aa = -Math.PI / 2 + rand(-.6, .6); const [x, y] = vMuzzle(v, aa); mkProj({ kind: 'missile', x, y, vx: Math.cos(aa) * 220, vy: Math.sin(aa) * 220, ang: aa, acc: 480, r: 5, dmg: W.dmg * dm * W.k * (1.3 + .2 * tier) / K4, pierce: 1, life: 2.4, col, boom: W.boom, homing: 4.5, target: t, explodeEnd: 1, size: .9 }); vFlash(x, y, aa, '#ffd180', 1); }); AU.sfx('missile', .8); v.recoil = 3; break; }
     case 'beam': { S.beamT = W.dur; S.tick = 0; AU.sfx('beam', 1); break; }
   }
-  if (key !== 'homing' && key !== 'mortar' && key !== 'mlrs' && key !== 'beam' && key !== 'rail') { AU.sfx(W.s[0], W.s[1] * (v.ch.r >= 25 ? 0.72 : v.ch.r <= 17 ? 1.3 : 1)); if (v.ch.r >= 25 || key === 'shell') AU.sfx('boom', 1); }
+  if (key !== 'homing' && key !== 'mortar' && key !== 'mlrs' && key !== 'beam' && key !== 'rail') { AU.sfx(W.s[0], W.s[1] * (v.ch.r >= 25 ? 0.72 : v.ch.r <= 17 ? 1.3 : 1)); if (v.ch.r >= 25 || key === 'shell') AU.sfx('boom', 1); if (v.ch.cat === 'hover' || v.def.ch === 'saucer' || v.def.ch === 'dpod') AU.sfx('zap', 1.4); }
   if (key === 'rocket' || key === 'plasma' || key === 'grenade') G.shake = Math.max(G.shake, 2.2);
 }
 function updateVehicle(dt) {
@@ -491,7 +490,7 @@ function seatFire(a, v, dt) {
 function allyHit(a, e, base, o = {}) {
   const p = a.spec.perk; const opt = Object.assign({ silent: true }, o);
   if (p === 'inc') opt.burn = base * 0.35; if (p === 'frost') opt.slow = 0.35; if (p === 'ap') opt.ap = 0.6; if (p === 'mark') e.markT = 3;
-  hitEnemy(e, base, opt);
+  opt.ally = 1; hitEnemy(e, base, opt);
   if (p === 'shock' && Math.random() < .3 && !e.dead) { const t2 = nearest(e.x, e.y, 120, new Set([e.id])); if (t2) zap(e.x, e.y, t2, base * .5, { col: '#ffee58' }); }
   if (p === 'heavy' && Math.random() < .35) explode(e.x, e.y, 30, base * .4, true, '#ff9100');
 }
@@ -593,8 +592,8 @@ function updateAllies(dt) {
     let on = 0; for (const e of enemies) if (!e.dead && onScreen(e, -20)) on++;
     if (on >= 4) for (const cb of COMBOS) {
       if (!has[cb.a] || !has[cb.b]) continue; const key = cb.a + cb.b;
-      if ((G.comboT[key] || 0) > G.time) continue;
-      G.comboT[key] = G.time + 28; G.comboCd = 7; doCombo(cb); break;
+      if ((G.acomboT[key] || 0) > G.time) continue;
+      G.acomboT[key] = G.time + 28; G.comboCd = 7; doCombo(cb); break;
     }
   }
 }
@@ -782,16 +781,18 @@ function bossGovern(e, dmg) {
   e.bud = Math.min(cap, e.bud + rate * (now - e.budT)); e.budT = now;
   if (dmg > e.bud) { const over = dmg - e.bud; dmg = e.bud + over * 0.3; e.bud = 0; } else e.bud -= dmg;
   const ft = now - e.spT;
-  if (ft > 75) { if (!e.weakMsg) { e.weakMsg = 1; toast('💢 보스 약점 노출! 받는 피해 증가', 1.6, '#ffd54f'); } dmg *= 1 + Math.min(1.5, (ft - 75) / 45); }
+  if (ft > 75) { if (!e.weakMsg) { e.weakMsg = 1; toast('💢 보스 약점 노출! 받는 피해 증가', 1.6, '#ffd54f'); } dmg *= 1 + Math.min(2.2, (ft - 75) / 50); }
   return dmg;
 }
 function bossExtStart(e, pat) {
   const lv = DF().pat;
+  if (typeof bossArchStart === 'function') bossArchStart(e, pat);
   if (pat === 'missile') { e.msN = (e.p2 ? 6 : 4) + lv; toast('🚀 보스 미사일 발사 준비!', .9, '#ff8a80'); }
   if (pat === 'barrage') { const n = (e.p2 ? 9 : 6) + lv * 2; for (let i = 0; i < n; i++) { const x = P.x + rand(-170, 170) + (i === 0 ? 0 : 0), y = P.y + rand(-170, 170); hazards.push({ kind: 'circle', x: i === 0 ? P.x : x, y: i === 0 ? P.y : y, r: 52, t: 0, delay: 1.2 + i * 0.12, dmg: e.dmg * 0.9 }); } AU.sfx('alarm'); }
   if (pat === 'sweep') { e.swA = Math.atan2(P.y - e.y, P.x - e.x) - 1.2; e.swDir = Math.random() < .5 ? 1 : -1; if (e.swDir < 0) e.swA += 2.4; hazards.push({ kind: 'line', x: e.x, y: e.y, ang: e.swA, len: 520, w: 22, t: 0, delay: 1.0, dmg: 0 }); AU.sfx('elaser'); }
 }
 function bossExtUpdate(e, dt) {
+  if (typeof bossArchUpdate === 'function' && bossArchUpdate(e, dt)) return true;
   switch (e.ps) {
     case 'missile':
       if (e.step < e.msN && e.sub >= 0.6 + e.step * 0.18) { const a = Math.atan2(P.y - e.y, P.x - e.x) + (e.step % 2 ? 1 : -1) * (0.6 + Math.random() * .6); eShot(e.x, e.y, a, 150, e.dmg * 0.5, 'fire'); const b = eprojs[eprojs.length - 1]; b.hom = 1; b.life = 4.5; AU.sfx('missile', 1.3); e.step++; }
@@ -868,7 +869,6 @@ function extArrows(list) {
 function setRideBtn() {
   const b = $('bRide'); if (!b) return;
   if (G.veh) { b.style.display = 'flex'; b.classList.add('exit'); b.innerHTML = '<span class="ic">⏏</span><span class="lb">하차</span>'; }
-  else if (G.rideNear && G.rideNear.noAuto) { b.style.display = 'flex'; b.classList.remove('exit'); b.innerHTML = '<span class="ic">🚘</span><span class="lb">탑승</span>'; }
   else b.style.display = 'none';
 }
 let skLast = '';

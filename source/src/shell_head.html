@@ -64,6 +64,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
 #squad{position:absolute;left:calc(10px + env(safe-area-inset-left));bottom:calc(168px + env(safe-area-inset-bottom));display:flex;gap:4px;pointer-events:none}
 #squad .ally{width:28px;height:28px;border-radius:50%;background:rgba(10,40,20,.7);border:2px solid #69f0ae;display:flex;align-items:center;justify-content:center;font-size:15px}
 #squad .ally.sp{border-color:#ffd54f;box-shadow:0 0 6px #ffd54f}#squad .ally.down{opacity:.4;border-color:#ff5252}#squad .ally.seat{border-color:#4dd0e1;border-style:dashed}
+.csec{margin-top:10px;background:rgba(0,0,0,.25);border-radius:12px;padding:8px}.secT{font-size:13px;font-weight:900;margin-bottom:6px;display:flex;justify-content:space-between;gap:6px}.ihg{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}.ihc{position:relative;font-family:inherit;background:#241a45;border:2px solid #6f5ab8;border-radius:10px;color:#fff;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:2px}.ihc.on{background:#004d40;box-shadow:0 0 10px #64ffda}.ihc .ii{font-size:22px}.ihc .in{font-size:10.5px;font-weight:700;line-height:1.2;text-align:center}.ihc .il{font-size:10px;color:#ffd54f}.ihc .ic2{position:absolute;right:4px;top:2px;color:#64ffda;font-weight:900}.ihnote{font-size:11px;opacity:.75;margin-top:6px;line-height:1.4}.shrow.sm{padding:4px 2px}.shrow.sm .cd{font-size:11px}
 .diffbox{margin:6px 0 2px;text-align:center}.diffbox .seg{justify-content:center;flex-wrap:wrap}.diffnote{font-size:11.5px;opacity:.85;margin-top:4px;line-height:1.4}
 /* ---------- screens ---------- */
 .scr{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
@@ -200,7 +201,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
   <button class="gbtn" id="bPot"><span class="ic" style="font-size:22px">🧪</span><span class="badge" id="potN">3</span><span class="cdv"></span></button>
   <button class="gbtn" id="bSk2"><span class="ic">💨</span><span class="lb">질주</span><span class="cdv"></span></button>
   <button class="gbtn" id="bUlt"><span class="ic">💥</span><span class="lb">필살기</span></button>
-  <button class="gbtn" id="bRide"><span class="ic">🚘</span><span class="lb">탑승</span></button>
+  <button class="gbtn" id="bRide"><span class="ic">🚪</span><span class="lb">하차</span></button>
   <div id="squad"></div>
   <button class="gbtn" id="bSk1"><span class="ic" style="font-size:32px">🌀</span><span class="lb">회오리</span><span class="cdv"></span></button>
  </div>
@@ -217,7 +218,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
   <button class="btn blue" id="tCodex">📖 무기 도감</button>
   <button class="btn blue" id="tHelp">🎮 조작 방법</button>
   <div class="trow"><button class="btn gray sm" id="tSet">⚙️ 설정</button><button class="btn kakao sm" id="tShare">💬 카카오톡 공유</button></div>
-  <div class="ver">확장팩 v6 · 무기 360종 · 탑승 장비 120종 · 정예 40종 · 40스테이지</div>
+  <div class="ver">확장팩 v7 · 무기 360종 · 탑승 장비 120종 · 정예 40종 · 40스테이지</div>
  </div>
 
  <!-- 스테이지 선택 -->
@@ -264,6 +265,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
   <div class="panel">
    <div class="res-t" id="rTitle">클리어!</div>
    <div id="rStats"></div>
+   <div id="rClear" style="display:none"><div id="rInhSel" class="csec"></div><div id="rShop" class="csec"></div></div>
    <div class="center" style="margin-top:12px" id="rBtns"></div>
   </div>
  </div>
@@ -303,8 +305,8 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
    <p>✨ <b>전설 보물상자</b> — 스테이지마다 1개 등장. 화살표를 따라가 열면 보상 3개 중 1개 선택.</p>
    <p>⚠ <b>정예 몬스터</b> — 크고 고유 기술을 씁니다. 처치 시 무기를 떨어뜨릴 수 있어요.</p>
    <p>🪂 <b>특수 전투 장비</b> — 스테이지 중반~후반에 차량·로봇·비행 장비가 낙하산으로 투하됩니다. 착륙한 장비에 다가가면 <b>자동 탑승</b>! 짧은 시간(20~40초) 동안 엄청난 화력으로 적을 쓸어버리세요. 🌀 버튼은 <b>특수능력</b>, 💥 버튼은 탑승마다 1번 쓰는 <b>필살기</b>. 시간이 끝나거나 내구도가 0이 되면 하차합니다.</p>
-   <p>👑 <b>보스 체력바</b> — 보스는 2~3줄의 체력바(빨강→주황→보라)를 가집니다. 줄이 바뀔 때마다 패턴이 강해지니 빨간 경고를 잘 피하세요.</p>
-   <p>🔁 <b>무기 계승</b> — 보스를 쓰러뜨리면 무기 1개를 골라 레벨 그대로 다음 스테이지에 가져갈 수 있습니다.</p>
+   <p>👑 <b>보스 체력바</b> — 모든 보스는 3줄의 체력바(빨강→주황→보라)를 가집니다. 보스마다 돌진·포격·레이저·소환·기계·화염·냉기·전기·중력·최종 유형의 고유 패턴이 있고, 줄이 바뀔 때마다 빨라지며 새 기술을 씁니다. 마지막 보라 줄에서는 <b>고유 필살기</b>! 빨간 경고를 잘 피하세요.</p>
+   <p>🔁 <b>무기 계승</b> — 보스를 쓰러뜨리면 남은 보석이 자동 회수되고, 클리어 화면에서 무기 최대 2개를 골라 레벨 그대로 다음 스테이지에 가져갈 수 있습니다. 골드 강화도 클리어 화면에서 바로! '다음 스테이지' 버튼을 눌러야 이동합니다.</p>
    <p>🔥 <b>콤보</b> — 빠르게 연속 처치하면 콤보! 10·30·50·100 콤보마다 보너스. 한꺼번에 여러 마리를 쓰러뜨리면 <b>연쇄 폭발</b>이 일어납니다.</p>
    <p>🎖️ <b>정예 몬스터</b> — 스테이지마다 고유한 정예가 등장합니다. 빨간 경고를 피하고 처치하면 <b>보상 선택</b>!</p>
    <p>🎁 <b>무기 보급 상자</b> — 20초 동안 화력·발사체·연사 강화.</p>
@@ -312,7 +314,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
    <p>🧪 <b>회복 물약</b> — 맵에 빨간 물약이 주기적으로 나타납니다. 체력이 가득하면 물약 가방에 보관.</p>
    <p>🏅 <b>특별 임무</b> — 구출·보급품·지휘관·구역 사수 등 선택형 임무. 완료 즉시 보상!</p>
    <p>⚙️ <b>난이도</b> — 쉬움·보통·어려움·지옥. 높을수록 보상(골드)이 커집니다. 일시정지 메뉴에서 언제든 변경.</p>
-   <p>⌨️ PC: WASD/방향키 이동, J 회오리(탑승 시 특수능력), K 질주, L 물약, E 탑승/하차, R 필살기, ESC 일시정지</p>
+   <p>⌨️ PC: WASD/방향키 이동, J 회오리(탑승 시 특수능력), K 질주, L 물약, E 하차 (탑승은 자동), R 필살기, ESC 일시정지</p>
    <div class="center"><button class="btn" id="helpClose">닫기</button></div>
   </div>
  </div>

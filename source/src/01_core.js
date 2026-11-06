@@ -28,7 +28,7 @@ const DEFAULT_SAVE = () => ({
   // v4 추가 항목
   vfound: {},       // 탑승한 적 있는 장비 { id: 1 }
   afound: {},       // 구출한 동료 종류 { 'cls+perk': 1 }
-  inherit: null     // 다음 스테이지 계승 무기 { id, lv, evo, from }
+  inherit: []       // 다음 스테이지 계승 무기 (최대 2개) [{ id, lv, evo, from }]
 });
 let save = DEFAULT_SAVE();
 function loadSave() {
@@ -47,7 +47,7 @@ function loadSave() {
       save.best = (d.best && typeof d.best === 'object') ? d.best : {};
       save.vfound = (d.vfound && typeof d.vfound === 'object') ? d.vfound : {};
       save.afound = (d.afound && typeof d.afound === 'object') ? d.afound : {};
-      save.inherit = (d.inherit && typeof d.inherit === 'object' && typeof d.inherit.id === 'string') ? { id: d.inherit.id, lv: Math.max(1, Math.min(5, d.inherit.lv | 0)), evo: !!d.inherit.evo, from: d.inherit.from | 0 } : null;
+      { const raw = Array.isArray(d.inherit) ? d.inherit : d.inherit ? [d.inherit] : []; save.inherit = raw.filter(x => x && typeof x === 'object' && typeof x.id === 'string').slice(0, 2).map(x => ({ id: x.id, lv: Math.max(1, Math.min(5, x.lv | 0)), evo: !!x.evo, from: x.from | 0 })); }
       save.settings.diff = [0, 1, 2, 3].includes(save.settings.diff) ? save.settings.diff : 1;
       save.cleared = clamp(Math.floor(+save.cleared || 0), 0, 40);
       save.gold = Math.max(0, Math.floor(+save.gold || 0));

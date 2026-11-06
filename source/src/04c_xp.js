@@ -274,6 +274,7 @@ function setUltBtn() {
 /* ------------------------- 확장팩 스테이지 시작 / 업데이트 ------------------------- */
 function xpStageStart() {
   G.theme = THEME_OF[G.st.mu] || 'war';
+  pools = []; G.adaptLive = 0;
   G.combo = 0; G.comboT = 0; G.comboMax = 0; G.comboGold = 0; G.kwin = []; G.chainCd = 0; G.eliteRw = 0; G.erAspd = 0; G.erCrit = 0; G.sup = null; G.auraT = 0;
   // 스테이지 전환 시 메모리 정리: 지난 스테이지 배경 타일·스프라이트 캐시 해제
   groundCache.clear(); if (SPR.size > 700) SPR.clear();
@@ -283,6 +284,6 @@ function xpUpdate(dt) {
   if (G.comboT > 0) { G.comboT -= dt; if (G.comboT <= 0) G.combo = 0; }
   if (G.chainCd > 0) G.chainCd -= dt;
   if (G.sup && G.sup.t > 0) { G.sup.t -= dt; if (G.sup.t <= 0) { G.sup = null; recalc(); toast('보급 효과 종료', .9, '#b0bec5'); } }
-  updateElitesX(dt); updateDrops(dt);
+  updateElitesX(dt); updateDrops(dt); updatePools(dt); G.adaptLive = Math.min(0.08, 0.02 * activeAllies());
   if (effects.length > 280) effects.splice(0, effects.length - 280);
 }

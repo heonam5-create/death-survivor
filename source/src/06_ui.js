@@ -106,20 +106,20 @@ function stageWin() {
   finishRun(true); AU.bgm('win');
   $('rTitle').textContent = n === 40 ? '최종 승리!' : 'STAGE CLEAR!'; $('rTitle').className = 'res-t win';
   const qrows = G.quests.map(q => `<div class="stat"><span>${q.done ? '✔' : '✖'} ${q.main ? '' : q.sp ? '[특별] ' : '[보조] '}${qLabel(q)}</span><span style="color:${q.done ? '#69f0ae' : '#ef9a9a'}">${q.done ? '완료' : '미완료'}</span></div>`).join('');
-  $('rStats').innerHTML = statRows([['스테이지', `${n}. ${G.st.name}`], ['난이도', `${DF().ic} ${DF().n} (보상 x${dmul.toFixed(2)})`], ['클리어 시간', fmtTime(G.t)], ['도달 레벨', 'Lv ' + G.lv], ['처치 수', G.kills], ['최대 콤보', (G.comboMax || 0) + ' 연속'], ['구출한 동료', G.rescued + '명'], ['탑승한 장비', G.vehUsed + '회']]) + qrows +
-    statRows([['클리어 보상', '+' + clearG + 'G'], ...(sideG ? [['보조 목표 보상', '+' + sideG + 'G']] : []), ...(special ? [[n % 10 === 0 ? '🏆 10스테이지 전설 보급' : '🎖️ 5스테이지 특별 보상', '+' + special + 'G']] : []), ['획득 골드 합계', '💰 ' + G.gold], ['보유 골드', '💰 ' + save.gold]]) +
+  $('rStats').innerHTML = statRows([['스테이지', `${n}. ${G.st.name}`], ['난이도', `${DF().ic} ${DF().n} (보상 x${dmul.toFixed(2)})`], ['클리어 시간', fmtTime(G.t)], ['도달 레벨', 'Lv ' + G.lv], ['획득 경험치', Math.round(G.xpTotal || 0) + ' XP'], ['처치 수', G.kills], ['최대 콤보', (G.comboMax || 0) + ' 연속'], ['구출한 동료', G.rescued + '명'], ['탑승한 장비', G.vehUsed + '회']]) + qrows +
+    statRows([['클리어 보상', '+' + clearG + 'G'], ...(sideG ? [['보조 목표 보상', '+' + sideG + 'G']] : []), ...(special ? [[n % 10 === 0 ? '🏆 10스테이지 전설 보급' : '🎖️ 5스테이지 특별 보상', '+' + special + 'G']] : []), ['획득 골드 합계', '💰 ' + G.gold]]) + `<div class="stat"><span>보유 골드</span><span class="goldNow">💰 ${save.gold}</span></div>` +
     (G.newFound.length ? `<p class="unl">✨ 새로 발견한 무기: ${G.newFound.map(id => WMAP[id].ic + ' ' + WMAP[id].nm).join(', ')}</p>` : '') +
     (newUnlocks.length ? `<p class="unl">🔓 다음 스테이지 신규 무기: ${newUnlocks.map(id => WMAP[id].ic + ' ' + WMAP[id].nm).join(', ')}</p>` : '') +
     (G.newVeh ? `<p class="unl">🚘 새로 탑승한 장비 ${G.newVeh}종 · 장비 도감 ${Object.keys(save.vfound).length} / ${VEH.length}</p>` : '') +
-    (n === 40 ? '<p class="unl">🎉 40개 스테이지를 모두 정복했습니다!</p>' : '') + `<p class="unl" id="rInh">🔁 계승 무기: ${inheritLabel(save.inherit)}</p>`;
+    (n === 40 ? '<p class="unl">🎉 40개 스테이지를 모두 정복했습니다!</p>' : '');
   const btns = $('rBtns'); btns.innerHTML = '';
-  if (n < 40) addBtn(btns, '다음 스테이지 ▶', '', () => startStage(n + 1));
-  addBtn(btns, '🔧 강화소', 'blue', () => openShop('result'));
-  addBtn(btns, '스테이지 선택', 'gray', openStageSelect);
+  if (n < 40) addBtn(btns, '다음 스테이지 ▶', '', () => { saveInheritSel(); startStage(n + 1); });
+  addBtn(btns, '스테이지 선택', 'gray', () => { saveInheritSel(); openStageSelect(); });
+  $('rClear').style.display = 'block'; renderClearExtras();
   showScreen('scrResult');
-  if (G.weapons.length && !window.__botPick) openInherit();
 }
 function stageLose() {
+  $('rClear').style.display = 'none';
   G.state = 'result'; $('gameUI').classList.remove('on'); finishRun(false); AU.bgm('lose');
   $('rTitle').textContent = 'GAME OVER'; $('rTitle').className = 'res-t lose';
   const qrows = G.quests.map(q => `<div class="stat"><span>${q.done ? '✔' : '✖'} ${q.main ? '' : '[보조] '}${qLabel(q)}</span><span>${q.k === 'boss' ? (q.done ? '완료' : '미완료') : qProgress(q)}</span></div>`).join('');

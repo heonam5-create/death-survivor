@@ -307,6 +307,7 @@ function drawZone(x, y, r, col, label, k) {
 function vis(x, y, m) { return Math.abs(x - G.camX) < VW / 2 + m && Math.abs(y - G.camY) < VH / 2 + m; }
 function drawWorldExt(layer) {
   if (layer === 'under') {
+    drawPools();
     if (G.hold && !G.hold.q.done && vis(G.hold.x, G.hold.y, 140)) drawZone(G.hold.x, G.hold.y, G.hold.r, '#ffab40', `🚩 구역 사수 ${Math.max(0, Math.ceil(G.hold.q.sec - G.hold.q.cur))}초`, G.hold.q.cur / G.hold.q.sec);
     const R = G.radio; if (R && vis(R.x, R.y, 160)) {
       drawZone(R.x, R.y, R.r, '#ffd54f', R.phase === 'go' ? '📻 고립된 아군' : `🛡️ 방어 ${Math.floor(R.prog / R.need * 100)}%`, R.prog / R.need);
