@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>은하수식당 - AI 카드게임</title>
+<meta name="description" content="외계 식당의 주인이 되어 외계인 손님을 대접하세요! 은하수식당 AI 대전 카드게임 (무료, 설치 없음)">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://heonam5-create.github.io/death-survivor/galaxy-diner/">
+<meta property="og:title" content="은하수식당 - AI 카드게임">
+<meta property="og:description" content="링크를 누르면 바로 시작! 2~4인 AI 대전 · 쉬움/보통/어려움">
+<meta property="og:image" content="https://heonam5-create.github.io/death-survivor/galaxy-diner/img/og.jpg">
+<meta name="theme-color" content="#2a1450">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="은하수식당">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="img/icon-192.png">
+<link rel="apple-touch-icon" href="img/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=1">
+</head>
+<body>
+<div id="app">
+  <!-- 시작 메뉴 -->
+  <section id="scr-menu" class="screen on">
+    <div class="menu-wrap">
+      <img class="title-img" src="img/ui/title.webp" alt="은하수식당">
+      <img class="chef-img" src="img/ui/chef.webp" alt="">
+      <div class="menu-btns">
+        <button class="btn big" id="b-new">🚀 새 게임 시작</button>
+        <button class="btn big" id="b-cont">▶ 이어하기</button>
+        <button class="btn big ghost" id="b-rules">📖 게임 방법</button>
+        <button class="btn big ghost" id="b-set">⚙ 설정</button>
+      </div>
+      <div class="menu-foot">무료 · 회원가입 없음 · 광고 없음</div>
+    </div>
+  </section>
+
+  <!-- 새 게임 설정 -->
+  <section id="scr-setup" class="screen">
+    <div class="panel-page">
+      <h2>새 게임</h2>
+      <h3>플레이 인원</h3>
+      <div class="seg" id="seg-n">
+        <button data-v="2">2인<small>나 + AI 1</small></button>
+        <button data-v="3" class="on">3인<small>나 + AI 2</small></button>
+        <button data-v="4">4인<small>나 + AI 3</small></button>
+      </div>
+      <h3>AI 난이도</h3>
+      <div class="seg" id="seg-d">
+        <button data-v="easy">쉬움<small>처음 배울 때</small></button>
+        <button data-v="normal" class="on">보통<small>일반 플레이어</small></button>
+        <button data-v="hard">어려움<small>숙련자</small></button>
+      </div>
+      <button class="btn big" id="b-start">게임 시작!</button>
+      <button class="btn ghost" data-back>← 뒤로</button>
+    </div>
+  </section>
+
+  <!-- 게임 방법 -->
+  <section id="scr-rules" class="screen">
+    <div class="panel-page scroll" id="rules-body"></div>
+  </section>
+
+  <!-- 설정 -->
+  <section id="scr-set" class="screen">
+    <div class="panel-page">
+      <h2>설정</h2>
+      <label class="row-set">효과음 <input type="checkbox" id="o-sfx" checked></label>
+      <label class="row-set">배경음악 <input type="checkbox" id="o-bgm" checked></label>
+      <label class="row-set">빠른 진행 (AI 연출 짧게) <input type="checkbox" id="o-fast"></label>
+      <button class="btn ghost" id="b-share">🔗 친구에게 링크 공유</button>
+      <button class="btn ghost" id="b-wipe">🗑 저장 데이터 지우기</button>
+      <button class="btn ghost" data-back>← 뒤로</button>
+      <p class="ver">은하수식당 디지털판 v1.0</p>
+    </div>
+  </section>
+
+  <!-- 게임 화면 -->
+  <section id="scr-game" class="screen">
+    <header id="g-top">
+      <div class="top-l"><span id="t-round">1/4 라운드</span><span id="t-turn"></span></div>
+      <div class="top-r"><span id="t-acts"></span><button class="icon-btn" id="b-gmenu">☰</button></div>
+    </header>
+    <div id="g-players"></div>
+    <main id="g-board">
+      <div id="g-market"></div>
+      <div id="g-guests"></div>
+      <div id="g-rows"></div>
+    </main>
+    <footer id="g-me">
+      <div id="g-prompt"></div>
+      <div id="g-hand"></div>
+      <div id="g-actions">
+        <button class="act" id="a-draw"><b>①</b>카드 얻기</button>
+        <button class="act" id="a-dice"><b>②</b>조커 받기</button>
+        <button class="act" id="a-serve"><b>③</b>요리 제공</button>
+        <button class="act" id="a-guest"><b>④</b>손님 대접</button>
+        <button class="act sm" id="a-exp">📋<br>전문가</button>
+      </div>
+    </footer>
+  </section>
+</div>
+<div id="fx"></div>
+<div id="modal" class="hidden"><div class="m-box" id="m-box"></div></div>
+<div id="toast"></div>
+<script src="js/data.js?v=1"></script>
+<script src="js/engine.js?v=1"></script>
+<script src="js/ai.js?v=1"></script>
+<script src="js/audio.js?v=1"></script>
+<script src="js/ui.js?v=1"></script>
+</body>
+</html>
