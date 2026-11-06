@@ -7,21 +7,30 @@ let enemies = [], projs = [], eprojs = [], pickups = [], parts = [], texts = [],
 const joy = { id: null, ox: 0, oy: 0, dx: 0, dy: 0, mag: 0 };
 const keys = {};
 function later(t, fn) { laterQ.push({ t: G.time + t, fn }); }
-function xpNeed(l) { return Math.floor(5 + l * 3.5 + l * l * 0.18); }
+// v8: 레벨업 속도 — Lv1~5 기존의 80%, 이후 레벨마다 조금씩 느려져 Lv31부터 20% (구간 사이 부드럽게 연결)
+function xpSpeed(l) { return l <= 5 ? 0.8 : l >= 31 ? 0.2 : 0.8 - (l - 5) * 0.6 / 26; }
+function xpNeedBase(l) { return Math.floor(5 + l * 3.5 + l * l * 0.18); }
+function xpNeed(l) { return Math.round(xpNeedBase(l) / xpSpeed(l)); }   // 배율은 여기서 한 번만 적용
+// v8: 골드 획득량 50% — 모든 획득 경로가 이 함수를 한 번만 거침 (소수점은 누적해서 정확히 절반)
+const GOLD_X = 0.5;
+function goldX(g) { G.goldFrac = (G.goldFrac || 0) + Math.max(0, g) * GOLD_X; const o = Math.floor(G.goldFrac + 1e-9); G.goldFrac -= o; return o; }
+// v8: 골드 강화 확장 — 기존 최대 단계 이후는 효과가 완만하게(60%) 증가
+function effUp(k) { const lv = save.up[k] || 0, om = UPGRADES[k].om; return lv <= om ? lv : om + (lv - om) * 0.6; }
+const POSTBOSS_T = 8;   // 보스 처치 후 보석을 직접 주울 수 있는 정리 시간(초)
 
 function recalc() {
   const p = G.pass, u = save.up;
-  P.dmgMul = (1 + 0.12 * (p.atk || 0)) * (1 + 0.05 * u.atk);
-  P.cdMul = 1 / (1 + 0.1 * (p.aspd || 0));
+  P.dmgMul = (1 + 0.12 * (p.atk || 0)) * (1 + 0.05 * effUp('atk'));
+  P.cdMul = 1 / ((1 + 0.1 * (p.aspd || 0)) * (1 + Math.min(0.3, 0.02 * effUp('aspd'))));
   P.projAdd = p.proj || 0; P.pierceAdd = p.pierce || 0;
   P.areaMul = 1 + 0.12 * (p.area || 0);
   P.crit = 0.05 + 0.07 * (p.crit || 0);
-  const oldMax = P.maxHp; P.maxHp = 100 + 25 * (p.hp || 0) + 12 * u.hp; if (P.maxHp > oldMax) P.hp += P.maxHp - oldMax;
-  P.armor = Math.min(0.6, 0.07 * (p.armor || 0) + 0.02 * u.armor);
+  const oldMax = P.maxHp; P.maxHp = 100 + 25 * (p.hp || 0) + Math.round(12 * effUp('hp')); if (P.maxHp > oldMax) P.hp += P.maxHp - oldMax;
+  P.armor = Math.min(0.6, 0.07 * (p.armor || 0) + 0.02 * effUp('armor'));
   P.regen = 0.5 * (p.regen || 0);
-  P.spd = 125 * (1 + 0.08 * (p.speed || 0)) * (1 + 0.02 * u.spd);
+  P.spd = 125 * (1 + 0.08 * (p.speed || 0)) * (1 + Math.min(0.3, 0.02 * effUp('spd')));
   P.magnet = 75 * (1 + 0.35 * (p.magnet || 0));
-  P.greed = (1 + 0.2 * (p.greed || 0)) * (1 + 0.05 * u.gain) * DF().gold; P.xpMul = (1 + 0.05 * u.gain) * DF().xp;
+  P.greed = (1 + 0.2 * (p.greed || 0)) * (1 + 0.05 * effUp('gain')) * DF().gold; P.xpMul = (1 + 0.05 * effUp('gain')) * DF().xp;
   if (G.allyAura) P.cdMul /= 1 + 0.06 * G.allyAura;
   supApply();
   const b = G.buff || {}; P.dmgMul *= 1 + (b.atk || 0); P.cdMul /= 1 + (b.aspd || 0); P.crit += b.crit || 0; P.spd *= 1 + (b.spd || 0);
@@ -40,7 +49,7 @@ function startStage(n) {
   G.stage = n; G.st = st; G.t = 0; G.time = 0;
   G.hpMul = 1 + (n - 1) * 0.16; G.dmgMul = 1 + (n - 1) * 0.07; G.spdMul = 1 + (n - 1) * 0.006;
   P = { x: 0, y: 0, r: 12, hp: 100, maxHp: 100, face: 1, aim: 0, walkT: 0, moving: false, inv: 0, hurtT: 0, dashT: 0, dashVx: 0, dashVy: 0, lastMx: 1, lastMy: 0, slowT: 0, atkT: 0, recoil: 0 };
-  G.pass = {}; G.buff = { atk: 0, aspd: 0, crit: 0, spd: 0, barrier: 0, vamp: 0 }; G.swapQ = []; G.legT = st.D * rand(0.22, 0.45); G.legSpawned = false; G.legGot = false; G.mergeT = 0; G.weapons = []; G.newFound = []; G.xpTotal = 0; G.vacuum = false; G.allyAura = 0; G.newVeh = 0; G.knownBefore = {}; for (const k in save.codex) G.knownBefore[k] = 1;
+  G.pass = {}; G.buff = { atk: 0, aspd: 0, crit: 0, spd: 0, barrier: 0, vamp: 0 }; G.swapQ = []; G.legT = st.D * rand(0.22, 0.45); G.legSpawned = false; G.legGot = false; G.mergeT = 0; G.weapons = []; G.newFound = []; G.xpTotal = 0; G.goldFrac = 0; G.allyAura = 0; G.newVeh = 0; G.knownBefore = {}; for (const k in save.codex) G.knownBefore[k] = 1;
   recalc(); P.hp = P.maxHp;
   let sw = save.startW; if (!WMAP[sw] || !save.codex[sw] || firstStageOf(sw) > Math.max(save.cleared + 1, n)) sw = 'rifle';
   addWeapon(sw);
@@ -176,7 +185,7 @@ function director(dt) {
   if (G.evT <= 0) { G.evT = rand(32, 46); randomEvent(); }
   // 정예 퀘스트가 있으면 정예를 꾸준히 등장시킴
   const eq = G.quests.find(q => q.k === 'elite' && !q.done);
-  if (eq) { G.eliteT -= dt; if (G.eliteT <= 0) { G.eliteT = eq.n >= 6 ? 17 : 24; spawnElite(); } }
+  if (eq) { G.eliteT -= dt * (1 + adaptNow()); if (G.eliteT <= 0) { G.eliteT = eq.n >= 6 ? 17 : 24; spawnElite(); } }
   // 수집 퀘스트 아이템 맵 배치
   const cq = G.quests.find(q => q.k === 'collect' && !q.done);
   if (cq) { G.itemT -= dt; if (G.itemT <= 0) { G.itemT = 22; const a = rand(0, TAU), d = rand(170, 300); dropPickup('qitem', P.x + Math.cos(a) * d, P.y + Math.sin(a) * d, 0, cq.item, true); } }
@@ -434,7 +443,7 @@ function acquireWeapon(id, src) {
   if (first) G.newFound.push(id);
   const owned = G.weapons.find(w => w.id === id);
   AU.sfx(W_.t >= 3 ? 'legend' : 'item');
-  if (owned) { if (owned.lv < WMAX) { owned.lv++; c.maxLv = Math.max(c.maxLv || 1, owned.lv); toast(`⬆ ${W_.nm} Lv${owned.lv}`, 1.3, '#ffd54f'); } else { G.gold += 30 * G.stage; toast(`💰 강화 재료로 전환 +${30 * G.stage}G`, 1.3, '#ffd54f'); } return; }
+  if (owned) { if (owned.lv < WMAX) { owned.lv++; c.maxLv = Math.max(c.maxLv || 1, owned.lv); toast(`⬆ ${W_.nm} Lv${owned.lv}`, 1.3, '#ffd54f'); } else { const g = goldX(30 * G.stage); G.gold += g; toast(`💰 강화 재료로 전환 +${g}G`, 1.3, '#ffd54f'); } return; }
   if (G.weapons.length < WSLOTS) { addWeapon(id); toast(`🔫 신규 무기 획득!<br><span style="font-size:18px;color:${TIER_COL[W_.t]}">${W_.nm}</span>`, 1.8, '#fff'); return; }
   G.swapQ = G.swapQ || []; G.swapQ.push(id);
 }
@@ -458,16 +467,16 @@ function collect(p) {
   if (extCollect(p)) return;
   switch (p.kind) {
     case 'gem': gainXp(p.v); AU.sfx('gem'); break;
-    case 'coin': { const g = Math.round(p.v * P.greed); G.gold += g; AU.sfx('coin'); texts.push({ x: P.x, y: P.y - 26, t: 0, v: '+' + g + 'G', col: '#ffd54f', pl: 1 }); break; }
+    case 'coin': { const g = goldX(p.v * P.greed); G.gold += g; AU.sfx('coin'); if (g > 0) texts.push({ x: P.x, y: P.y - 26, t: 0, v: '+' + g + 'G', col: '#ffd54f', pl: 1 }); break; }
     case 'meat': heal(25); break;
     case 'magnet': for (const q of pickups) if (q.kind === 'gem') q.mag = true; AU.sfx('heal'); toast('🧲 자석!', 0.8, '#90caf9'); break;
     case 'qitem': AU.sfx('item'); qAdd('collect', 1, q => q.item === p.item); texts.push({ x: P.x, y: P.y - 30, t: 0, v: QITEMS[p.item].ic + '+1', col: QITEMS[p.item].col, pl: 1 }); break;
     case 'wdrop': acquireWeapon(p.item, 'drop'); break;
     case 'legend': G.legGot = true; openLegendChest(); break;
     case 'power': G.powerT = 15; AU.sfx('power'); toast('⚡ 공격력 1.5배 (15초)!', 1.4, '#ff8a80'); break;
-    case 'crate': { heal(30); const g = Math.round(10 * G.stage * P.greed); G.gold += g; for (let i = 0; i < 8; i++) dropGem(p.x + rand(-30, 30), p.y + rand(-30, 30), 3); qAdd('collect', 1, q => q.item === 'supply'); AU.sfx('chest'); toast(`📦 보급! 체력 회복 +${g}G`, 1.2, '#90caf9'); break; }
+    case 'crate': { heal(30); const g = goldX(10 * G.stage * P.greed); G.gold += g; for (let i = 0; i < 8; i++) dropGem(p.x + rand(-30, 30), p.y + rand(-30, 30), 3); qAdd('collect', 1, q => q.item === 'supply'); AU.sfx('chest'); toast(`📦 보급! 체력 회복 +${g}G`, 1.2, '#90caf9'); break; }
     case 'chest': case 'secret': {
-      AU.sfx('chest'); const g = Math.round(randi(25, 45) * (p.kind === 'secret' ? 2.5 : 1) * (1 + G.stage * 0.15) * P.greed); G.gold += g;
+      AU.sfx('chest'); const g = goldX(randi(25, 45) * (p.kind === 'secret' ? 2.5 : 1) * (1 + G.stage * 0.15) * P.greed); G.gold += g;
       G.pendingLv++; effects.push({ type: 'pillar', x: p.x, y: p.y, t: 0, dur: 1.0, col: '#ffd54f' });
       toast(`🎁 ${p.kind === 'secret' ? '비밀 보물 상자' : '보물 상자'}! +${g}G`, 1.4, '#ffd54f'); break;
     }
@@ -1007,7 +1016,7 @@ function bossDefeated(e) {
     dropPickup('chest', e.x, e.y); for (let i = 0; i < 10; i++) dropGem(e.x + rand(-50, 50), e.y + rand(-50, 50), 6);
     toast('👿 난입 보스 격퇴!', 1.8, '#ffd54f'); return;
   }
-  G.bossState = 3; G.winT = 1.6; startVacuum(); for (const m of enemies) if (!m.dead && m.type === 'bturret') m.dead = true; G.shake = 20; G.flash = 0.8; G.flashCol = '255,255,255'; AU.sfx('bossdie');
+  G.bossState = 3; G.winT = POSTBOSS_T; pools = []; later(1.2, () => { if (G.bossState === 3) toast('💎 남은 보석은 직접 주우세요! 잠시 후 클리어 화면', 2, '#80deea'); }); for (const m of enemies) if (!m.dead && m.type === 'bturret') m.dead = true; G.shake = 20; G.flash = 0.8; G.flashCol = '255,255,255'; AU.sfx('bossdie');
   save.stats.bossKills++;
   for (let i = 0; i < 14; i++) later(i * 0.12, () => { explode(e.x + rand(-80, 80), e.y + rand(-80, 80), 40 + i * 4, 0, false, pick(['#b388ff', '#ff9800', '#ffeb3b', '#ff5252'])); G.shake = Math.max(G.shake, 8); });
   later(1.7, () => { effects.push({ type: 'nova', x: e.x, y: e.y, r: 260, t: 0, dur: .7, col: '#fff59d' }); G.flash = .5; G.flashCol = '255,240,200'; AU.sfx('bigboom'); });
@@ -1016,11 +1025,10 @@ function bossDefeated(e) {
   effects.push({ type: 'pillar', x: e.x, y: e.y, t: 0, dur: 3, col: '#ffb300' });
   for (const m of enemies) if (!m.dead && !m.boss && !m.static) { m.dead = true; effects.push({ type: 'poof', x: m.x, y: m.y, r: m.r, t: 0, dur: 0.3 }); }
   eprojs.length = 0; hazards.length = 0;
-  for (const p of pickups) if (p.kind === 'gem' || p.kind === 'coin' || p.kind === 'qitem') p.mag = true;
   for (const q of G.quests) if (q.k === 'boss') completeQuest(q);
   const wid = pickDropWeapon(4, true);
-  if (wid) { dropPickup('wdrop', e.x, e.y + 20, 0, wid); G.bossDrop = wid; toast(`👑 보스 처치! 👑<br><span style="font-size:17px">확정 보상: ${WMAP[wid].nm}</span>`, 3, '#ffd54f'); }
-  else { const own = G.weapons.filter(w => w.lv < WMAX); if (own.length) { const w = pick(own); w.lv++; } const g = 80 * G.stage; G.gold += g; toast(`👑 보스 처치! 👑<br><span style="font-size:16px">무기를 모두 모아 강화 재료 지급 (+${g}G, 무기 강화)</span>`, 3, '#ffd54f'); }
+  if (wid) { dropPickup('wdrop', e.x, e.y + 20, 0, wid); const wp = pickups[pickups.length - 1]; if (wp && wp.kind === 'wdrop') wp.mag = true; G.bossDrop = wid; toast(`👑 보스 처치! 👑<br><span style="font-size:17px">확정 보상: ${WMAP[wid].nm}</span>`, 3, '#ffd54f'); }
+  else { const own = G.weapons.filter(w => w.lv < WMAX); if (own.length) { const w = pick(own); w.lv++; } const g = goldX(80 * G.stage); G.gold += g; toast(`👑 보스 처치! 👑<br><span style="font-size:16px">무기를 모두 모아 강화 재료 지급 (+${g}G, 무기 강화)</span>`, 3, '#ffd54f'); }
 }
 
 /* ------------------------- 일반 몬스터 AI ------------------------- */
@@ -1176,7 +1184,7 @@ function update(dt) {
     const big = p.kind === 'hpot' || p.kind === 'rkit' || p.kind === 'wsup' || p.kind === 'scrate' || p.kind === 'chest' || p.kind === 'meat' || p.kind === 'magnet' || p.kind === 'crate' || p.kind === 'secret' || p.kind === 'power' || p.kind === 'wdrop' || p.kind === 'legend';
     const rng = big ? 24 * 24 : p.kind === 'qitem' ? Math.max(mg2, 55 * 55) : mg2;
     if (p.t > 0.4 && d2 < rng) p.mag = true;
-    if (p.mag) { const d = Math.sqrt(d2) || 1, sp = p.vac ? 900 + p.t * 400 : 260 + p.t * 60; if (p.vac && Q.level && Math.random() < .3) addPart(p.x, p.y, 0, 0, p.kind === 'gem' ? '#80deea' : '#ffd54f', .25, 3); p.x += dx / d * sp * dt; p.y += dy / d * sp * dt; if (d < P.r + 6) { p.dead = true; collect(p); } }
+    if (p.mag) { const d = Math.sqrt(d2) || 1, sp = 260 + p.t * 60; p.x += dx / d * sp * dt; p.y += dy / d * sp * dt; if (d < P.r + 6) { p.dead = true; collect(p); } }
   }
   for (const q of parts) { q.life -= dt; q.x += q.vx * dt; q.y += q.vy * dt; q.vy += q.grav * dt; q.vx *= 0.96; q.vy *= 0.96; }
   for (const t of texts) t.t += dt;
@@ -1190,5 +1198,5 @@ function update(dt) {
   if (G.swapQ && G.swapQ.length && G.state === 'play' && P.hp > 0) openSwap(G.swapQ.shift());
   else if (G.pendingLv > 0 && G.state === 'play' && P.hp > 0 && G.clearing === 0) openLevelUp();
   else if (G.eliteRw > 0 && G.state === 'play' && P.hp > 0 && G.clearing === 0) openEliteReward();
-  if (G.bossState === 3) { G.winT -= dt; if (vacuumStep(dt) && G.state === 'play') stageWin(); }
+  if (G.bossState === 3) { G.winT -= dt; if (G.winT <= 0 && G.state === 'play') stageWin(); }
 }

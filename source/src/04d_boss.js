@@ -43,15 +43,18 @@ function inheritLabel() { const L = inhList(); if (!L.length) return '없음'; r
 
 /* ------------------------- 강화 수준 기반 난이도 보정 (상한 있음) ------------------------- */
 // 플레이어가 골드 강화·계승 무기로 강해진 만큼, 다음 스테이지 적을 '일부만' 강화 (난이도별 상한 15~25%, 누적 없음)
+// v8: 강화 단계 확장에 맞춰 '최대치 대비 비율'로 계산, 완만하게 포화(1-e^-x), 초반 스테이지는 상한을 낮게
 function adaptStrength() {
-  const u = save.up; let S = 0.75 * u.atk / 15 + 0.45 * u.hp / 15 + 0.3 * u.armor / 10 + 0.1 * u.spd / 10;
+  const f = k => effUp(k) / effLv(k, UPGRADES[k].max);   // 0~1
+  let S = 1.0 * f('atk') + 0.5 * f('hp') + 0.35 * f('armor') + 0.3 * f('aspd') + 0.1 * f('spd');
   for (const ih of inhList()) S += 0.06 * ih.lv + (ih.evo ? 0.15 : 0) + (WMAP[ih.id].t >= 3 ? 0.05 : 0);
   return S;
 }
 function adaptCap() { return [0.18, 0.22, 0.27, 0.32][diffIdx()]; }
-// 스테이지 중 동료 성장(활동 동료 수) 반영분 포함, 상한 내에서만
+function adaptStageF() { return 0.45 + 0.55 * Math.min(1, ((G.stage || 1) - 1) / 25); }
+// 스테이지 중 동료 성장(활동 동료 수 × 동료 성장도) 반영분 포함, 상한 내에서만 — 누적 없음
 function adaptNow() { return Math.min(adaptCap(), (G.adapt || 0) + (G.adaptLive || 0)); }
-function computeAdapt() { return Math.min(adaptCap(), adaptStrength() * 0.17); }
+function computeAdapt() { return adaptCap() * adaptStageF() * (1 - Math.exp(-adaptStrength() * 0.6)); }
 function CNT() { return DF().cnt * (1 + adaptNow() * 0.5); }
 
 /* ------------------------- 차량 자동 탑승 ------------------------- */

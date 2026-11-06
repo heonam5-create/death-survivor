@@ -65,8 +65,8 @@ function onKill(e) {
 function comboMilestone(c) {
   const lv = c >= 100 ? 3 : c >= 50 ? 2 : c >= 30 ? 1 : 0;
   effects.push({ type: 'combo', c, lv, t: 0, dur: 1.3 });
-  const g = Math.round((2 + lv * 4) * (1 + G.stage * 0.15) * diffRewardMul());
-  if (G.comboGold < 150 + G.stage * 15) { G.comboGold += g; G.gold += g; }
+  const g = goldX((2 + lv * 4) * (1 + G.stage * 0.15) * diffRewardMul());
+  if (G.comboGold < (150 + G.stage * 15) * GOLD_X) { G.comboGold += g; G.gold += g; }
   if (lv >= 1) for (let i = 0; i < 2 + lv * 2; i++) dropGem(P.x + rand(-50, 50), P.y + rand(-50, 50), 2 + Math.round(G.stage * 0.25));
   AU.sfx(['coin', 'quest', 'power', 'legend'][lv]);
   if (lv >= 2) { G.flash = Math.max(G.flash, .18); G.flashCol = lv === 3 ? '255,215,0' : '255,120,40'; if (fxOk()) effects.push({ type: 'nova', x: P.x, y: P.y, r: 160 + lv * 40, t: 0, dur: .5, col: lv === 3 ? '#ffd54f' : '#ff7043' }); }
@@ -284,6 +284,6 @@ function xpUpdate(dt) {
   if (G.comboT > 0) { G.comboT -= dt; if (G.comboT <= 0) G.combo = 0; }
   if (G.chainCd > 0) G.chainCd -= dt;
   if (G.sup && G.sup.t > 0) { G.sup.t -= dt; if (G.sup.t <= 0) { G.sup = null; recalc(); toast('보급 효과 종료', .9, '#b0bec5'); } }
-  updateElitesX(dt); updateDrops(dt); updatePools(dt); G.adaptLive = Math.min(0.08, 0.02 * activeAllies());
+  updateElitesX(dt); updateDrops(dt); updatePools(dt); G.adaptT = (G.adaptT || 0) - dt; if (G.adaptT <= 0) { G.adaptT = 1; G.adaptLive = Math.min(0.08, 0.012 * activeAllies() * clamp(allyGrowth(), 1, 2.5)); }
   if (effects.length > 280) effects.splice(0, effects.length - 280);
 }

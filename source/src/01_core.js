@@ -21,7 +21,7 @@ const DEFAULT_SAVE = () => ({
   stats: { kills: 0, bossKills: 0, runs: 0, bestLv: 1 },
   settings: { music: 0.6, sfx: 0.8, quality: 'auto', shake: 1, dmgNum: 1, fast: 0, diff: 1 },
   // v2 추가 항목 (기존 저장에는 없으므로 기본값으로 채움)
-  up: { atk: 0, hp: 0, armor: 0, spd: 0, gain: 0, pot: 0 },
+  up: { atk: 0, hp: 0, armor: 0, aspd: 0, spd: 0, gain: 0, pot: 0 },
   codex: {},        // 무기 도감: { id: { found:1, maxLv, kills } }
   startW: 'rifle',  // 출전 무기
   best: {},         // 스테이지별 최고 기록 { n: {time, side} }

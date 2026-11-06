@@ -126,6 +126,7 @@ function render() {
   if (G.bossState === 1) { ctx.fillStyle = `rgba(150,0,0,${0.15 + 0.12 * Math.sin(G.time * 10)})`; ctx.fillRect(0, 0, cv.width, cv.height); }
   drawArrows();
   drawHUD();
+  drawTrackers(W, H);
 }
 // 총기 모양: 무기 계열별로 다르게
 function drawGun(g, wid, atk) {

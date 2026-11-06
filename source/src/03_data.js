@@ -104,15 +104,19 @@ const PASSIVES = {
 };
 const PSLOTS = 6;
 // 강화소 (골드로 영구 강화)
+// v8: 최대 단계 약 2배 확장 (om = 기존 최대). 기존 최대 이후 단계는 효과 60%, 비용은 단계마다 +22%
+const effLv = (k, v) => { const om = UPGRADES[k].om; return v <= om ? v : om + (v - om) * 0.6; };
+const pct = x => Math.round(x * 10) / 10;
 const UPGRADES = {
-  atk: { n: '화력 강화', ic: '💥', max: 15, d: v => `모든 피해 +${v * 5}%`, base: 60 },
-  hp: { n: '체력 강화', ic: '❤️', max: 15, d: v => `최대 체력 +${v * 12}`, base: 50 },
-  armor: { n: '방탄 강화', ic: '🛡️', max: 10, d: v => `받는 피해 -${v * 2}%`, base: 70 },
-  spd: { n: '기동 강화', ic: '👟', max: 10, d: v => `이동속도 +${v * 2}%`, base: 50 },
-  gain: { n: '보급 강화', ic: '💰', max: 10, d: v => `경험치·골드 +${v * 5}%`, base: 60 },
-  pot: { n: '물약 가방', ic: '🧪', max: 3, d: v => `스테이지 시작 물약 +${v}`, base: 150 }
+  atk: { n: '화력 강화', ic: '💥', om: 15, max: 30, d: v => `모든 피해 +${pct(effLv('atk', v) * 5)}%`, base: 60 },
+  hp: { n: '체력 강화', ic: '❤️', om: 15, max: 30, d: v => `최대 체력 +${Math.round(effLv('hp', v) * 12)}`, base: 50 },
+  armor: { n: '방탄 강화', ic: '🛡️', om: 10, max: 20, d: v => `받는 피해 -${pct(effLv('armor', v) * 2)}%`, base: 70 },
+  aspd: { n: '연사 강화', ic: '⚡', om: 10, max: 20, d: v => `공격속도 +${pct(Math.min(30, effLv('aspd', v) * 2))}% (최대 30%)`, base: 65 },
+  spd: { n: '기동 강화', ic: '👟', om: 10, max: 20, d: v => `이동속도 +${pct(Math.min(30, effLv('spd', v) * 2))}% (최대 30%)`, base: 50 },
+  gain: { n: '보급 강화', ic: '💰', om: 10, max: 20, d: v => `경험치·골드 +${pct(effLv('gain', v) * 5)}%`, base: 60 },
+  pot: { n: '물약 가방', ic: '🧪', om: 3, max: 6, d: v => `스테이지 시작 물약 +${v}`, base: 150 }
 };
-function upCost(k, lv) { return Math.round(UPGRADES[k].base * Math.pow(1.36, lv) / 10) * 10; }
+function upCost(k, lv) { const U = UPGRADES[k]; if (lv < U.om) return Math.round(U.base * Math.pow(1.36, lv) / 10) * 10; return Math.round(U.base * Math.pow(1.36, U.om - 1) * Math.pow(1.22, lv - U.om + 1) / 10) * 10; }
 
 /* ------------------------- 몬스터 (48종) -------------------------
    ai: chase 기본 / flutter 날기 / zig 지그재그 / dash 돌진 / ranged 원거리 / phase 반투명 / bomb 자폭

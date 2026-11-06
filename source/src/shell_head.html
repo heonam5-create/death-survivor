@@ -59,6 +59,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
 #bRide{width:60px;height:60px;right:calc(22px + env(safe-area-inset-right));bottom:calc(182px + env(safe-area-inset-bottom));display:none;background:radial-gradient(circle at 50% 35%,#26a69a,#004d40);animation:ridePulse 1s ease-in-out infinite}
 #bRide.exit{animation:none;background:radial-gradient(circle at 50% 35%,#78909c,#263238);width:50px;height:50px;right:calc(28px + env(safe-area-inset-right))}
 @keyframes ridePulse{0%,100%{box-shadow:0 4px 0 rgba(0,0,0,.35),0 0 0 0 rgba(100,255,218,.7)}50%{box-shadow:0 4px 0 rgba(0,0,0,.35),0 0 0 10px rgba(100,255,218,0)}}
+#bFin{position:absolute;left:50%;transform:translateX(-50%);top:calc(124px + env(safe-area-inset-top));display:none;z-index:6;pointer-events:auto;border:2px solid #80deea;border-radius:22px;background:rgba(0,40,60,.85);color:#e0f7fa;font:800 14px "Noto Sans KR",sans-serif;padding:9px 16px;white-space:nowrap;box-shadow:0 0 14px rgba(128,222,234,.5)}
 #bUlt{width:58px;height:58px;right:calc(92px + env(safe-area-inset-right));bottom:calc(100px + env(safe-area-inset-bottom));display:none;background:radial-gradient(circle at 50% 35%,#ff1744,#6a0010);animation:ridePulse 1.2s ease-in-out infinite}
 #bSk1.vsp{background:radial-gradient(circle at 50% 35%,#ff8f00,#6d2c00)}
 #squad{position:absolute;left:calc(10px + env(safe-area-inset-left));bottom:calc(168px + env(safe-area-inset-bottom));display:flex;gap:4px;pointer-events:none}
@@ -201,6 +202,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
   <button class="gbtn" id="bPot"><span class="ic" style="font-size:22px">🧪</span><span class="badge" id="potN">3</span><span class="cdv"></span></button>
   <button class="gbtn" id="bSk2"><span class="ic">💨</span><span class="lb">질주</span><span class="cdv"></span></button>
   <button class="gbtn" id="bUlt"><span class="ic">💥</span><span class="lb">필살기</span></button>
+  <button id="bFin">💎 보석 줍는 중… <b id="finT">8</b>초 · 바로 클리어 ▶</button>
   <button class="gbtn" id="bRide"><span class="ic">🚪</span><span class="lb">하차</span></button>
   <div id="squad"></div>
   <button class="gbtn" id="bSk1"><span class="ic" style="font-size:32px">🌀</span><span class="lb">회오리</span><span class="cdv"></span></button>
@@ -218,7 +220,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
   <button class="btn blue" id="tCodex">📖 무기 도감</button>
   <button class="btn blue" id="tHelp">🎮 조작 방법</button>
   <div class="trow"><button class="btn gray sm" id="tSet">⚙️ 설정</button><button class="btn kakao sm" id="tShare">💬 카카오톡 공유</button></div>
-  <div class="ver">확장팩 v7 · 무기 360종 · 탑승 장비 120종 · 정예 40종 · 40스테이지</div>
+  <div class="ver">확장팩 v8 · 무기 360종 · 탑승 장비 120종 · 정예 40종 · 40스테이지</div>
  </div>
 
  <!-- 스테이지 선택 -->
@@ -305,8 +307,10 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
    <p>✨ <b>전설 보물상자</b> — 스테이지마다 1개 등장. 화살표를 따라가 열면 보상 3개 중 1개 선택.</p>
    <p>⚠ <b>정예 몬스터</b> — 크고 고유 기술을 씁니다. 처치 시 무기를 떨어뜨릴 수 있어요.</p>
    <p>🪂 <b>특수 전투 장비</b> — 스테이지 중반~후반에 차량·로봇·비행 장비가 낙하산으로 투하됩니다. 착륙한 장비에 다가가면 <b>자동 탑승</b>! 짧은 시간(20~40초) 동안 엄청난 화력으로 적을 쓸어버리세요. 🌀 버튼은 <b>특수능력</b>, 💥 버튼은 탑승마다 1번 쓰는 <b>필살기</b>. 시간이 끝나거나 내구도가 0이 되면 하차합니다.</p>
+   <p>📍 <b>위치 표시</b> — 투하된 차량(종류별 아이콘)과 구출할 동료(병과별 아이콘)는 화면 가장자리에 방향과 거리(m)로 표시됩니다.</p>
+   <p>📈 <b>성장 속도</b> — 레벨이 오를수록 다음 레벨까지 필요한 경험치가 점점 늘어납니다. 강화소는 최대 단계가 약 2배로 늘었고(연사 강화 추가), 기존 최대 이후 단계는 효과가 완만하게 오릅니다.</p>
    <p>👑 <b>보스 체력바</b> — 모든 보스는 3줄의 체력바(빨강→주황→보라)를 가집니다. 보스마다 돌진·포격·레이저·소환·기계·화염·냉기·전기·중력·최종 유형의 고유 패턴이 있고, 줄이 바뀔 때마다 빨라지며 새 기술을 씁니다. 마지막 보라 줄에서는 <b>고유 필살기</b>! 빨간 경고를 잘 피하세요.</p>
-   <p>🔁 <b>무기 계승</b> — 보스를 쓰러뜨리면 남은 보석이 자동 회수되고, 클리어 화면에서 무기 최대 2개를 골라 레벨 그대로 다음 스테이지에 가져갈 수 있습니다. 골드 강화도 클리어 화면에서 바로! '다음 스테이지' 버튼을 눌러야 이동합니다.</p>
+   <p>🔁 <b>무기 계승</b> — 보스를 쓰러뜨리면 8초 동안 남은 보석을 직접 주울 수 있고('바로 클리어' 버튼으로 생략 가능), 이어지는 클리어 화면에서 무기 최대 2개를 골라 레벨 그대로 다음 스테이지에 가져갈 수 있습니다. 골드 강화도 클리어 화면에서 바로! '다음 스테이지' 버튼을 눌러야 이동합니다.</p>
    <p>🔥 <b>콤보</b> — 빠르게 연속 처치하면 콤보! 10·30·50·100 콤보마다 보너스. 한꺼번에 여러 마리를 쓰러뜨리면 <b>연쇄 폭발</b>이 일어납니다.</p>
    <p>🎖️ <b>정예 몬스터</b> — 스테이지마다 고유한 정예가 등장합니다. 빨간 경고를 피하고 처치하면 <b>보상 선택</b>!</p>
    <p>🎁 <b>무기 보급 상자</b> — 20초 동안 화력·발사체·연사 강화.</p>

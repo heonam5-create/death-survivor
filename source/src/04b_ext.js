@@ -251,7 +251,7 @@ function extStageStart() {
 
 /* ------------------------- 탑승 장비 ------------------------- */
 function mkVeh(def, x, y) {
-  const ch = VCH[def.ch], hp = Math.round(ch.hp * (1 + (G.stage - 1) * 0.075) * (1 + 0.03 * save.up.hp) / Math.sqrt(DF().dmg));
+  const ch = VCH[def.ch], hp = Math.round(ch.hp * (1 + (G.stage - 1) * 0.075) * (1 + 0.03 * effUp('hp')) / Math.sqrt(DF().dmg));
   return { def, ch, x, y, hp, maxHp: hp, time: ch.time, maxTime: ch.time, tier: def.tier || 0, ultUsed: false, ultT: 0, repairs: 0, aim: 0, aim2: 0, face: 1, walkT: 0, recoil: 0, skCd: 2, ovT: 0, nitroT: 0, hoverT: 0, ramT: 0, sl: [], seats: [], dead: false, flash: 0, bob: rand(0, 6), seen: false };
 }
 // 실측(군중 상대) 피해량 기준 무기별 보정 — 단일 대상 무기는 덜 깎아 보스전 가치를 유지
@@ -274,7 +274,7 @@ function vehDmg(key, slot) {
   const share = G.veh && G.veh.def.sub ? (slot ? 0.38 : 0.72) : 1;
   return target / 300 * (key ? VW_F[key] : 1) * share;
 }
-function vehSpd() { const v = G.veh; return v.ch.spd * (1 + 0.02 * save.up.spd) * (v.nitroT > 0 ? 2.1 : 1) * (P.slowT > 0 ? 0.7 : 1); }
+function vehSpd() { const v = G.veh; return v.ch.spd * (1 + Math.min(0.3, 0.02 * effUp('spd'))) * (v.nitroT > 0 ? 2.1 : 1) * (P.slowT > 0 ? 0.7 : 1); }
 function nearVeh() {
   if (G.veh) return null; let best = null, bd = 64 * 64;
   for (const v of vehs) { if (v.dead || v.drop) continue; const d = (v.x - P.x) ** 2 + (v.y - P.y) ** 2; if (d < bd) { bd = d; best = v; } }
@@ -445,7 +445,7 @@ function mkAlly(spec, x, y) {
 function activeAllies() { let n = 0; for (const a of allies) if (a.down <= 0) n++; return n; }
 function addAlly(spec, x, y) {
   if (allies.length >= ALLY_MAX) {
-    const g = Math.round((40 + 15 * G.stage) * P.greed); G.gold += g; heal(Math.round(P.maxHp * .2));
+    const g = goldX((40 + 15 * G.stage) * P.greed); G.gold += g; heal(Math.round(P.maxHp * .2));
     toast(`동료가 가득 차 보급을 받았습니다 +${g}G`, 1.6, '#ffd54f'); return null;
   }
   const a = mkAlly(spec, x, y); allies.push(a);
@@ -457,7 +457,7 @@ function addAlly(spec, x, y) {
 // 동료 성장: 주인공 공격력 증가분의 약 50%만 반영 (주인공 +100% → 동료 +50%)
 function allyGrowth() {
   let lvs = 0; for (const w of G.weapons) lvs += w.lv + (w.evo ? 2 : 0); const avg = G.weapons.length ? lvs / G.weapons.length : 1;
-  const idx = P.dmgMul / (1 + 0.05 * save.up.atk) * (1 + 0.04 * (G.lv - 1)) * (1 + 0.08 * (avg - 1)) * (1 + 0.05 * save.up.atk);
+  const idx = P.dmgMul * (1 + 0.04 * (G.lv - 1)) * (1 + 0.08 * (avg - 1));
   return 1 + 0.5 * Math.max(0, idx - 1);
 }
 function aRank() { return Math.min(5, 1 + Math.floor((G.lv - 1) / 6)); }
@@ -672,7 +672,7 @@ function updateExtEvents(dt) {
       if (R.prog >= R.need) {
         G.radio = null; G.rescued++; qAdd('rescue'); AU.sfx('quest');
         effects.push({ type: 'pillar', x: R.x, y: R.y, t: 0, dur: 1.6, col: '#ffd54f' });
-        const g = Math.round((60 + 20 * G.stage) * P.greed); G.gold += g;
+        const g = goldX((60 + 20 * G.stage) * P.greed); G.gold += g;
         const a = addAlly(R.spec, R.x, R.y);
         if (a) toast(`⭐ 특별 동료 합류: ${R.spec.name}<br><span style="font-size:14px">${ACL[R.spec.cls].d} · +${g}G</span>`, 2.4, '#ffd54f');
       }
@@ -812,7 +812,7 @@ function bossExtUpdate(e, dt) {
 /* ------------------------- 특별 임무 보상 / 물품 ------------------------- */
 function spReward(q) {
   G.spDone++;
-  const g = Math.round((40 + 20 * G.stage) * diffRewardMul()); G.gold += g;
+  const g = goldX((40 + 20 * G.stage) * diffRewardMul()); G.gold += g;
   for (let i = 0; i < 10; i++) dropGem(P.x + rand(-40, 40), P.y + rand(-40, 40), 4 + G.stage);
   const r = pick(['pot', 'wlv', 'power']); let t = '';
   if (r === 'pot') { G.potions++; updatePotBadge(); t = '🧪 물약 +1'; }
@@ -825,15 +825,15 @@ function extCollect(p) {
     case 'hpot':
       if (P.hp < P.maxHp - 1) heal(Math.round(P.maxHp * .3));
       else if (G.potions < 6) { G.potions++; updatePotBadge(); AU.sfx('item'); texts.push({ x: P.x, y: P.y - 26, t: 0, v: '🧪+1', col: '#ff8a80', pl: 1 }); }
-      else { const g = Math.round(5 * G.stage * P.greed); G.gold += g; AU.sfx('coin'); }
+      else { const g = goldX(5 * G.stage * P.greed); G.gold += g; AU.sfx('coin'); }
       return true;
     case 'rkit':
       if (G.veh && G.veh.repairs < 2) repairVeh(G.veh);
-      else if (G.veh) { const g = Math.round(15 * G.stage * P.greed); G.gold += g; toast(`이 차량은 더 수리할 수 없습니다 (+${g}G)`, 1.2, '#b0bec5'); }
+      else if (G.veh) { const g = goldX(15 * G.stage * P.greed); G.gold += g; toast(`이 차량은 더 수리할 수 없습니다 (+${g}G)`, 1.2, '#b0bec5'); }
       else { G.rkit = 1; AU.sfx('item'); toast('🔧 수리 키트 보관 (탑승 장비가 손상되면 자동 사용)', 1.6, '#80deea'); }
       return true;
     case 'wsup': collectSup(); return true;
-    case 'scrate': { const g = Math.round(12 * G.stage * P.greed); G.gold += g; qAdd('scrate'); AU.sfx('chest'); heal(Math.round(P.maxHp * .1)); texts.push({ x: P.x, y: P.y - 26, t: 0, v: '📦 보급품 확보', col: '#90caf9', pl: 1, big: 1 }); return true; }
+    case 'scrate': { const g = goldX(12 * G.stage * P.greed); G.gold += g; qAdd('scrate'); AU.sfx('chest'); heal(Math.round(P.maxHp * .1)); texts.push({ x: P.x, y: P.y - 26, t: 0, v: '📦 보급품 확보', col: '#90caf9', pl: 1, big: 1 }); return true; }
   }
   return false;
 }
@@ -859,8 +859,6 @@ function extUpdate(dt) {
   updateSquadHud();
 }
 function extArrows(list) {
-  for (const v of vehs) if (!v.dead && v !== G.veh) list.unshift([v.x, v.y, '#4dd0e1', true]);
-  for (const r of rescues) if (!r.done) list.push([r.x, r.y, '#69f0ae']);
   if (G.radio) list.unshift([G.radio.x, G.radio.y, '#ffd54f', true]);
   if (G.hold && !G.hold.q.done) list.push([G.hold.x, G.hold.y, '#ffab40']);
 }

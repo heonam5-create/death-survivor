@@ -77,7 +77,7 @@ function chooseOption(o) {
   else if (o.kind === 'evo') { const w = G.weapons.find(w => w.id === o.id); w.evo = true; codexOf(w.id).evo = 1; AU.sfx('evolve'); toast(`🔥 ${EVOS[o.id].n} 진화!`, 1.6, '#ff8a80'); G.flash = 0.4; G.flashCol = '255,200,0'; }
   else if (o.kind === 'pas') { G.pass[o.id] = (G.pass[o.id] || 0) + 1; recalc(); }
   else if (o.kind === 'heal') heal(50);
-  else G.gold += 20 * G.stage;
+  else G.gold += goldX(20 * G.stage);
   showScreen(null); G.state = 'play'; G.lastFrame = performance.now();
 }
 
@@ -96,10 +96,10 @@ function finishRun(win) {
 }
 function stageWin() {
   const first = save.cleared < G.stage;
-  const n = G.stage, dmul = diffRewardMul(), clearG = Math.round((60 + 30 * n) * dmul);
+  const n = G.stage, dmul = diffRewardMul(), clearG = goldX((60 + 30 * n) * dmul);
   const sides = G.quests.filter(q => !q.main && !q.sp), sideDone = sides.filter(q => q.done);
-  const sideG = Math.round(sideDone.length * (40 + 20 * n) * dmul);
-  const special = first && n % 5 === 0 ? (n % 10 === 0 ? 300 * n / 5 : 150 * n / 5) : 0;
+  const sideG = goldX(sideDone.length * (40 + 20 * n) * dmul);
+  const special = first && n % 5 === 0 ? goldX(n % 10 === 0 ? 300 * n / 5 : 150 * n / 5) : 0;
   G.gold += clearG + sideG + special;
   G.state = 'result'; $('gameUI').classList.remove('on');
   const newUnlocks = n < 40 && first ? STAGES[n].wp.filter(id => firstStageOf(id) === n + 1) : [];
@@ -281,7 +281,7 @@ $('pResume').addEventListener('click', () => { AU.sfx('button'); resumeGame(); }
 $('pSet').addEventListener('click', () => { AU.sfx('button'); openSettings('scrPause'); });
 $('pQuit').addEventListener('click', () => { AU.sfx('button'); confirmBox('포기하기', '지금까지 모은 골드는 보관됩니다.<br>스테이지를 포기할까요?', () => { finishRun(false); openStageSelect(); }, () => showScreen('scrPause')); });
 function bindPress(id, fn) { $(id).addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); fn(); }); }
-bindPress('bSk1', useSkill1); bindPress('bSk2', useSkill2); bindPress('bPot', usePotion); bindPress('bRide', () => { AU.sfx('button'); rideToggle(); }); bindPress('bUlt', useVehUlt);
+bindPress('bSk1', useSkill1); bindPress('bSk2', useSkill2); bindPress('bPot', usePotion); bindPress('bRide', () => { AU.sfx('button'); rideToggle(); }); bindPress('bUlt', useVehUlt); bindPress('bFin', () => { AU.sfx('button'); postBossFinish(); });
 bindPress('bPause', () => { AU.sfx('button'); pauseGame(); });
 
 /* ------------------------- 터치 조이스틱 ------------------------- */

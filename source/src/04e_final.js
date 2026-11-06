@@ -126,19 +126,9 @@ function bossUltTick(e, dt) {
   if (e.ultT <= 0 && e.ps === 'idle') { e.ultT = 20; e.ps = 'ult'; e.sub = 0; e.step = 0; bossUltStart(e); }
 }
 
-/* ------------------------- 보스 처치 후 보석 자동 회수 ------------------------- */
-function startVacuum() {
-  G.vacuum = true; G.vacT = 0; pools = [];
-  toast('💎 남은 보석과 보상을 모두 회수합니다!', 1.6, '#80deea');
-}
-function vacuumStep(dt) {
-  G.vacT += dt;
-  for (const p of pickups) if (!p.dead) { p.mag = true; p.vac = true; }
-  let left = 0; for (const p of pickups) if (!p.dead) left++;
-  // 모든 보석 회수 + 레벨업·무기 교체 처리 완료 + 최소 연출 시간 → 클리어 화면 (안전장치 12초)
-  return G.vacT > 1.6 && ((left === 0 && G.pendingLv === 0 && !(G.swapQ && G.swapQ.length) && !G.eliteRw) || G.vacT > 12);
-}
-
+/* ------------------------- 보스 처치 후 정리 시간 (v8: 자동 회수 없음) ------------------------- */
+// 보석은 바닥에 그대로 남고, 정리 시간(POSTBOSS_T초) 동안 직접 주울 수 있음. '바로 클리어' 버튼으로 즉시 종료 가능.
+function postBossFinish() { if (G.bossState === 3 && G.state === 'play') G.winT = 0; }
 /* ------------------------- 클리어 화면: 골드 강화 + 무기 2개 계승 + 다음 버튼 ------------------------- */
 const INH_MAX = 2;
 function inhList() { const a = Array.isArray(save.inherit) ? save.inherit : save.inherit ? [save.inherit] : []; return a.filter(x => x && WMAP[x.id]).slice(0, INH_MAX); }
@@ -180,4 +170,46 @@ function renderClearShop() {
     save.gold -= cost; save.up[k]++; writeSave(); AU.sfx('levelup'); renderClearShop();
     const gs = document.querySelector('#rStats .goldNow'); if (gs) gs.textContent = '💰 ' + save.gold;
   };
+}
+
+/* ------------------------- v8: 차량 · 구출 동료 위치 표시 ------------------------- */
+const VCH_IC = { bike: '🏍️', buggy: '🏎️', jeep: '🚙', rover: '🚐', apc: '🚛', tank: '🚜', hbike: '🛵', htank: '🚤', minibot: '🤖', mech: '🦾', spider: '🕷️', titan: '🦿', heli: '🚁', jet: '✈️', dpod: '🛩️', gunship: '🛫', saucer: '🛸' };
+function trackTargets() {
+  const L = [];
+  for (const v of vehs) if (!v.dead && v !== G.veh && v.time > 0) L.push({ x: v.x, y: v.y, ic: VCH_IC[v.def.ch] || '🚘', col: '#4dd0e1', lb: v.drop ? '착륙 중' : '탑승', veh: 1 });
+  for (const r of rescues) if (!r.done) L.push({ x: r.x, y: r.y, ic: (ACL[r.spec.cls] || {}).ic || '🙋', col: '#69f0ae', lb: r.active ? '구출 중' : '구출' });
+  return L;
+}
+let finShown = false, finSec = -1;
+function updFinBtn() {
+  const on = G.bossState === 3 && G.state === 'play', b = $('bFin'); if (!b) return;
+  if (on !== finShown) { finShown = on; b.style.display = on ? 'block' : 'none'; }
+  if (on) { const s = Math.max(0, Math.ceil(G.winT)); if (s !== finSec) { finSec = s; $('finT').textContent = s; } }
+}
+function drawTrackers(W, H) {
+  updFinBtn();
+  if (G.state !== 'play' && G.state !== 'pause') return;
+  const L = trackTargets(); if (!L.length) return;
+  const cx = W / 2, cy = H / 2, mL = 30 + SAFE.l, mR = 30 + SAFE.r, mT = 200 + SAFE.t, mB = 205 + SAFE.b;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const bob = Math.sin(G.time * 5) * 3; let n = 0;
+  for (const t of L) {
+    const sx = cx + (t.x - G.camX) * S, sy = cy + (t.y - G.camY) * S, dist = Math.round(Math.hypot(t.x - P.x, t.y - P.y) / 10);
+    const on = sx > 10 && sx < W - 10 && sy > 30 && sy < H - 10;
+    let bx, by, a = Math.atan2(sy - cy, sx - cx);
+    if (on) { bx = sx; by = sy - 46 + bob; }
+    else { if (++n > 6) continue; bx = clamp(cx + Math.cos(a) * 2000, mL, W - mR); by = clamp(cy + Math.sin(a) * 2000, mT, H - mB); }
+    ctx.globalAlpha = .93;
+    if (!on) { // 방향 화살표
+      ctx.save(); ctx.translate(bx, by); ctx.rotate(a); ctx.fillStyle = t.col; ctx.beginPath(); ctx.moveTo(27, 0); ctx.lineTo(17, -7); ctx.lineTo(17, 7); ctx.closePath(); ctx.fill(); ctx.restore();
+    } else { ctx.fillStyle = t.col; ctx.beginPath(); ctx.moveTo(bx - 6, by + 15); ctx.lineTo(bx + 6, by + 15); ctx.lineTo(bx, by + 23); ctx.closePath(); ctx.fill(); }
+    ctx.fillStyle = 'rgba(0,0,0,.72)'; ctx.beginPath(); ctx.arc(bx, by, 16, 0, TAU); ctx.fill();
+    ctx.lineWidth = 2.5; ctx.strokeStyle = t.col; ctx.stroke();
+    ctx.font = '17px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(t.ic, bx, by + 1);
+    const txt = on ? t.lb : `${t.lb} ${dist}m`;
+    ctx.font = '800 10px "Noto Sans KR",sans-serif'; const tw = ctx.measureText(txt).width + 8;
+    ctx.fillStyle = 'rgba(0,0,0,.72)'; rr(ctx, bx - tw / 2, by + 18 + (on ? 6 : 0), tw, 14, 6); ctx.fill();
+    ctx.fillStyle = t.col; ctx.fillText(txt, bx, by + 25.5 + (on ? 6 : 0));
+  }
+  ctx.globalAlpha = 1; ctx.textBaseline = 'alphabetic';
 }
