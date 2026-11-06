@@ -19,12 +19,15 @@ const SAVE_KEY = 'deathSurvivor_save_v1';
 const DEFAULT_SAVE = () => ({
   v: 1, cleared: 0, gold: 0,
   stats: { kills: 0, bossKills: 0, runs: 0, bestLv: 1 },
-  settings: { music: 0.6, sfx: 0.8, quality: 'auto', shake: 1, dmgNum: 1, fast: 0 },
+  settings: { music: 0.6, sfx: 0.8, quality: 'auto', shake: 1, dmgNum: 1, fast: 0, diff: 1 },
   // v2 추가 항목 (기존 저장에는 없으므로 기본값으로 채움)
   up: { atk: 0, hp: 0, armor: 0, spd: 0, gain: 0, pot: 0 },
   codex: {},        // 무기 도감: { id: { found:1, maxLv, kills } }
   startW: 'rifle',  // 출전 무기
-  best: {}          // 스테이지별 최고 기록 { n: {time, side} }
+  best: {},         // 스테이지별 최고 기록 { n: {time, side} }
+  // v4 추가 항목
+  vfound: {},       // 탑승한 적 있는 장비 { id: 1 }
+  afound: {}        // 구출한 동료 종류 { 'cls+perk': 1 }
 });
 let save = DEFAULT_SAVE();
 function loadSave() {
@@ -41,6 +44,9 @@ function loadSave() {
       save.up = Object.assign(DEFAULT_SAVE().up, d.up || {});
       save.codex = (d.codex && typeof d.codex === 'object') ? d.codex : {};
       save.best = (d.best && typeof d.best === 'object') ? d.best : {};
+      save.vfound = (d.vfound && typeof d.vfound === 'object') ? d.vfound : {};
+      save.afound = (d.afound && typeof d.afound === 'object') ? d.afound : {};
+      save.settings.diff = [0, 1, 2, 3].includes(save.settings.diff) ? save.settings.diff : 1;
       save.cleared = clamp(Math.floor(+save.cleared || 0), 0, 40);
       save.gold = Math.max(0, Math.floor(+save.gold || 0));
       for (const k in save.up) save.up[k] = Math.max(0, Math.floor(+save.up[k] || 0));

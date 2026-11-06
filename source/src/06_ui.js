@@ -4,7 +4,7 @@
 const cdEls = { sk1: $('bSk1').querySelector('.cdv'), sk2: $('bSk2').querySelector('.cdv'), pot: $('bPot').querySelector('.cdv') };
 const cdLast = {};
 function setCd(k, frac) { const v = Math.round(frac * 40); if (cdLast[k] === v) return; cdLast[k] = v; cdEls[k].style.background = v > 0 ? `conic-gradient(rgba(0,0,0,.65) ${v * 9}deg, transparent 0)` : 'none'; }
-function updateButtons() { setCd('sk1', Math.max(0, G.sk1) / SK1_CD); setCd('sk2', Math.max(0, G.sk2) / SK2_CD); setCd('pot', Math.max(0, G.potCd)); }
+function updateButtons() { if (!G.veh) setCd('sk1', Math.max(0, G.sk1) / SK1_CD); setCd('sk2', Math.max(0, G.sk2) / SK2_CD); setCd('pot', Math.max(0, G.potCd)); }
 
 /* ------------------------- 레벨업 카드 ------------------------- */
 function evoReady(w) {
@@ -96,20 +96,21 @@ function finishRun(win) {
 }
 function stageWin() {
   const first = save.cleared < G.stage;
-  const n = G.stage, clearG = 60 + 30 * n;
-  const sides = G.quests.filter(q => !q.main), sideDone = sides.filter(q => q.done);
-  const sideG = sideDone.length * (40 + 20 * n);
+  const n = G.stage, dmul = diffRewardMul(), clearG = Math.round((60 + 30 * n) * dmul);
+  const sides = G.quests.filter(q => !q.main && !q.sp), sideDone = sides.filter(q => q.done);
+  const sideG = Math.round(sideDone.length * (40 + 20 * n) * dmul);
   const special = first && n % 5 === 0 ? (n % 10 === 0 ? 300 * n / 5 : 150 * n / 5) : 0;
   G.gold += clearG + sideG + special;
   G.state = 'result'; $('gameUI').classList.remove('on');
   const newUnlocks = n < 40 && first ? STAGES[n].wp.filter(id => firstStageOf(id) === n + 1) : [];
   finishRun(true); AU.bgm('win');
   $('rTitle').textContent = n === 40 ? '최종 승리!' : 'STAGE CLEAR!'; $('rTitle').className = 'res-t win';
-  const qrows = G.quests.map(q => `<div class="stat"><span>${q.done ? '✔' : '✖'} ${q.main ? '' : '[보조] '}${qLabel(q)}</span><span style="color:${q.done ? '#69f0ae' : '#ef9a9a'}">${q.done ? '완료' : '미완료'}</span></div>`).join('');
-  $('rStats').innerHTML = statRows([['스테이지', `${n}. ${G.st.name}`], ['클리어 시간', fmtTime(G.t)], ['도달 레벨', 'Lv ' + G.lv], ['처치 수', G.kills]]) + qrows +
+  const qrows = G.quests.map(q => `<div class="stat"><span>${q.done ? '✔' : '✖'} ${q.main ? '' : q.sp ? '[특별] ' : '[보조] '}${qLabel(q)}</span><span style="color:${q.done ? '#69f0ae' : '#ef9a9a'}">${q.done ? '완료' : '미완료'}</span></div>`).join('');
+  $('rStats').innerHTML = statRows([['스테이지', `${n}. ${G.st.name}`], ['난이도', `${DF().ic} ${DF().n} (보상 x${dmul.toFixed(2)})`], ['클리어 시간', fmtTime(G.t)], ['도달 레벨', 'Lv ' + G.lv], ['처치 수', G.kills], ['구출한 동료', G.rescued + '명'], ['탑승한 장비', G.vehUsed + '회']]) + qrows +
     statRows([['클리어 보상', '+' + clearG + 'G'], ...(sideG ? [['보조 목표 보상', '+' + sideG + 'G']] : []), ...(special ? [[n % 10 === 0 ? '🏆 10스테이지 전설 보급' : '🎖️ 5스테이지 특별 보상', '+' + special + 'G']] : []), ['획득 골드 합계', '💰 ' + G.gold], ['보유 골드', '💰 ' + save.gold]]) +
     (G.newFound.length ? `<p class="unl">✨ 새로 발견한 무기: ${G.newFound.map(id => WMAP[id].ic + ' ' + WMAP[id].nm).join(', ')}</p>` : '') +
     (newUnlocks.length ? `<p class="unl">🔓 다음 스테이지 신규 무기: ${newUnlocks.map(id => WMAP[id].ic + ' ' + WMAP[id].nm).join(', ')}</p>` : '') +
+    (G.newVeh ? `<p class="unl">🚘 새로 탑승한 장비 ${G.newVeh}종 · 장비 도감 ${Object.keys(save.vfound).length} / ${VEH.length}</p>` : '') +
     (n === 40 ? '<p class="unl">🎉 40개 스테이지를 모두 정복했습니다!</p>' : '');
   const btns = $('rBtns'); btns.innerHTML = '';
   if (n < 40) addBtn(btns, '다음 스테이지 ▶', '', () => startStage(n + 1));
@@ -154,7 +155,7 @@ function openStageSelect() {
     c.addEventListener('click', () => { AU.sfx('button'); if (avail) { selStage = i; renderStageInfo(); } else renderStageInfo(i); });
     grid.appendChild(c);
   }
-  renderStageInfo(); showScreen('scrStage');
+  renderStageInfo(); segSet('segDiffS', String(diffIdx())); renderDiffNote(); showScreen('scrStage');
 }
 function renderStageInfo(lockedN) {
   const box = $('sInfo');
@@ -166,6 +167,9 @@ function renderStageInfo(lockedN) {
   const best = save.best[s.n];
   box.innerHTML = `<div class="nm">STAGE ${s.n}. ${s.name}</div><div class="ds">
     ${s.main.map(q => qtxt(q, true)).join('<br>')}${s.side.length ? '<br>' + s.side.map(q => qtxt(q, false)).join('<br>') : ''}<br>
+    ${stageMissions(s.n).map(m => '🏅 [특별] ' + SPM_LABEL[m.k] + (m.n > 1 ? ' ' + m.n : '') + (m.sec ? ' ' + m.sec + '초' : '')).join('<br>')}<br>
+    🚘 탑승 장비: ${VEH_ST[s.n].map(v => `<span style="color:${save.vfound[v.id] ? '#80deea' : '#b0bec5'}">${s.n <= save.cleared + 1 ? v.name : '???'}</span>`).join(', ')}<br>
+    🤝 구조 대상: ${ALLY_ST[s.n].slice(0, 2).map(a => ACL[a.cls].ic + ' ' + a.name + ' <small>(' + APERK[a.perk].n + ')</small>').join(', ')}<br>
     👾 ${mobs}<br>🔫 주력 무기: ${s.wp.map(id => `<span style="color:${TIER_COL[WMAP[id].t]}">${WMAP[id].ic}${WMAP[id].nm}</span>`).join(', ')}
     ${best ? `<br>🏅 최고 기록: ${fmtTime(best.time)}` : ''}</div>`;
   $('sGo').style.visibility = 'visible';
@@ -230,7 +234,9 @@ function pauseGame() {
   G.state = 'pause'; joy.id = null; joy.mag = 0;
   const wl = G.weapons.map(w => `${w.evo ? EVOS[w.id].ic : WMAP[w.id].ic} ${w.evo ? EVOS[w.id].n : WMAP[w.id].nm} Lv${w.lv}`).join('<br>');
   const pl = Object.entries(G.pass).map(([k, v]) => `${PASSIVES[k].icon}${v}`).join(' ');
-  $('pInfo').innerHTML = statRows([['스테이지', `${G.stage}. ${G.st.name}`], ['레벨', 'Lv ' + G.lv]]) + G.quests.map(q => `<div class="stat"><span>${q.done ? '✔' : q.main ? '▶' : '☆'} ${qLabel(q)}</span><span>${qProgress(q)}</span></div>`).join('') + `<div style="font-size:13px;margin-top:8px;line-height:1.6">${wl}<br>${pl || ''}</div>`;
+  segSet('segDiffP', String(diffIdx()));
+  const sq = allies.map(a => `${ACL[a.cls].ic} ${a.spec.name}${a.down > 0 ? ' (부상)' : ''}`).join('<br>');
+  $('pInfo').innerHTML = statRows([['스테이지', `${G.stage}. ${G.st.name}`], ['레벨', 'Lv ' + G.lv], ...(G.veh ? [['탑승 장비', `${G.veh.def.name} (${Math.ceil(G.veh.hp)}/${G.veh.maxHp})`]] : [])]) + (sq ? `<div style="font-size:12px;margin:6px 0;line-height:1.5;color:#b9f6ca">${sq}</div>` : '') + G.quests.map(q => `<div class="stat"><span>${q.done ? '✔' : q.main ? '▶' : q.sp ? '🏅' : '☆'} ${qLabel(q)}</span><span>${qProgress(q)}</span></div>`).join('') + `<div style="font-size:13px;margin-top:8px;line-height:1.6">${wl}<br>${pl || ''}</div>`;
   showScreen('scrPause');
 }
 function resumeGame() { if (G.state !== 'pause') return; showScreen(null); G.state = 'play'; }
@@ -247,6 +253,9 @@ bindSeg('segQ', v => { save.settings.quality = v; applyQualitySetting(); });
 bindSeg('segShake', v => save.settings.shake = +v);
 bindSeg('segDmg', v => save.settings.dmgNum = +v);
 bindSeg('segFast', v => save.settings.fast = +v);
+bindSeg('segDiffP', v => setDiff(+v));
+bindSeg('segDiffS', v => { setDiff(+v); renderDiffNote(); });
+function renderDiffNote() { const d = DF(); $('diffNote').innerHTML = `${d.ic} <b style="color:${d.col}">${d.n}</b> — 적 체력 ${Math.round(d.hp * 100)}% · 공격력 ${Math.round(d.dmg * 100)}% · 등장 수 ${Math.round(d.cnt * 100)}% · 골드 x${d.gold}`; }
 $('vMusic').addEventListener('input', e => { save.settings.music = e.target.value / 100; AU.applyVol(); });
 $('vSfx').addEventListener('input', e => { save.settings.sfx = e.target.value / 100; AU.applyVol(); });
 $('vMusic').addEventListener('change', writeSave); $('vSfx').addEventListener('change', () => { writeSave(); AU.sfx('coin'); });
@@ -270,7 +279,7 @@ $('pResume').addEventListener('click', () => { AU.sfx('button'); resumeGame(); }
 $('pSet').addEventListener('click', () => { AU.sfx('button'); openSettings('scrPause'); });
 $('pQuit').addEventListener('click', () => { AU.sfx('button'); confirmBox('포기하기', '지금까지 모은 골드는 보관됩니다.<br>스테이지를 포기할까요?', () => { finishRun(false); openStageSelect(); }, () => showScreen('scrPause')); });
 function bindPress(id, fn) { $(id).addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); fn(); }); }
-bindPress('bSk1', useSkill1); bindPress('bSk2', useSkill2); bindPress('bPot', usePotion);
+bindPress('bSk1', useSkill1); bindPress('bSk2', useSkill2); bindPress('bPot', usePotion); bindPress('bRide', () => { AU.sfx('button'); rideToggle(); });
 bindPress('bPause', () => { AU.sfx('button'); pauseGame(); });
 
 /* ------------------------- 터치 조이스틱 ------------------------- */
@@ -289,7 +298,7 @@ const joyEnd = e => { if (e.pointerId === joy.id) { joy.id = null; joy.mag = 0; 
 cv.addEventListener('pointerup', joyEnd); cv.addEventListener('pointercancel', joyEnd); cv.addEventListener('lostpointercapture', joyEnd);
 window.addEventListener('keydown', e => {
   const k = e.key.length === 1 ? e.key.toLowerCase() : e.key; keys[k] = true;
-  if (k === 'j') useSkill1(); if (k === 'k') useSkill2(); if (k === 'l' || k === 'q') usePotion();
+  if (k === 'j') useSkill1(); if (k === 'k') useSkill2(); if (k === 'l' || k === 'q') usePotion(); if (k === 'e' || k === 'f') rideToggle();
   if (k === 'Escape' || k === 'p') { if (G.state === 'play') pauseGame(); else if (G.state === 'pause') resumeGame(); }
 });
 window.addEventListener('keyup', e => { const k = e.key.length === 1 ? e.key.toLowerCase() : e.key; keys[k] = false; });
@@ -322,7 +331,7 @@ function frame(now) {
 applyQualitySetting();
 AU.bgm('title');
 requestAnimationFrame(frame);
-window.__DS = { eprojs: () => eprojs, hazards: () => hazards, gens: () => gens, G, joy, get P() { return P; }, get enemies() { return enemies; }, pickups: () => pickups, startStage, update, save: () => save, STAGES, WEAPONS, wstat, addWeapon, recalc, hitEnemy, spawnEnemy, buildGrid };
+window.__DS = { ext: () => ({ allies, vehs, rescues, VEH, VEH_ST, ALLY_ST, DIFFS, setDiff, boardVehicle, exitVehicle, addAlly, useVehSpecial, extEvent, rideToggle, spawnBoss, bossHpMul }), eprojs: () => eprojs, hazards: () => hazards, gens: () => gens, G, joy, get P() { return P; }, get enemies() { return enemies; }, pickups: () => pickups, startStage, update, save: () => save, STAGES, WEAPONS, wstat, addWeapon, recalc, hitEnemy, spawnEnemy, buildGrid };
 
 /* ------------------------- 무기 획득 (슬롯이 가득 찬 경우 교체) ------------------------- */
 function openSwap(id) {

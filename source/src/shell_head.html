@@ -6,11 +6,11 @@
 <meta name="theme-color" content="#1a1030">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="description" content="설치 없이 바로 플레이! 현대 화기 280종으로 40개 지역을 돌파하는 모바일 생존 슈팅 RPG">
+<meta name="description" content="설치 없이 바로 플레이! 탑승 장비 120종 · 동료 구출 · 현대 화기 280종으로 40개 지역을 돌파하는 모바일 생존 슈팅 RPG">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="데스 서바이버">
 <meta property="og:title" content="데스 서바이버: 전설의 귀환">
-<meta property="og:description" content="설치 없이 터치 한 번으로 바로 플레이! 현대 화기 280종 · 40스테이지 생존 슈팅 RPG">
+<meta property="og:description" content="설치 없이 터치 한 번으로 바로 플레이! 탑승 장비 120종 · 동료 구출 · 난이도 4단계 · 40스테이지 생존 슈팅 RPG">
 <meta property="og:url" content="https://heonam5-create.github.io/death-survivor/">
 <meta property="og:image" content="https://heonam5-create.github.io/death-survivor/og.jpg">
 <meta property="og:image:width" content="1200">
@@ -56,6 +56,14 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
 #bSk1{width:74px;height:74px;right:calc(18px + env(safe-area-inset-right));bottom:calc(26px + env(safe-area-inset-bottom))}
 #bSk2{width:62px;height:62px;right:calc(102px + env(safe-area-inset-right));bottom:calc(22px + env(safe-area-inset-bottom));background:radial-gradient(circle at 50% 35%,#3d7fb8,#1d3d6b)}
 #bPot{width:54px;height:54px;right:calc(26px + env(safe-area-inset-right));bottom:calc(112px + env(safe-area-inset-bottom));background:radial-gradient(circle at 50% 35%,#c2185b,#5c0b2e)}
+#bRide{width:60px;height:60px;right:calc(22px + env(safe-area-inset-right));bottom:calc(182px + env(safe-area-inset-bottom));display:none;background:radial-gradient(circle at 50% 35%,#26a69a,#004d40);animation:ridePulse 1s ease-in-out infinite}
+#bRide.exit{animation:none;background:radial-gradient(circle at 50% 35%,#78909c,#263238);width:50px;height:50px;right:calc(28px + env(safe-area-inset-right))}
+@keyframes ridePulse{0%,100%{box-shadow:0 4px 0 rgba(0,0,0,.35),0 0 0 0 rgba(100,255,218,.7)}50%{box-shadow:0 4px 0 rgba(0,0,0,.35),0 0 0 10px rgba(100,255,218,0)}}
+#bSk1.vsp{background:radial-gradient(circle at 50% 35%,#ff8f00,#6d2c00)}
+#squad{position:absolute;left:calc(10px + env(safe-area-inset-left));bottom:calc(168px + env(safe-area-inset-bottom));display:flex;gap:4px;pointer-events:none}
+#squad .ally{width:28px;height:28px;border-radius:50%;background:rgba(10,40,20,.7);border:2px solid #69f0ae;display:flex;align-items:center;justify-content:center;font-size:15px}
+#squad .ally.sp{border-color:#ffd54f;box-shadow:0 0 6px #ffd54f}#squad .ally.down{opacity:.4;border-color:#ff5252}#squad .ally.seat{border-color:#4dd0e1;border-style:dashed}
+.diffbox{margin:6px 0 2px;text-align:center}.diffbox .seg{justify-content:center;flex-wrap:wrap}.diffnote{font-size:11.5px;opacity:.85;margin-top:4px;line-height:1.4}
 /* ---------- screens ---------- */
 .scr{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
  padding:calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
@@ -190,6 +198,8 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
   <button class="gbtn" id="bPause" aria-label="일시정지">⏸</button>
   <button class="gbtn" id="bPot"><span class="ic" style="font-size:22px">🧪</span><span class="badge" id="potN">3</span><span class="cdv"></span></button>
   <button class="gbtn" id="bSk2"><span class="ic">💨</span><span class="lb">질주</span><span class="cdv"></span></button>
+  <button class="gbtn" id="bRide"><span class="ic">🚘</span><span class="lb">탑승</span></button>
+  <div id="squad"></div>
   <button class="gbtn" id="bSk1"><span class="ic" style="font-size:32px">🌀</span><span class="lb">회오리</span><span class="cdv"></span></button>
  </div>
  <div id="toast"></div>
@@ -205,7 +215,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
   <button class="btn blue" id="tCodex">📖 무기 도감</button>
   <button class="btn blue" id="tHelp">🎮 조작 방법</button>
   <div class="trow"><button class="btn gray sm" id="tSet">⚙️ 설정</button><button class="btn kakao sm" id="tShare">💬 카카오톡 공유</button></div>
-  <div class="ver">v3 · 현대 화기 280종 · 40스테이지</div>
+  <div class="ver">v4 · 탑승 장비 120종 · 동료 구출 · 40스테이지</div>
  </div>
 
  <!-- 스테이지 선택 -->
@@ -217,6 +227,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
    <div class="sgrid" id="sGrid"></div>
    <div class="sinfo" id="sInfo"></div>
    <div id="sStart"></div>
+   <div class="diffbox"><div class="lbl" style="font-size:12px;opacity:.8;margin-bottom:3px">난이도 (게임 중 일시정지 메뉴에서도 변경 가능)</div><div class="seg" id="segDiffS"><button data-v="0">🌱 쉬움</button><button data-v="1">⚔️ 보통</button><button data-v="2">🔥 어려움</button><button data-v="3">👹 지옥</button></div><div class="diffnote" id="diffNote"></div></div>
    <div class="center gobar"><button class="btn" id="sGo">출전!</button></div>
   </div>
  </div>
@@ -232,6 +243,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
   <div class="panel center">
    <h2>일시정지</h2>
    <div id="pInfo" style="width:100%;margin-bottom:8px"></div>
+   <div class="diffbox" style="width:100%"><div style="font-size:12px;opacity:.8;margin-bottom:3px">난이도 변경 (즉시 적용)</div><div class="seg" id="segDiffP"><button data-v="0">🌱 쉬움</button><button data-v="1">⚔️ 보통</button><button data-v="2">🔥 어려움</button><button data-v="3">👹 지옥</button></div></div>
    <button class="btn" id="pResume">▶ 계속하기</button>
    <button class="btn gray" id="pSet">⚙️ 설정</button>
    <button class="btn red" id="pQuit">🏳️ 포기하기</button>
@@ -280,7 +292,12 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
    <p>👑 모든 스테이지는 목표 달성 후 고유 보스가 등장합니다. 보스를 처치하면 그 스테이지의 새 무기를 확정 획득!</p>
    <p>✨ <b>전설 보물상자</b> — 스테이지마다 1개 등장. 화살표를 따라가 열면 보상 3개 중 1개 선택.</p>
    <p>⚠ <b>정예 몬스터</b> — 크고 고유 기술을 씁니다. 처치 시 무기를 떨어뜨릴 수 있어요.</p>
-   <p>⌨️ PC: WASD/방향키 이동, J 회오리, K 질주, L 물약, ESC 일시정지</p>
+   <p>🚘 <b>탑승 장비</b> — 스테이지마다 새로운 차량·로봇·비행 장비 3종이 맵에 있습니다. 가까이 가면 <b>탑승</b> 버튼! 탑승 중에는 장비 전용 무기로 자동 공격하고 🌀 버튼이 <b>특수능력</b>으로 바뀝니다. 내구도가 0이 되면 자동 하차.</p>
+   <p>🤝 <b>동료 구출</b> — 철창·캡슐에 갇힌 아군 근처에서 몇 초 버티면 구출! 동료는 따라다니며 함께 싸우고, 서로 다른 동료 조합은 <b>합동 공격</b>을 씁니다.</p>
+   <p>🧪 <b>회복 물약</b> — 맵에 빨간 물약이 주기적으로 나타납니다. 체력이 가득하면 물약 가방에 보관.</p>
+   <p>🏅 <b>특별 임무</b> — 구출·보급품·지휘관·구역 사수 등 선택형 임무. 완료 즉시 보상!</p>
+   <p>⚙️ <b>난이도</b> — 쉬움·보통·어려움·지옥. 높을수록 보상(골드)이 커집니다. 일시정지 메뉴에서 언제든 변경.</p>
+   <p>⌨️ PC: WASD/방향키 이동, J 회오리(탑승 시 특수능력), K 질주, L 물약, E 탑승/하차, ESC 일시정지</p>
    <div class="center"><button class="btn" id="helpClose">닫기</button></div>
   </div>
  </div>

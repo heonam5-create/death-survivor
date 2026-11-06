@@ -21,7 +21,8 @@ function recalc() {
   P.regen = 0.5 * (p.regen || 0);
   P.spd = 125 * (1 + 0.08 * (p.speed || 0)) * (1 + 0.02 * u.spd);
   P.magnet = 75 * (1 + 0.35 * (p.magnet || 0));
-  P.greed = (1 + 0.2 * (p.greed || 0)) * (1 + 0.05 * u.gain); P.xpMul = 1 + 0.05 * u.gain;
+  P.greed = (1 + 0.2 * (p.greed || 0)) * (1 + 0.05 * u.gain) * DF().gold; P.xpMul = (1 + 0.05 * u.gain) * DF().xp;
+  if (G.allyAura) P.cdMul /= 1 + 0.06 * G.allyAura;
   const b = G.buff || {}; P.dmgMul *= 1 + (b.atk || 0); P.cdMul /= 1 + (b.aspd || 0); P.crit += b.crit || 0; P.spd *= 1 + (b.spd || 0);
 }
 function codexOf(id) { return save.codex[id] || (save.codex[id] = { found: 1, maxLv: 1, kills: 0 }); }
@@ -38,7 +39,7 @@ function startStage(n) {
   G.stage = n; G.st = st; G.t = 0; G.time = 0;
   G.hpMul = 1 + (n - 1) * 0.16; G.dmgMul = 1 + (n - 1) * 0.07; G.spdMul = 1 + (n - 1) * 0.006;
   P = { x: 0, y: 0, r: 12, hp: 100, maxHp: 100, face: 1, aim: 0, walkT: 0, moving: false, inv: 0, hurtT: 0, dashT: 0, dashVx: 0, dashVy: 0, lastMx: 1, lastMy: 0, slowT: 0, atkT: 0, recoil: 0 };
-  G.pass = {}; G.buff = { atk: 0, aspd: 0, crit: 0, spd: 0, barrier: 0, vamp: 0 }; G.swapQ = []; G.legT = st.D * rand(0.22, 0.45); G.legSpawned = false; G.legGot = false; G.mergeT = 0; G.weapons = []; G.newFound = []; G.knownBefore = {}; for (const k in save.codex) G.knownBefore[k] = 1;
+  G.pass = {}; G.buff = { atk: 0, aspd: 0, crit: 0, spd: 0, barrier: 0, vamp: 0 }; G.swapQ = []; G.legT = st.D * rand(0.22, 0.45); G.legSpawned = false; G.legGot = false; G.mergeT = 0; G.weapons = []; G.newFound = []; G.allyAura = 0; G.newVeh = 0; G.knownBefore = {}; for (const k in save.codex) G.knownBefore[k] = 1;
   recalc(); P.hp = P.maxHp;
   let sw = save.startW; if (!WMAP[sw] || !save.codex[sw] || firstStageOf(sw) > Math.max(save.cleared + 1, n)) sw = 'rifle';
   addWeapon(sw);
@@ -49,6 +50,7 @@ function startStage(n) {
   enemies = []; projs = []; eprojs = []; pickups = []; parts = []; texts = []; effects = []; hazards = []; fields = []; turrets = []; mines = []; gens = []; laterQ = [];
   joy.id = null; joy.mag = 0;
   initQuests(st);
+  extStageStart();
   G.paused = false; G.state = 'play';
   showScreen(null); $('gameUI').classList.add('on'); updatePotBadge();
   AU.bgm(st.mu, st.muVar);
@@ -78,11 +80,12 @@ function qLabel(q) {
     case 'collect': return QITEMS[q.item].ic + ' ' + QITEMS[q.item].n + ' 수집'; case 'survive': return '생존';
     case 'defend': return q.gens > 1 ? `발전기 ${q.gens}개 방어` : '벙커 코어 방어'; case 'portal': return '적 포탈 파괴';
     case 'egg': return '괴생명체 알 파괴'; case 'device': return '신전 장치 파괴'; case 'boss': return '보스 처치';
+    case 'rescue': case 'scrate': case 'commander': case 'hold': case 'ride': return SPM_LABEL[q.k];
   }
   return '';
 }
 function qProgress(q) {
-  if (q.k === 'survive' || q.k === 'defend') { const r = Math.max(0, q.sec - q.cur); return q.done ? '완료' : `${Math.floor(r / 60)}:${String(Math.floor(r % 60)).padStart(2, '0')}`; }
+  if (q.k === 'survive' || q.k === 'defend' || q.k === 'hold') { const r = Math.max(0, q.sec - q.cur); return q.done ? '완료' : `${Math.floor(r / 60)}:${String(Math.floor(r % 60)).padStart(2, '0')}`; }
   if (q.k === 'boss') return q.done ? '완료' : G.bossState >= 1 ? '전투 중!' : '대기';
   return `${Math.min(q.cur, q.n)} / ${q.n}`;
 }
@@ -95,6 +98,7 @@ function qAdd(k, v = 1, filter) {
 }
 function completeQuest(q) {
   if (q.done) return; q.done = true; q.doneT = G.time; AU.sfx('quest');
+  if (q.sp) { spReward(q); return; }
   texts.push({ x: P.x, y: P.y - 40, t: 0, v: q.main ? '✔ 목표 달성!' : '✔ 보조 목표 달성!', col: q.main ? '#69f0ae' : '#ffd54f', pl: 1, big: 1 });
 }
 function updateQuests(dt) {
@@ -132,15 +136,16 @@ function spawnEnemy(type, x, y, o = {}) {
   const p = progress(), late = G.t > G.st.D ? Math.min(0.6, (G.t - G.st.D) / G.st.D * 0.6) : 0;
   let hp = d.hp * G.hpMul * (o.obj ? (1 + G.stage * 0.12) * (type === 'device' && G.stage > 27 ? 0.7 : 1) : (1 + p * 3 + late * 3)) * (el ? 11 : 1);
   if (type === 'golden') hp = d.hp * G.hpMul * 2;
+  hp *= o.obj ? Math.sqrt(DF().hp) : DF().hp;
   const e = { id: ++G.eid, type, d, x, y, r: d.r * sc, hp, maxHp: hp, dmg: d.dmg * G.dmgMul * (el ? 1.4 : 1),
-    spd: d.spd * rand(0.9, 1.1) * G.spdMul * (1 + p * 0.1) * (el ? 0.85 : 1), elite: el, face: 1, flash: 0, atkCd: 0, kx: 0, ky: 0,
+    spd: d.spd * rand(0.9, 1.1) * G.spdMul * (1 + p * 0.1) * (el ? 0.85 : 1) * DF().spd, elite: el, face: 1, flash: 0, atkCd: 0, kx: 0, ky: 0,
     seed: Math.random() * 10, burn: 0, burnDps: 0, burnTick: 0, poison: 0, poisonDps: 0, slowT: 0, slowF: 1, stunT: 0, shredT: 0, chill: 0,
     st: 0, aiT: rand(0.5, 2), ang: 0, orbCd: 0, dead: false, alpha: 1, armor: d.armor || 0, static: d.ai === 'static', pal: d.pal, draw: d.draw, z: 0, life: 0 };
-  if (el) { e.affix = pick(['fast', 'shield', 'aura']); if (e.affix === 'fast') e.spd *= 1.4; if (e.affix === 'shield') e.armor = Math.min(0.7, e.armor + 0.25); e.skill = o.skill || G.st.eliteSkill; e.skT = rand(2, 3.5); }
+  if (el) { e.affix = pick(['fast', 'shield', 'aura']); if (e.affix === 'fast') e.spd *= 1.4; if (e.affix === 'shield') e.armor = Math.min(0.7, e.armor + 0.25); e.skill = o.skill || G.st.eliteSkill; e.skT = rand(2, 3.5); if (DF().pat >= 2) e.skill2 = pick(ELITE_SKILLS.filter(k => k !== e.skill)); }
   if (o.tgtGen) e.tgtGen = true;
   enemies.push(e); return e;
 }
-function maxEnemies() { return Math.round((Q.level === 0 ? 130 : 200 + G.stage * 4) * G.st.crowd); }
+function maxEnemies() { return Math.min(Q.level === 0 ? 240 : 640, Math.round((Q.level === 0 ? 130 : 200 + G.stage * 4) * G.st.crowd * DF().cnt)); }
 function aliveCount() { let n = 0; for (const e of enemies) if (!e.dead) n++; return n; }
 function director(dt) {
   const st = G.st, p = progress();
@@ -149,7 +154,7 @@ function director(dt) {
   if ((G.bossState === 0 || G.bossState === 2) && G.clearing === 0) {
     G.spawnT -= dt;
     if (G.spawnT <= 0) {
-      G.spawnT = lerp(0.7, 0.2, p) / st.crowd * (G.bossState === 2 ? 2.4 : 1) * (1 - late * 0.4);
+      G.spawnT = lerp(0.7, 0.2, p) / st.crowd * (G.bossState === 2 ? 2.4 : 1) * (1 - late * 0.4) / (DF().cnt * allySpawnMul());
       const batch = 1 + Math.floor(p * 4.5 + Math.random() * 1.5);
       let alive = aliveCount(); let ranged = 0; for (const e of enemies) if (!e.dead && e.d.ai === 'ranged') ranged++;
       for (let i = 0; i < batch && alive < maxEnemies(); i++, alive++) {
@@ -162,6 +167,7 @@ function director(dt) {
   if (G.bossState === 1) { G.warnT -= dt; if (G.warnT <= 0) spawnBoss(st.boss); }
   G.mergeT -= dt; if (G.mergeT <= 0) { G.mergeT = 0.5; mergeGems(); }
   if (!G.legSpawned && G.clearing === 0) { G.legT -= dt; if (G.legT <= 0) spawnLegendChest(); }
+  extDirector(dt);
   if (G.bossState !== 0 || G.clearing) return;
   // 무작위 이벤트
   G.evT -= dt;
@@ -192,6 +198,7 @@ function eliteSkill(e, dt, pdist) {
     case 'blink': e.skT = 5; effects.push({ type: 'poof', x: e.x, y: e.y, r: e.r * 1.4, t: 0, dur: .3 }); { const b2 = rand(0, TAU); e.x = P.x + Math.cos(b2) * 110; e.y = P.y + Math.sin(b2) * 110; } e.stunT = 0.4; for (let i = 0; i < 8; i++) eShot(e.x, e.y, i / 8 * TAU, 130, e.dmg * 0.4, 'plasma'); AU.sfx('portal'); break;
     case 'shield': e.skT = 6; e.shieldT = 2.5; AU.sfx('clank'); break;
   }
+  if (e.skill2) { const t = e.skill; e.skill = e.skill2; e.skill2 = t; e.skT *= 0.8; }
 }
 // 전설 보물상자: 스테이지마다 최소 1회 등장 (맵에 실제 배치)
 function spawnLegendChest() {
@@ -238,15 +245,16 @@ function spawnElite() {
   AU.sfx('alarm'); G.flash = Math.max(G.flash, 0.18); G.flashCol = '255,120,0';
 }
 function startBossWarning() {
+  spawnHpot(true); if (G.potions === 0) { G.potions = 1; updatePotBadge(); } later(1.2, () => toast('🧪 보스전 대비 회복 물약 보급!', 1.4, '#ff8a80'));
   G.bossState = 1; G.warnT = 3; AU.sfx('bosswarn'); AU.bgm(BOSSES[G.st.boss].final ? 'finalboss' : 'boss'); G.shake = Math.max(G.shake, 6);
   toast('⚠ 보스 출현 ⚠<br><span style="font-size:20px">' + BOSSES[G.st.boss].name + '</span>', 2.8, '#ff5252');
 }
 function spawnBoss(id, intrude) {
   const b = BOSSES[id]; if (!intrude) G.bossState = 2;
   const ang = rand(0, TAU), dist = Math.min(VW, VH) * 0.42;
-  const hp = b.base * (1 + Math.min(G.lv, 55) * 0.045) * (b.mini ? 0.8 * (1 + G.stage * 0.03) : 1) * (save.settings.fast ? 0.4 : 1);
+  const hp = b.base * (1 + Math.min(G.lv, 55) * 0.045) * (b.mini ? 0.8 * (1 + G.stage * 0.03) : 1) * (save.settings.fast ? 0.4 : 1) * bossHpMul(intrude);
   const e = { id: ++G.eid, type: 'boss', bdef: b, d: { xp: 0 }, x: P.x + Math.cos(ang) * dist, y: P.y + Math.sin(ang) * dist, r: b.r, hp, maxHp: hp,
-    dmg: b.dmg * G.dmgMul, spd: b.spd, face: 1, flash: 0, atkCd: 0, kx: 0, ky: 0, seed: 0, burn: 0, burnDps: 0, burnTick: 0, poison: 0, poisonDps: 0, slowT: 0, slowF: 1, stunT: 0, shredT: 0, chill: 0,
+    dmg: b.dmg * G.dmgMul * 1.1, spd: b.spd, face: 1, flash: 0, atkCd: 0, kx: 0, ky: 0, seed: 0, burn: 0, burnDps: 0, burnTick: 0, poison: 0, poisonDps: 0, slowT: 0, slowF: 1, stunT: 0, shredT: 0, chill: 0,
     boss: true, mini: !!intrude, ps: 'idle', pt: 2.0, sub: 0, lastPat: '', p2: false, dead: false, alpha: 1, orbCd: 0, z: 0, armor: 0.15, draw: b.draw, pal: b.pal };
   enemies.push(e); if (intrude) G.mini = e; else G.boss = e;
   G.shake = 14; G.flash = 0.5; G.flashCol = '255,40,40';
@@ -306,9 +314,12 @@ function hitEnemy(e, base, o = {}) {
   if (tr && tr.includes('exec') && e.hp < e.maxHp * 0.3 && !e.boss) dmg *= 2;
   if (e.shieldT > 0) dmg *= 0.25;
   let arm = e.shredT > 0 ? 0 : (e.armor || 0); arm *= (1 - (o.ap || 0)); dmg *= (1 - arm); if (e.shredT > 0) dmg *= 1.2;
+  if (e.exposeT > 0) dmg *= 1.5;
+  if (e.boss) dmg = bossGovern(e, dmg);
   dmg = Math.max(1, Math.round(dmg));
   e.hp -= dmg; e.flash = 0.08; G.dmgDealt += dmg; if (o.wid) { e.lastW = o.wid; e.lastDmg = base; }
   if (G.wdmg && o.wid) G.wdmg[o.wid] = (G.wdmg[o.wid] || 0) + dmg;
+  if (o.wid && !G.veh) G.pAcc = (G.pAcc || 0) + dmg;
   let kb = o.kb || 0; if (tr && tr.includes('knock')) kb = (o.tick || W_.m === 'cone' || W_.m === 'beam') ? (kb || 14) * 1.5 : (kb || 60) * 3;
   if (kb && !e.boss && !e.static) { const a = o.ang !== undefined ? o.ang : Math.atan2(e.y - P.y, e.x - P.x); const m = e.elite ? 0.3 : 1; e.kx += Math.cos(a) * kb * m; e.ky += Math.sin(a) * kb * m; }
   if (o.burn) { e.burn = 2.2; e.burnDps = Math.max(e.burnDps, o.burn); }
@@ -370,6 +381,9 @@ function killEnemy(e) {
   if (tr && tr.includes('nova') && Math.random() < 0.35) explode(e.x, e.y, 50, (e.lastDmg || 10) * 0.7, true, '#ffab40', { wid: e.lastW, noTrait: 1 });
   if (e.elite) {
     G.elitesKilled++; qAdd('elite');
+    if (e.cmd) { qAdd('commander'); G.cmdKilled = true; dropPickup('chest', e.x - 16, e.y); }
+    if (Math.random() < 0.15) dropPickup('hpot', e.x - 12, e.y + 6);
+    if (G.veh && G.veh.repairs < 2 && Math.random() < 0.08) dropPickup('rkit', e.x + 12, e.y + 6);
     if (Math.random() < 0.35) { const id = pickDropWeapon(2); if (id) { dropPickup('wdrop', e.x + 14, e.y, 0, id); toast('🔫 정예가 무기를 떨어뜨렸다!', 1.3, '#64b5f6'); } }
   }
   if (e.d.split) for (let i = 0; i < 2; i++) { const s = spawnEnemy(e.d.split, e.x + rand(-8, 8), e.y + rand(-8, 8)); s.kx = rand(-150, 150); s.ky = rand(-150, 150); }
@@ -386,6 +400,8 @@ function killEnemy(e) {
 function damagePlayer(dmg, src) {
   if (P.inv > 0 || G.state !== 'play' || P.hp <= 0 || G.clearing > 0) return;
   if (G.buff && G.buff.barrier > 0) { G.buff.barrier--; P.inv = 0.5; effects.push({ type: 'shock', x: P.x, y: P.y, r: 40, t: 0, dur: 0.35, col: '#80d8ff' }); AU.sfx('clank'); texts.push({ x: P.x, y: P.y - 24, t: 0, v: '보호막!', col: '#80d8ff', pl: 1 }); return; }
+  dmg *= DF().dmg;
+  if (G.veh) { vehHit(dmg, src); return; }
   dmg = Math.max(1, Math.round(dmg * (1 - P.armor)));
   if (G.dmgLog) G.dmgLog[src || '?'] = (G.dmgLog[src || '?'] || 0) + dmg;
   P.hp -= dmg; P.inv = 0.35; P.hurtT = 0.25; G.flash = Math.max(G.flash, 0.25); G.flashCol = '255,0,0';
@@ -429,6 +445,7 @@ function dropGem(x, y, v) {
 function dropPickup(kind, x, y, v = 0, item, placed) { pickups.push({ kind, x, y, v, item, t: 0, mag: false, vx: placed ? 0 : rand(-40, 40), vy: placed ? 0 : rand(-80, -40), z: placed ? undefined : 0, placed: !!placed }); }
 function gainXp(v) { G.xp += v * P.xpMul; while (G.xp >= G.need) { G.xp -= G.need; G.lv++; G.need = xpNeed(G.lv); G.pendingLv++; } }
 function collect(p) {
+  if (extCollect(p)) return;
   switch (p.kind) {
     case 'gem': gainXp(p.v); AU.sfx('gem'); break;
     case 'coin': { const g = Math.round(p.v * P.greed); G.gold += g; AU.sfx('coin'); texts.push({ x: P.x, y: P.y - 26, t: 0, v: '+' + g + 'G', col: '#ffd54f', pl: 1 }); break; }
@@ -871,6 +888,7 @@ function updateFields(dt) {
 /* ------------------------- 액티브 스킬 / 물약 ------------------------- */
 const SK1_CD = 10, SK2_CD = 5;
 function useSkill1() {
+  if (G.veh) { useVehSpecial(); return; }
   if (G.state !== 'play' || G.paused || G.sk1 > 0 || P.hp <= 0) return;
   G.sk1 = SK1_CD; const r = 115 * P.areaMul; const dmg = 30 + G.lv * 3 + G.stage * 4;
   effects.push({ type: 'spin', t: 0, dur: 0.45, r });
@@ -896,9 +914,10 @@ function updatePotBadge() { $('potN').textContent = G.potions; $('bPot').classLi
 /* ------------------------- 보스 AI ------------------------- */
 function bossUpdate(e, dt) {
   const b = e.bdef, dx = P.x - e.x, dy = P.y - e.y, dist = Math.hypot(dx, dy) || 1;
-  if (!e.p2 && e.hp < e.maxHp * 0.5) { e.p2 = true; G.shake = 12; G.flash = 0.4; G.flashCol = '255,0,60'; AU.sfx('rage'); toast('💢 ' + b.name + ' 분노! (2페이즈)', 1.8, '#ff1744'); if (b.final) e.armor = 0.25; }
+  if (!e.p2 && e.hp < e.maxHp * 0.5) { e.p2 = true; if (DF().pat >= 1 && b.summon) for (let i = 0; i < 6 + DF().pat * 2; i++) { const a = i / (6 + DF().pat * 2) * TAU; later(.3, () => { if (G.state === 'play' && !e.dead) spawnEnemy(b.summon, e.x + Math.cos(a) * 80, e.y + Math.sin(a) * 80); }); } G.shake = 12; G.flash = 0.4; G.flashCol = '255,0,60'; AU.sfx('rage'); toast('💢 ' + b.name + ' 분노! (2페이즈)', 1.8, '#ff1744'); if (b.final) e.armor = 0.25; }
   if (b.special && !e.p3 && e.hp < e.maxHp * 0.25) { e.p3 = true; e.armor = 0.3; G.shake = 16; G.flash = 0.5; G.flashCol = '255,215,0'; AU.sfx('rage'); toast('🔥 ' + b.name + ' 최종 페이즈!', 2, '#ffd600'); e.pats3 = [...new Set([...b.pats, 'spiral', 'laser', 'slam'])]; }
-  const rate = e.p3 ? 1.6 : e.p2 ? 1.35 : 1;
+  if (e.exposeT > 0) e.exposeT -= dt;
+  const rate = (e.p3 ? 1.6 : e.p2 ? 1.35 : 1) * (1 + DF().pat * 0.1);
   e.face = dx >= 0 ? 1 : -1;
   if (e.ps === 'idle') {
     const sp = e.spd * (e.p2 ? 1.25 : 1) * (dist > VW * 0.7 ? 2.5 : 1) * (e.slowT > 0 ? e.slowF : 1);
@@ -935,6 +954,7 @@ function bossUpdate(e, dt) {
       if (e.sub >= 1.3) endPattern(e); break;
     case 'slam': if (e.sub >= 1.4) endPattern(e); break;
     case 'summon': if (e.sub >= 0.8) endPattern(e); break;
+    default: bossExtUpdate(e, dt); break;
     case 'jump':
       if (e.step === 0) { const k = Math.min(1, e.sub / 1.1); e.z = Math.sin(k * Math.PI) * 120; e.x = lerp(e.jx0, e.jx, k); e.y = lerp(e.jy0, e.jy, k);
         if (e.sub >= 1.1) { e.step = 1; e.z = 0; G.shake = 10; AU.sfx('slam'); effects.push({ type: 'shock', x: e.x, y: e.y, r: e.r * 2.2, t: 0, dur: 0.4 }); if (Math.hypot(P.x - e.x, P.y - e.y) < e.r * 1.7 + P.r) damagePlayer(e.dmg * 1.3, 'boss'); if (e.p2) ringShot(e, 12, 0, 150, shot); } }
@@ -950,9 +970,11 @@ function startPattern(e, pat) {
     for (let i = 0; i < cnt; i++) { const a = i / cnt * TAU, x = e.x + Math.cos(a) * 90, y = e.y + Math.sin(a) * 90; effects.push({ type: 'portal', x, y, t: 0, dur: 0.7 }); later(0.6, () => { if (G.state === 'play' && !e.dead) spawnEnemy(e.bdef.summon, x, y); }); }
     AU.sfx('portal');
   }
+  bossExtStart(e, pat);
   if (pat === 'jump') { e.jx0 = e.x; e.jy0 = e.y; e.jx = P.x; e.jy = P.y; hazards.push({ kind: 'circle', x: P.x, y: P.y, r: e.r * 1.7, t: 0, delay: 1.1, dmg: 0 }); }
 }
 function endPattern(e, next) {
+  if (!next && ['charge', 'slam', 'jump', 'sweep', 'barrage'].includes(e.ps) && !e.mini) { e.exposeT = 1.6; texts.push({ x: e.x, y: e.y - e.r - 10, t: 0, v: '약점 노출!', col: '#ffd54f', big: 1 }); }
   if (next === 'charge2') { e.again = true; e.ps = 'charge'; e.sub = 0; e.step = 0; startPattern(e, 'charge'); return; }
   e.again = false; e.ps = 'idle'; e.pt = e.p2 ? 1.3 : 1.9;
 }
@@ -967,9 +989,10 @@ function bossDefeated(e) {
   }
   G.bossState = 3; G.winT = 3.2; G.shake = 20; G.flash = 0.8; G.flashCol = '255,255,255'; AU.sfx('bossdie');
   save.stats.bossKills++;
-  for (let i = 0; i < 6; i++) later(i * 0.15, () => explode(e.x + rand(-50, 50), e.y + rand(-50, 50), 50, 0, false, '#b388ff'));
+  for (let i = 0; i < 14; i++) later(i * 0.12, () => { explode(e.x + rand(-80, 80), e.y + rand(-80, 80), 40 + i * 4, 0, false, pick(['#b388ff', '#ff9800', '#ffeb3b', '#ff5252'])); G.shake = Math.max(G.shake, 8); });
+  later(1.7, () => { effects.push({ type: 'nova', x: e.x, y: e.y, r: 260, t: 0, dur: .7, col: '#fff59d' }); G.flash = .5; G.flashCol = '255,240,200'; AU.sfx('bigboom'); });
   for (let i = 0; i < 20; i++) dropGem(e.x + rand(-60, 60), e.y + rand(-60, 60), 10);
-  dropPickup('coin', e.x, e.y, 40 * G.stage);
+  dropPickup('coin', e.x, e.y, Math.round(40 * G.stage * diffRewardMul())); dropPickup('hpot', e.x + 30, e.y + 10, 0, null, true);
   effects.push({ type: 'pillar', x: e.x, y: e.y, t: 0, dur: 3, col: '#ffb300' });
   for (const m of enemies) if (!m.dead && !m.boss && !m.static) { m.dead = true; effects.push({ type: 'poof', x: m.x, y: m.y, r: m.r, t: 0, dur: 0.3 }); }
   eprojs.length = 0; hazards.length = 0;
@@ -992,6 +1015,7 @@ function updateEnemies(dt) {
     if (e.slowT > 0) { e.slowT -= dt; if (e.slowT <= 0) e.slowF = 1; }
     let tx = P.x, ty = P.y;
     if (e.tgtGen) { let bd = 1e9; for (const g of gens) { if (g.dead) continue; const d = (g.x - e.x) ** 2 + (g.y - e.y) ** 2; if (d < bd) { bd = d; tx = g.x; ty = g.y; } } if (bd === 1e9) e.tgtGen = false; }
+    if (!e.tgtGen && !e.boss && !e.static && allies.length) { const at = allyTarget(e); if (at) { tx = at.x; ty = at.y; } }
     const dx = tx - e.x, dy = ty - e.y; const dist = Math.hypot(dx, dy) || 1; const nx = dx / dist, ny = dy / dist;
     const pdist = Math.hypot(P.x - e.x, P.y - e.y);
     if (e.boss) { if (e.stunT > 0) e.stunT = 0; bossUpdate(e, dt); }
@@ -1043,6 +1067,7 @@ function updateEnemies(dt) {
       if (Math.abs(vx) > 3) e.face = vx > 0 ? 1 : -1;
       if (e.affix === 'aura') { e.auraT = (e.auraT || 0) - dt; if (e.auraT <= 0 && pdist < e.r + 50) { e.auraT = 0.5; damagePlayer(e.dmg * 0.3, 'aura'); } }
       if (e.elite && e.skill) eliteSkill(e, dt, pdist);
+      if (DF().pat) diffAI(e, dt, pdist);
     }
     if (!e.static) {
       const near = query(e.x, e.y, e.r, SEP); let c = 0;
@@ -1105,7 +1130,7 @@ function update(dt) {
   const kx = (keys.ArrowRight || keys.d ? 1 : 0) - (keys.ArrowLeft || keys.a ? 1 : 0), ky = (keys.ArrowDown || keys.s ? 1 : 0) - (keys.ArrowUp || keys.w ? 1 : 0);
   if (kx || ky) { const m = Math.hypot(kx, ky); mx = kx / m; my = ky / m; }
   P.moving = Math.hypot(mx, my) > 0.05;
-  const spd = P.spd * (P.slowT > 0 ? 0.6 : 1);
+  const spd = G.veh ? vehSpd() : P.spd * (P.slowT > 0 ? 0.6 : 1);
   if (P.dashT > 0) { P.dashT -= dt; P.x += P.dashVx * dt; P.y += P.dashVy * dt; if (Math.random() < 0.9) effects.push({ type: 'ghost', x: P.x, y: P.y, face: P.face, t: 0, dur: 0.25 }); }
   else if (P.moving) { P.x += mx * spd * dt; P.y += my * spd * dt; P.walkT += dt; const m = Math.hypot(mx, my); P.lastMx = mx / m; P.lastMy = my / m; if (Math.abs(mx) > 0.15 && P.atkT <= 0) P.face = mx > 0 ? 1 : -1; }
   if (P.inv > 0) P.inv -= dt; if (P.hurtT > 0) P.hurtT -= dt; if (P.atkT > 0) P.atkT -= dt; if (P.slowT > 0) P.slowT -= dt; if (P.recoil > 0) P.recoil = Math.max(0, P.recoil - dt * 30);
@@ -1113,7 +1138,8 @@ function update(dt) {
   if (G.sk1 > 0) G.sk1 -= dt; if (G.sk2 > 0) G.sk2 -= dt; if (G.potCd > 0) G.potCd -= dt; if (G.powerT > 0) G.powerT -= dt;
   director(dt);
   buildGrid();
-  updateWeapons(dt); updateProjs(dt); updateFields(dt); updateTurrets(dt); updateMines(dt);
+  if (!G.veh) updateWeapons(dt); updateProjs(dt); updateFields(dt); updateTurrets(dt); updateMines(dt);
+  extUpdate(dt);
   buildGrid();
   updateEnemies(dt); updateEProjs(dt); updateHazards(dt); updateGens(dt);
   if (G.state !== 'play') return;
@@ -1123,7 +1149,7 @@ function update(dt) {
     if (p.dead) continue; p.t += dt;
     if (p.kind !== 'gem' && p.z !== undefined && p.t < 0.5) { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 300 * dt; }
     const dx = P.x - p.x, dy = P.y - p.y, d2 = dx * dx + dy * dy;
-    const big = p.kind === 'chest' || p.kind === 'meat' || p.kind === 'magnet' || p.kind === 'crate' || p.kind === 'secret' || p.kind === 'power' || p.kind === 'wdrop' || p.kind === 'legend';
+    const big = p.kind === 'hpot' || p.kind === 'rkit' || p.kind === 'scrate' || p.kind === 'chest' || p.kind === 'meat' || p.kind === 'magnet' || p.kind === 'crate' || p.kind === 'secret' || p.kind === 'power' || p.kind === 'wdrop' || p.kind === 'legend';
     const rng = big ? 24 * 24 : p.kind === 'qitem' ? Math.max(mg2, 55 * 55) : mg2;
     if (p.t > 0.4 && d2 < rng) p.mag = true;
     if (p.mag) { const d = Math.sqrt(d2) || 1, sp = 260 + p.t * 60; p.x += dx / d * sp * dt; p.y += dy / d * sp * dt; if (d < P.r + 6) { p.dead = true; collect(p); } }

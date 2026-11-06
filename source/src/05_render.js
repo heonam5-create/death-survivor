@@ -38,6 +38,7 @@ function render() {
     if (!g.dead) { ctx.save(); ctx.translate(g.x, g.y - 18); circ(ctx, 0, 0, 6); fs(ctx, '#455a64', 1.5); ctx.rotate(g.a || 0); rr(ctx, 0, -2, 14, 4, 1.5); fs(ctx, '#263238', 1); ctx.restore(); }
     if (!g.dead) { const w = 44; ctx.fillStyle = '#000a'; ctx.fillRect(g.x - w / 2, g.y - g.r - 18, w, 6); ctx.fillStyle = g.hp / g.maxHp < 0.3 ? '#ff1744' : '#00e676'; ctx.fillRect(g.x - w / 2, g.y - g.r - 18, w * g.hp / g.maxHp, 6); if (g.repair) { ctx.fillStyle = '#69f0ae'; ctx.font = '900 11px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('🔧 수리 중', g.x, g.y - g.r - 22); } }
   }
+  drawWorldExt('under');
   // 아이템
   for (const p of pickups) { if (p.dead || Math.abs(p.x - G.camX) > VW / 2 + 30 || Math.abs(p.y - G.camY) > VH / 2 + 30) continue; drawPickup(p); }
   // 포탑
@@ -80,14 +81,17 @@ function render() {
   // 플레이어
   for (const f of effects) if (f.type === 'ghost') { ctx.globalAlpha = 0.35 * (1 - f.t / f.dur); drawPlayer(ctx, f.x, f.y, f.face, 0, true); ctx.globalAlpha = 1; }
   if (G.powerT > 0 && QC.glow) { ctx.globalAlpha = .45 + .15 * Math.sin(G.time * 8); ctx.drawImage(glowSprite('#ff1744'), P.x - 32, P.y - 40, 64, 64); ctx.globalAlpha = 1; }
-  drawPlayer(ctx, P.x, P.y, P.face, P.walkT, false);
+  if (G.veh) drawVehicle(ctx, G.veh, P.x, P.y, true); else drawPlayer(ctx, P.x, P.y, P.face, P.walkT, false);
   // 드론
+  if (!G.veh) {
   for (const w of G.weapons) if (w.drones) for (const d of w.drones) drawDrone(d, w.evo);
   for (const w of G.weapons) if (w.saws && w.sawS) for (const [x, y, a] of w.saws) { ctx.save(); ctx.translate(x, y); ctx.rotate(G.time * 18); ctx.fillStyle = w.sawS.col; ctx.beginPath(); for (let i = 0; i < 16; i++) { const r = i % 2 ? 7 : 11; ctx.lineTo(Math.cos(i / 16 * TAU) * r, Math.sin(i / 16 * TAU) * r); } ctx.closePath(); ctx.fill(); ctx.strokeStyle = OL; ctx.lineWidth = 1.5; ctx.stroke(); ctx.fillStyle = '#455a64'; circ(ctx, 0, 0, 3); ctx.fill(); ctx.restore(); }
   for (const p of projs) if (p.harp && !p.dead) { ctx.strokeStyle = 'rgba(141,110,99,.9)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(P.x, P.y - 4); ctx.lineTo(p.x, p.y); ctx.stroke(); }
   // 광선 (회전 레이저·연속 레이저)
   for (const w of G.weapons) if (w.beams && w.beamS) for (const b of w.beams) drawBeam(b, w.beamS);
-  for (const w of G.weapons) if (w.coneOn && w.coneS && QC.glow) { const [mx, my] = muzzle(w.coneAng); ctx.globalAlpha = .18; ctx.fillStyle = w.coneS.col; ctx.beginPath(); ctx.moveTo(mx, my); ctx.arc(mx, my, w.coneS.range, w.coneAng - w.coneS.arc, w.coneAng + w.coneS.arc); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1; }
+  }
+  for (const w of G.weapons) if (!G.veh && w.coneOn && w.coneS && QC.glow) { const [mx, my] = muzzle(w.coneAng); ctx.globalAlpha = .18; ctx.fillStyle = w.coneS.col; ctx.beginPath(); ctx.moveTo(mx, my); ctx.arc(mx, my, w.coneS.range, w.coneAng - w.coneS.arc, w.coneAng + w.coneS.arc); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1; }
+  drawWorldExt('over');
   // 투사체
   for (const p of projs) drawProj(p);
   for (const b of eprojs) drawEProj(b);
@@ -111,6 +115,7 @@ function render() {
   if (dark > 0) { const pxp = cx + (P.x - G.camX) * K, pyp = cy + (P.y - G.camY) * K; const gr = ctx.createRadialGradient(pxp, pyp, 60 * K, pxp, pyp, Math.max(cx, cy) * 1.3); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, `rgba(${bossOn ? '40,0,20' : '0,0,10'},${dark})`); ctx.fillStyle = gr; ctx.fillRect(0, 0, cv.width, cv.height); }
   if (bossOn) { ctx.fillStyle = `rgba(120,0,40,${0.07 + 0.05 * Math.sin(G.time * 2)})`; ctx.fillRect(0, 0, cv.width, cv.height); }
   drawWeather(st.wx);
+  drawScreenExt(cx, cy);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   if (G.flash > 0) { ctx.fillStyle = `rgba(${G.flashCol},${Math.min(0.4, G.flash)})`; ctx.fillRect(0, 0, cv.width, cv.height); }
   if (P.hp > 0 && P.hp / P.maxHp < 0.3) { const a = 0.25 + 0.15 * Math.sin(G.time * 6); const gr = ctx.createRadialGradient(cx, cy, Math.min(cx, cy) * 0.6, cx, cy, Math.max(cx, cy) * 1.2); gr.addColorStop(0, 'rgba(255,0,0,0)'); gr.addColorStop(1, `rgba(255,0,0,${a})`); ctx.fillStyle = gr; ctx.fillRect(0, 0, cv.width, cv.height); }
@@ -224,6 +229,7 @@ function drawField(f) {
   ctx.globalAlpha = 1;
 }
 function drawPickup(p) {
+  if (drawPickupExt(p)) return;
   const bob = Math.sin(G.time * 4 + p.x) * 2;
   switch (p.kind) {
     case 'gem': {
@@ -355,6 +361,7 @@ function drawArrows() {
   for (const p of pickups) if (!p.dead && (p.kind === 'qitem' || p.kind === 'secret' || p.kind === 'crate' || p.kind === 'legend' || p.kind === 'wdrop')) list.unshift([p.x, p.y, p.kind === 'qitem' ? QITEMS[p.item].col : p.kind === 'secret' ? '#e040fb' : p.kind === 'legend' ? '#ffd600' : p.kind === 'wdrop' ? '#64b5f6' : '#90caf9', p.kind === 'legend']);
   for (const e of enemies) if (!e.dead && e.elite) list.push([e.x, e.y, '#ff9800']);
   for (const g of gens) if (!g.dead) list.push([g.x, g.y, '#00e676']);
+  extArrows(list);
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   const cx = W / 2, cy = H / 2, mL = 18 + SAFE.l, mR = 18 + SAFE.r, mT = 130 + SAFE.t, mB = 150 + SAFE.b;
   let n = 0;
@@ -394,7 +401,8 @@ function drawHUD() {
   ctx.strokeText(`💰 ${G.gold}`, W - SAFE.r - 12, hy + 26); ctx.fillStyle = '#ffd54f'; ctx.fillText(`💰 ${G.gold}`, W - SAFE.r - 12, hy + 26);
   // 무기 슬롯
   ctx.textAlign = 'center'; let sx = L;
-  for (const w of G.weapons) {
+  drawHudExt(L, hy, W); ctx.textAlign = 'center';
+  if (!G.veh) for (const w of G.weapons) {
     const t = WMAP[w.id].t;
     ctx.fillStyle = 'rgba(0,0,0,.55)'; rr(ctx, sx, hy + 22, 30, 30, 7); ctx.fill(); ctx.strokeStyle = w.evo ? '#ff1744' : w.lv >= WMAX ? '#ffd54f' : TIER_COL[t]; ctx.lineWidth = 1.8; ctx.stroke();
     ctx.font = '16px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(w.evo ? EVOS[w.id].ic : WMAP[w.id].ic, sx + 15, hy + 43);
@@ -425,8 +433,8 @@ function drawHUD() {
     const fresh = q.done && G.time - q.doneT < 1.2;
     ctx.font = (fresh ? '900 ' : '700 ') + '11px "Noto Sans KR",sans-serif';
     ctx.fillStyle = q.done ? '#69f0ae' : q.main ? '#fff' : '#b0bec5';
-    const mark = q.done ? '✔' : q.main ? '▶' : '☆';
-    ctx.fillText(`${mark} ${q.main ? '' : '[보조] '}${qLabel(q)}`, L + 8, y);
+    const mark = q.done ? '✔' : q.main ? '▶' : q.sp ? '🏅' : '☆';
+    ctx.fillText(`${mark} ${q.main ? '' : q.sp ? '[특별] ' : '[보조] '}${qLabel(q)}`, L + 8, y);
     ctx.textAlign = 'right'; ctx.fillText(qProgress(q), L + qw - 8, y); ctx.textAlign = 'left';
     y += lineH;
   }
