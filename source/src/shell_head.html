@@ -217,7 +217,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
   <button class="btn blue" id="tCodex">📖 무기 도감</button>
   <button class="btn blue" id="tHelp">🎮 조작 방법</button>
   <div class="trow"><button class="btn gray sm" id="tSet">⚙️ 설정</button><button class="btn kakao sm" id="tShare">💬 카카오톡 공유</button></div>
-  <div class="ver">확장팩 v5 · 무기 360종 · 탑승 장비 120종 · 정예 40종 · 40스테이지</div>
+  <div class="ver">확장팩 v6 · 무기 360종 · 탑승 장비 120종 · 정예 40종 · 40스테이지</div>
  </div>
 
  <!-- 스테이지 선택 -->
@@ -232,6 +232,13 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
    <div class="diffbox"><div class="lbl" style="font-size:12px;opacity:.8;margin-bottom:3px">난이도 (게임 중 일시정지 메뉴에서도 변경 가능)</div><div class="seg" id="segDiffS"><button data-v="0">🌱 쉬움</button><button data-v="1">⚔️ 보통</button><button data-v="2">🔥 어려움</button><button data-v="3">👹 지옥</button></div><div class="diffnote" id="diffNote"></div></div>
    <div class="center gobar"><button class="btn" id="sGo">출전!</button></div>
   </div>
+ </div>
+
+ <!-- 무기 계승 -->
+ <div class="scr dim" id="scrInherit">
+  <div class="ttl">🔁 다음 스테이지 계승 무기 선택</div>
+  <div style="font-size:13px;opacity:.9;margin:-4px 0 6px;text-align:center;line-height:1.5">무기 1개를 레벨·진화 상태 그대로 다음 스테이지에 가져갑니다.<br>나머지 무기는 초기화됩니다. <span id="ihCur" style="color:#80deea"></span></div>
+  <div id="ihCards" class="center" style="max-height:72vh;overflow-y:auto;-webkit-overflow-scrolling:touch;width:100%"></div>
  </div>
 
  <!-- 레벨업 -->
@@ -295,7 +302,9 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
    <p>👑 모든 스테이지는 목표 달성 후 고유 보스가 등장합니다. 보스를 처치하면 그 스테이지의 새 무기를 확정 획득!</p>
    <p>✨ <b>전설 보물상자</b> — 스테이지마다 1개 등장. 화살표를 따라가 열면 보상 3개 중 1개 선택.</p>
    <p>⚠ <b>정예 몬스터</b> — 크고 고유 기술을 씁니다. 처치 시 무기를 떨어뜨릴 수 있어요.</p>
-   <p>🪂 <b>특수 전투 장비</b> — 스테이지 중반~후반에 차량·로봇·비행 장비가 낙하산으로 투하됩니다. 착륙하면 <b>탑승</b>! 짧은 시간(20~40초) 동안 엄청난 화력으로 적을 쓸어버리세요. 🌀 버튼은 <b>특수능력</b>, 💥 버튼은 탑승마다 1번 쓰는 <b>필살기</b>. 시간이 끝나거나 내구도가 0이 되면 하차합니다.</p>
+   <p>🪂 <b>특수 전투 장비</b> — 스테이지 중반~후반에 차량·로봇·비행 장비가 낙하산으로 투하됩니다. 착륙한 장비에 다가가면 <b>자동 탑승</b>! 짧은 시간(20~40초) 동안 엄청난 화력으로 적을 쓸어버리세요. 🌀 버튼은 <b>특수능력</b>, 💥 버튼은 탑승마다 1번 쓰는 <b>필살기</b>. 시간이 끝나거나 내구도가 0이 되면 하차합니다.</p>
+   <p>👑 <b>보스 체력바</b> — 보스는 2~3줄의 체력바(빨강→주황→보라)를 가집니다. 줄이 바뀔 때마다 패턴이 강해지니 빨간 경고를 잘 피하세요.</p>
+   <p>🔁 <b>무기 계승</b> — 보스를 쓰러뜨리면 무기 1개를 골라 레벨 그대로 다음 스테이지에 가져갈 수 있습니다.</p>
    <p>🔥 <b>콤보</b> — 빠르게 연속 처치하면 콤보! 10·30·50·100 콤보마다 보너스. 한꺼번에 여러 마리를 쓰러뜨리면 <b>연쇄 폭발</b>이 일어납니다.</p>
    <p>🎖️ <b>정예 몬스터</b> — 스테이지마다 고유한 정예가 등장합니다. 빨간 경고를 피하고 처치하면 <b>보상 선택</b>!</p>
    <p>🎁 <b>무기 보급 상자</b> — 20초 동안 화력·발사체·연사 강화.</p>

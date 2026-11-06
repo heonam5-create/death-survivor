@@ -27,7 +27,8 @@ const DEFAULT_SAVE = () => ({
   best: {},         // 스테이지별 최고 기록 { n: {time, side} }
   // v4 추가 항목
   vfound: {},       // 탑승한 적 있는 장비 { id: 1 }
-  afound: {}        // 구출한 동료 종류 { 'cls+perk': 1 }
+  afound: {},       // 구출한 동료 종류 { 'cls+perk': 1 }
+  inherit: null     // 다음 스테이지 계승 무기 { id, lv, evo, from }
 });
 let save = DEFAULT_SAVE();
 function loadSave() {
@@ -46,6 +47,7 @@ function loadSave() {
       save.best = (d.best && typeof d.best === 'object') ? d.best : {};
       save.vfound = (d.vfound && typeof d.vfound === 'object') ? d.vfound : {};
       save.afound = (d.afound && typeof d.afound === 'object') ? d.afound : {};
+      save.inherit = (d.inherit && typeof d.inherit === 'object' && typeof d.inherit.id === 'string') ? { id: d.inherit.id, lv: Math.max(1, Math.min(5, d.inherit.lv | 0)), evo: !!d.inherit.evo, from: d.inherit.from | 0 } : null;
       save.settings.diff = [0, 1, 2, 3].includes(save.settings.diff) ? save.settings.diff : 1;
       save.cleared = clamp(Math.floor(+save.cleared || 0), 0, 40);
       save.gold = Math.max(0, Math.floor(+save.gold || 0));

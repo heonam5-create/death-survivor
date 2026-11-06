@@ -111,12 +111,13 @@ function stageWin() {
     (G.newFound.length ? `<p class="unl">✨ 새로 발견한 무기: ${G.newFound.map(id => WMAP[id].ic + ' ' + WMAP[id].nm).join(', ')}</p>` : '') +
     (newUnlocks.length ? `<p class="unl">🔓 다음 스테이지 신규 무기: ${newUnlocks.map(id => WMAP[id].ic + ' ' + WMAP[id].nm).join(', ')}</p>` : '') +
     (G.newVeh ? `<p class="unl">🚘 새로 탑승한 장비 ${G.newVeh}종 · 장비 도감 ${Object.keys(save.vfound).length} / ${VEH.length}</p>` : '') +
-    (n === 40 ? '<p class="unl">🎉 40개 스테이지를 모두 정복했습니다!</p>' : '');
+    (n === 40 ? '<p class="unl">🎉 40개 스테이지를 모두 정복했습니다!</p>' : '') + `<p class="unl" id="rInh">🔁 계승 무기: ${inheritLabel(save.inherit)}</p>`;
   const btns = $('rBtns'); btns.innerHTML = '';
   if (n < 40) addBtn(btns, '다음 스테이지 ▶', '', () => startStage(n + 1));
   addBtn(btns, '🔧 강화소', 'blue', () => openShop('result'));
   addBtn(btns, '스테이지 선택', 'gray', openStageSelect);
   showScreen('scrResult');
+  if (G.weapons.length && !window.__botPick) openInherit();
 }
 function stageLose() {
   G.state = 'result'; $('gameUI').classList.remove('on'); finishRun(false); AU.bgm('lose');
@@ -136,7 +137,7 @@ function statRows(rows) { return rows.map(([a, b]) => `<div class="stat"><span>$
 function addBtn(parent, label, cls, fn) { const b = document.createElement('button'); b.className = 'btn ' + cls; b.textContent = label; b.addEventListener('click', () => { AU.sfx('button'); fn(); }); parent.appendChild(b); }
 
 /* ------------------------- 화면 전환 ------------------------- */
-const SCREENS = ['scrTitle', 'scrStage', 'scrLevel', 'scrPause', 'scrResult', 'scrSet', 'scrHelp', 'scrShop', 'scrCodex', 'scrChest', 'scrShare', 'modal'];
+const SCREENS = ['scrInherit', 'scrTitle', 'scrStage', 'scrLevel', 'scrPause', 'scrResult', 'scrSet', 'scrHelp', 'scrShop', 'scrCodex', 'scrChest', 'scrShare', 'modal'];
 function showScreen(id) { for (const s of SCREENS) $(s).classList.toggle('on', s === id); }
 let toastTimer = null;
 function toast(html, dur = 1.5, col = '#fff') { const t = $('toast'); t.innerHTML = html; t.style.color = col; t.style.opacity = 1; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.style.opacity = 0, dur * 1000); }
@@ -171,7 +172,7 @@ function renderStageInfo(lockedN) {
     🚘 탑승 장비: ${VEH_ST[s.n].map(v => `<span style="color:${save.vfound[v.id] ? '#80deea' : '#b0bec5'}">${s.n <= save.cleared + 1 ? v.name : '???'}</span>`).join(', ')}<br>
     🤝 구조 대상: ${ALLY_ST[s.n].slice(0, 2).map(a => ACL[a.cls].ic + ' ' + a.name + ' <small>(' + APERK[a.perk].n + ')</small>').join(', ')}<br>
     👾 ${mobs}<br>🔫 주력 무기: ${s.wp.map(id => `<span style="color:${TIER_COL[WMAP[id].t]}">${WMAP[id].ic}${WMAP[id].nm}</span>`).join(', ')}
-    ${best ? `<br>🏅 최고 기록: ${fmtTime(best.time)}` : ''}</div>`;
+    ${best ? `<br>🏅 최고 기록: ${fmtTime(best.time)}` : ''}<br>🔁 계승 무기: ${inheritLabel(save.inherit)}<br>👑 보스 체력바: ${bossBarsFor(s.n, s.special)}줄</div>`;
   $('sGo').style.visibility = 'visible';
   [...$('sGrid').children].forEach((c, i) => c.style.outline = i + 1 === selStage ? '3px solid #fff' : '');
   // 출전 무기 선택 (도감에서 발견한 무기 중)
@@ -256,7 +257,7 @@ bindSeg('segDmg', v => save.settings.dmgNum = +v);
 bindSeg('segFast', v => save.settings.fast = +v);
 bindSeg('segDiffP', v => setDiff(+v));
 bindSeg('segDiffS', v => { setDiff(+v); renderDiffNote(); });
-function renderDiffNote() { const d = DF(); $('diffNote').innerHTML = `${d.ic} <b style="color:${d.col}">${d.n}</b> — 적 체력 ${Math.round(d.hp * 100)}% · 공격력 ${Math.round(d.dmg * 100)}% · 등장 수 ${Math.round(d.cnt * 100)}% · 골드 x${d.gold}`; }
+function renderDiffNote() { const d = DF(); $('diffNote').innerHTML = `${d.ic} <b style="color:${d.col}">${d.n}</b> — 적 체력 ${Math.round(d.hp * 100)}% · 공격력 ${Math.round(d.dmg * 100)}% · 등장 수 ${Math.round(d.cnt * 100)}% · 골드 x${d.gold}${adaptStrength() > 0 ? ` · 💪 강화 보정 +${Math.round(computeAdapt() * 100)}% (상한 ${Math.round(adaptCap() * 100)}%)` : ''}`; }
 $('vMusic').addEventListener('input', e => { save.settings.music = e.target.value / 100; AU.applyVol(); });
 $('vSfx').addEventListener('input', e => { save.settings.sfx = e.target.value / 100; AU.applyVol(); });
 $('vMusic').addEventListener('change', writeSave); $('vSfx').addEventListener('change', () => { writeSave(); AU.sfx('coin'); });

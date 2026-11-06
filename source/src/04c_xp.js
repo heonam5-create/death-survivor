@@ -56,8 +56,8 @@ function onKill(e) {
   if (COMBO_MS.includes(G.combo) || (G.combo > 100 && G.combo % 50 === 0)) comboMilestone(G.combo);
   // 짧은 시간에 여러 마리를 쓰러뜨리면 연쇄 폭발 (실제 범위 피해)
   G.kwin.push(G.time); while (G.kwin.length && G.kwin[0] < G.time - 0.3) G.kwin.shift();
-  if (G.kwin.length >= 6 && G.chainCd <= 0 && onScreen(e, 0)) {
-    G.chainCd = 0.14; const r = 44 + Math.min(30, G.kwin.length * 2), x = e.x, y = e.y, dmg = Math.max(e.lastDmg || 0, e.maxHp * 0.5) * 0.5;
+  if (G.kwin.length >= (G.veh ? 4 : 6) && G.chainCd <= 0 && onScreen(e, 0)) {
+    G.chainCd = G.veh ? 0.1 : 0.14; const r = (G.veh ? 58 : 44) + Math.min(30, G.kwin.length * 2), x = e.x, y = e.y, dmg = Math.max(e.lastDmg || 0, e.maxHp * 0.5) * 0.5;
     later(0.06, () => { if (G.state === 'play') explode(x, y, r, dmg, true, pick(TH().cols), { noTrait: 1 }); });
     if (Math.random() < .25 && texts.length < 70) texts.push({ x, y: y - 16, t: 0, v: '연쇄 폭발!', col: '#ffab40', big: 1 });
   }

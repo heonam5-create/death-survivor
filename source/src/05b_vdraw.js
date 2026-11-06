@@ -464,3 +464,38 @@ function drawHudX(W) {
   // 전투 보급 효과
   if (G.sup && G.sup.t > 0) { const S = SUPK[G.sup.k]; ctx.textAlign = 'center'; ctx.font = '900 11px "Noto Sans KR",sans-serif'; ctx.lineWidth = 3; ctx.strokeStyle = '#000'; const tx = W / 2, ty = H * .2 + SAFE.t; const s = `${S.ic} ${S.n} ${Math.ceil(G.sup.t)}초${G.veh ? ' (하차 후)' : ''}`; ctx.strokeText(s, tx, ty); ctx.fillStyle = '#ffd54f'; ctx.fillText(s, tx, ty); }
 }
+
+/* ------------------------- 보스 다중 체력바 (던전앤파이터식) ------------------------- */
+function drawBossBars(b, y, W) {
+  const bw = Math.min(W - 30 - SAFE.l - SAFE.r, 380), bx = (W - bw) / 2, h = 18;
+  const per = b.maxHp / b.bars, cur = Math.min(b.bars - 1, b.bar || 0), left = b.bars - cur;
+  const inBar = clamp((Math.max(0, b.hp) - (b.bars - 1 - cur) * per) / per, 0, 1);
+  if (G.barFlash > 0) G.barFlash -= 0.016;
+  ctx.fillStyle = 'rgba(0,0,0,.78)'; rr(ctx, bx - 4, y - 4, bw + 8, h + 26, 7); ctx.fill();
+  // 아래에 다음 줄 색을 깔고, 현재 줄을 위에 그림
+  ctx.fillStyle = left > 1 ? BAR_COLS[Math.min(2, cur + 1)] : '#263238'; rr(ctx, bx, y, bw, h, 6); ctx.fill();
+  if (left > 1) { ctx.fillStyle = 'rgba(0,0,0,.35)'; rr(ctx, bx, y, bw, h, 6); ctx.fill(); }
+  // 지연 감소 표시(흰색) → 현재 체력
+  b.trail = b.trail === undefined || b.trailBar !== cur ? inBar : Math.max(inBar, b.trail - 0.008); b.trailBar = cur;
+  ctx.fillStyle = 'rgba(255,255,255,.75)'; rr(ctx, bx, y, Math.max(3, bw * b.trail), h, 6); ctx.fill();
+  const col = BAR_COLS[Math.min(2, cur)], gr = ctx.createLinearGradient(0, y, 0, y + h); gr.addColorStop(0, '#ffffff55'); gr.addColorStop(.35, col); gr.addColorStop(1, col);
+  ctx.fillStyle = gr; rr(ctx, bx, y, Math.max(3, bw * inBar), h, 6); ctx.fill();
+  for (let i = 1; i < 10; i++) { ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fillRect(bx + bw * i / 10, y + 2, 1, h - 4); }
+  if (G.barFlash > 0) { ctx.globalAlpha = Math.min(1, G.barFlash * 1.6); ctx.fillStyle = '#fff'; rr(ctx, bx, y, bw, h, 6); ctx.fill(); ctx.globalAlpha = 1; }
+  ctx.strokeStyle = b.exposeT > 0 ? '#ffd54f' : 'rgba(255,255,255,.5)'; ctx.lineWidth = b.exposeT > 0 ? 3 : 1.5; rr(ctx, bx, y, bw, h, 6); ctx.stroke();
+  // 남은 줄 수 (x3) + 이름
+  ctx.textAlign = 'right'; ctx.font = '900 17px "Black Han Sans","Noto Sans KR",sans-serif'; ctx.lineWidth = 4; ctx.strokeStyle = '#000';
+  ctx.strokeText('x' + left, bx + bw - 6, y + 15); ctx.fillStyle = '#fff'; ctx.fillText('x' + left, bx + bw - 6, y + 15);
+  ctx.textAlign = 'left'; ctx.font = '900 11px "Noto Sans KR",sans-serif'; ctx.lineWidth = 3;
+  const label = `👑 ${b.bdef.name}${b.exposeT > 0 ? '  ⚡약점!' : ''}`; ctx.strokeText(label, bx + 6, y + 13); ctx.fillText(label, bx + 6, y + 13);
+  // 남은 체력바 아이콘
+  for (let i = 0; i < b.bars; i++) { const on = i >= cur; ctx.fillStyle = on ? BAR_COLS[i] : 'rgba(255,255,255,.15)'; rr(ctx, bx + i * 22, y + h + 5, 18, 8, 3); ctx.fill(); }
+  ctx.font = '700 9px "Noto Sans KR",sans-serif'; ctx.fillStyle = '#eee'; ctx.textAlign = 'left'; ctx.fillText(`체력바 ${left}/${b.bars} · ${['1페이즈', '2페이즈', '3페이즈'][cur]}`, bx + b.bars * 22 + 4, y + h + 12);
+  return h + 30;
+}
+// 보스 머리 위 남은 체력바 개수
+function drawBossTag(e) {
+  if (!e.bars) return; const left = e.bars - (e.bar || 0);
+  ctx.font = '900 13px "Black Han Sans","Noto Sans KR",sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 4; ctx.strokeStyle = '#000';
+  const y = e.y - e.r - 26 - (e.z || 0); ctx.strokeText('x' + left, e.x, y); ctx.fillStyle = BAR_COLS[Math.min(2, e.bar || 0)]; ctx.fillText('x' + left, e.x, y);
+}

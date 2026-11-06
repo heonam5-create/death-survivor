@@ -217,7 +217,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
   <button class="btn blue" id="tCodex">📖 무기 도감</button>
   <button class="btn blue" id="tHelp">🎮 조작 방법</button>
   <div class="trow"><button class="btn gray sm" id="tSet">⚙️ 설정</button><button class="btn kakao sm" id="tShare">💬 카카오톡 공유</button></div>
-  <div class="ver">확장팩 v5 · 무기 360종 · 탑승 장비 120종 · 정예 40종 · 40스테이지</div>
+  <div class="ver">확장팩 v6 · 무기 360종 · 탑승 장비 120종 · 정예 40종 · 40스테이지</div>
  </div>
 
  <!-- 스테이지 선택 -->
@@ -232,6 +232,13 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
    <div class="diffbox"><div class="lbl" style="font-size:12px;opacity:.8;margin-bottom:3px">난이도 (게임 중 일시정지 메뉴에서도 변경 가능)</div><div class="seg" id="segDiffS"><button data-v="0">🌱 쉬움</button><button data-v="1">⚔️ 보통</button><button data-v="2">🔥 어려움</button><button data-v="3">👹 지옥</button></div><div class="diffnote" id="diffNote"></div></div>
    <div class="center gobar"><button class="btn" id="sGo">출전!</button></div>
   </div>
+ </div>
+
+ <!-- 무기 계승 -->
+ <div class="scr dim" id="scrInherit">
+  <div class="ttl">🔁 다음 스테이지 계승 무기 선택</div>
+  <div style="font-size:13px;opacity:.9;margin:-4px 0 6px;text-align:center;line-height:1.5">무기 1개를 레벨·진화 상태 그대로 다음 스테이지에 가져갑니다.<br>나머지 무기는 초기화됩니다. <span id="ihCur" style="color:#80deea"></span></div>
+  <div id="ihCards" class="center" style="max-height:72vh;overflow-y:auto;-webkit-overflow-scrolling:touch;width:100%"></div>
  </div>
 
  <!-- 레벨업 -->
@@ -295,7 +302,9 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
    <p>👑 모든 스테이지는 목표 달성 후 고유 보스가 등장합니다. 보스를 처치하면 그 스테이지의 새 무기를 확정 획득!</p>
    <p>✨ <b>전설 보물상자</b> — 스테이지마다 1개 등장. 화살표를 따라가 열면 보상 3개 중 1개 선택.</p>
    <p>⚠ <b>정예 몬스터</b> — 크고 고유 기술을 씁니다. 처치 시 무기를 떨어뜨릴 수 있어요.</p>
-   <p>🪂 <b>특수 전투 장비</b> — 스테이지 중반~후반에 차량·로봇·비행 장비가 낙하산으로 투하됩니다. 착륙하면 <b>탑승</b>! 짧은 시간(20~40초) 동안 엄청난 화력으로 적을 쓸어버리세요. 🌀 버튼은 <b>특수능력</b>, 💥 버튼은 탑승마다 1번 쓰는 <b>필살기</b>. 시간이 끝나거나 내구도가 0이 되면 하차합니다.</p>
+   <p>🪂 <b>특수 전투 장비</b> — 스테이지 중반~후반에 차량·로봇·비행 장비가 낙하산으로 투하됩니다. 착륙한 장비에 다가가면 <b>자동 탑승</b>! 짧은 시간(20~40초) 동안 엄청난 화력으로 적을 쓸어버리세요. 🌀 버튼은 <b>특수능력</b>, 💥 버튼은 탑승마다 1번 쓰는 <b>필살기</b>. 시간이 끝나거나 내구도가 0이 되면 하차합니다.</p>
+   <p>👑 <b>보스 체력바</b> — 보스는 2~3줄의 체력바(빨강→주황→보라)를 가집니다. 줄이 바뀔 때마다 패턴이 강해지니 빨간 경고를 잘 피하세요.</p>
+   <p>🔁 <b>무기 계승</b> — 보스를 쓰러뜨리면 무기 1개를 골라 레벨 그대로 다음 스테이지에 가져갈 수 있습니다.</p>
    <p>🔥 <b>콤보</b> — 빠르게 연속 처치하면 콤보! 10·30·50·100 콤보마다 보너스. 한꺼번에 여러 마리를 쓰러뜨리면 <b>연쇄 폭발</b>이 일어납니다.</p>
    <p>🎖️ <b>정예 몬스터</b> — 스테이지마다 고유한 정예가 등장합니다. 빨간 경고를 피하고 처치하면 <b>보상 선택</b>!</p>
    <p>🎁 <b>무기 보급 상자</b> — 20초 동안 화력·발사체·연사 강화.</p>
@@ -385,7 +394,8 @@ const DEFAULT_SAVE = () => ({
   best: {},         // 스테이지별 최고 기록 { n: {time, side} }
   // v4 추가 항목
   vfound: {},       // 탑승한 적 있는 장비 { id: 1 }
-  afound: {}        // 구출한 동료 종류 { 'cls+perk': 1 }
+  afound: {},       // 구출한 동료 종류 { 'cls+perk': 1 }
+  inherit: null     // 다음 스테이지 계승 무기 { id, lv, evo, from }
 });
 let save = DEFAULT_SAVE();
 function loadSave() {
@@ -404,6 +414,7 @@ function loadSave() {
       save.best = (d.best && typeof d.best === 'object') ? d.best : {};
       save.vfound = (d.vfound && typeof d.vfound === 'object') ? d.vfound : {};
       save.afound = (d.afound && typeof d.afound === 'object') ? d.afound : {};
+      save.inherit = (d.inherit && typeof d.inherit === 'object' && typeof d.inherit.id === 'string') ? { id: d.inherit.id, lv: Math.max(1, Math.min(5, d.inherit.lv | 0)), evo: !!d.inherit.evo, from: d.inherit.from | 0 } : null;
       save.settings.diff = [0, 1, 2, 3].includes(save.settings.diff) ? save.settings.diff : 1;
       save.cleared = clamp(Math.floor(+save.cleared || 0), 0, 40);
       save.gold = Math.max(0, Math.floor(+save.gold || 0));
@@ -1810,6 +1821,7 @@ function startStage(n) {
   recalc(); P.hp = P.maxHp;
   let sw = save.startW; if (!WMAP[sw] || !save.codex[sw] || firstStageOf(sw) > Math.max(save.cleared + 1, n)) sw = 'rifle';
   addWeapon(sw);
+  G.adapt = computeAdapt(); applyInherit();
   G.lv = 1; G.xp = 0; G.need = xpNeed(1); G.pendingLv = 0; G.kills = 0; G.gold = 0; G.eid = 0; G.elitesKilled = 0; G.tagKills = {};
   G.potions = 3 + save.up.pot; G.potCd = 0; G.sk1 = 0; G.sk2 = 0; G.spawnT = 0.5; G.evT = 28; G.eliteT = 22; G.itemT = 12; G.qPity = 0;
   G.bossState = 0; G.boss = null; G.mini = null; G.intruded = false; G.warnT = 0; G.winT = 0; G.deadT = 0; G.shake = 0; G.flash = 0; G.flashCol = '255,0,0';
@@ -1903,7 +1915,7 @@ function spawnEnemy(type, x, y, o = {}) {
   const p = progress(), late = G.t > G.st.D ? Math.min(0.6, (G.t - G.st.D) / G.st.D * 0.6) : 0;
   let hp = d.hp * G.hpMul * (o.obj ? (1 + G.stage * 0.12) * (type === 'device' && G.stage > 27 ? 0.7 : 1) : (1 + p * 3 + late * 3)) * (el ? 11 : 1);
   if (type === 'golden') hp = d.hp * G.hpMul * 2;
-  hp *= o.obj ? Math.sqrt(DF().hp) : DF().hp;
+  hp *= o.obj ? Math.sqrt(DF().hp) : DF().hp * (1 + (G.adapt || 0));
   const e = { id: ++G.eid, type, d, x, y, r: d.r * sc, hp, maxHp: hp, dmg: d.dmg * G.dmgMul * (el ? 1.4 : 1),
     spd: d.spd * rand(0.9, 1.1) * G.spdMul * (1 + p * 0.1) * (el ? 0.85 : 1) * DF().spd, elite: el, face: 1, flash: 0, atkCd: 0, kx: 0, ky: 0,
     seed: Math.random() * 10, burn: 0, burnDps: 0, burnTick: 0, poison: 0, poisonDps: 0, slowT: 0, slowF: 1, stunT: 0, shredT: 0, chill: 0,
@@ -1912,7 +1924,7 @@ function spawnEnemy(type, x, y, o = {}) {
   if (o.tgtGen) e.tgtGen = true;
   enemies.push(e); return e;
 }
-function maxEnemies() { return Math.min(Q.level === 0 ? 210 : Q.level === 1 ? 420 : 640, Math.round((Q.level === 0 ? 130 : 200 + G.stage * 4) * G.st.crowd * DF().cnt)); }
+function maxEnemies() { return Math.min(Q.level === 0 ? 210 : Q.level === 1 ? 420 : 640, Math.round((Q.level === 0 ? 130 : 200 + G.stage * 4) * G.st.crowd * CNT())); }
 function aliveCount() { let n = 0; for (const e of enemies) if (!e.dead) n++; return n; }
 function director(dt) {
   const st = G.st, p = progress();
@@ -1921,7 +1933,7 @@ function director(dt) {
   if ((G.bossState === 0 || G.bossState === 2) && G.clearing === 0) {
     G.spawnT -= dt;
     if (G.spawnT <= 0) {
-      G.spawnT = lerp(0.7, 0.2, p) / st.crowd * (G.bossState === 2 ? 2.4 : 1) * (1 - late * 0.4) / (DF().cnt * allySpawnMul());
+      G.spawnT = lerp(0.7, 0.2, p) / st.crowd * (G.bossState === 2 ? 3.0 : 1) * (1 - late * 0.4) / (CNT() * allySpawnMul());
       const batch = 1 + Math.floor(p * 4.5 + Math.random() * 1.5);
       let alive = aliveCount(); let ranged = 0; for (const e of enemies) if (!e.dead && e.d.ai === 'ranged') ranged++;
       for (let i = 0; i < batch && alive < maxEnemies(); i++, alive++) {
@@ -1967,6 +1979,7 @@ function eliteSkill(e, dt, pdist) {
     default: eliteSkillX(e, a); break;
   }
   if (e.skill2) { const t = e.skill; e.skill = e.skill2; e.skill2 = t; e.skT *= 0.8; }
+  e.skT *= 0.9;
 }
 // 전설 보물상자: 스테이지마다 최소 1회 등장 (맵에 실제 배치)
 function spawnLegendChest() {
@@ -2020,11 +2033,12 @@ function startBossWarning() {
 function spawnBoss(id, intrude) {
   const b = BOSSES[id]; if (!intrude) G.bossState = 2;
   const ang = rand(0, TAU), dist = Math.min(VW, VH) * 0.42;
-  const hp = b.base * (1 + Math.min(G.lv, 55) * 0.045) * (b.mini ? 0.8 * (1 + G.stage * 0.03) : 1) * (save.settings.fast ? 0.4 : 1) * bossHpMul(intrude);
+  const hp = b.base * (1 + Math.min(G.lv, 55) * 0.045) * (b.mini ? 0.8 * (1 + G.stage * 0.03) : 1) * (save.settings.fast ? 0.4 : 1) * bossHpMul(intrude) * (intrude ? 1 : BOSS_HP_X) * (1 + (G.adapt || 0) * 0.6);
   const e = { id: ++G.eid, type: 'boss', bdef: b, d: { xp: 0 }, x: P.x + Math.cos(ang) * dist, y: P.y + Math.sin(ang) * dist, r: b.r, hp, maxHp: hp,
     dmg: b.dmg * G.dmgMul * 1.1, spd: b.spd, face: 1, flash: 0, atkCd: 0, kx: 0, ky: 0, seed: 0, burn: 0, burnDps: 0, burnTick: 0, poison: 0, poisonDps: 0, slowT: 0, slowF: 1, stunT: 0, shredT: 0, chill: 0,
     boss: true, mini: !!intrude, ps: 'idle', pt: 2.0, sub: 0, lastPat: '', p2: false, dead: false, alpha: 1, orbCd: 0, z: 0, armor: 0.15, draw: b.draw, pal: b.pal };
   enemies.push(e); if (intrude) G.mini = e; else G.boss = e;
+  initBossBars(e);
   G.shake = 14; G.flash = 0.5; G.flashCol = '255,40,40';
   for (let i = 0; i < 30; i++) addPart(e.x, e.y, rand(-200, 200), rand(-200, 200), '#b388ff', 0.8, 5);
   AU.sfx('slam'); if (intrude) { AU.sfx('alarm'); toast('👿 ' + b.name + '!', 2, '#ff5252'); }
@@ -2171,7 +2185,7 @@ function killEnemy(e) {
 function damagePlayer(dmg, src) {
   if (P.inv > 0 || G.state !== 'play' || P.hp <= 0 || G.clearing > 0) return;
   if (G.buff && G.buff.barrier > 0) { G.buff.barrier--; P.inv = 0.5; effects.push({ type: 'shock', x: P.x, y: P.y, r: 40, t: 0, dur: 0.35, col: '#80d8ff' }); AU.sfx('clank'); texts.push({ x: P.x, y: P.y - 24, t: 0, v: '보호막!', col: '#80d8ff', pl: 1 }); return; }
-  dmg *= DF().dmg;
+  dmg *= DF().dmg * (1 + (G.adapt || 0) * 0.7);
   if (G.veh) { vehHit(dmg, src); return; }
   dmg = Math.max(1, Math.round(dmg * (1 - P.armor)));
   if (G.dmgLog) G.dmgLog[src || '?'] = (G.dmgLog[src || '?'] || 0) + dmg;
@@ -2202,7 +2216,7 @@ function acquireWeapon(id, src) {
 }
 function explode(x, y, r, dmg, friendly, col = '#ff9800', o = {}) {
   effects.push({ type: 'boom', x, y, r, t: 0, dur: 0.35, col });
-  explodeFx(x, y, r, col);
+  explodeFx(x, y, r, col); if (o.vfx) vehBoomFx(x, y, r);
   const np = Q.level ? Math.min(22, 8 + r / 6) : 6;
   for (let i = 0; i < np; i++) { const a = rand(0, TAU), s = rand(40, 180) * r / 50; addPart(x, y, Math.cos(a) * s, Math.sin(a) * s, pick(['#ffeb3b', '#ff9800', '#ff5722', col]), rand(0.25, 0.55), rand(2.5, 5)); }
   AU.sfx(r > 85 ? 'bigboom' : 'boom');
@@ -2335,6 +2349,7 @@ function updateWeapons(dt) {
   }
 }
 function mkProj(o) {
+  vehProj(o);
   o.hit = o.hit || new Set(); o.life = o.life || 1;
   const W_ = o.wid ? WMAP[o.wid] : null;
   if (W_ && W_.tr && W_.tr.length && !o.lob && !o.noTr) { const t = W_.tr; if (t.includes('ric')) o.ric = 2; if (t.includes('split')) o.splitT = 1; if (t.includes('blast')) o.blastT = 1; if (t.includes('homing')) o.homT = 3.2; o.trCol = W_.col2; }
@@ -2547,7 +2562,7 @@ function shardBurst(x, y, n, dmg, col, wid, split2, skipId) {
 }
 function projEnd(p, hitE) {
   if (p.ended) return; p.ended = true; p.dead = true;
-  if (p.boom) explode(p.x, p.y, p.boom, p.dmg * (p.kind === 'cball' ? 0.8 : 1), true, p.col, { burn: p.burn, wid: p.wid, ap: p.ap });
+  if (p.boom) explode(p.x, p.y, p.boom, p.dmg * (p.kind === 'cball' ? 0.8 : 1), true, p.col, { burn: p.burn, wid: p.wid, ap: p.ap, vfx: p.vfx });
   if (p.zap) { const t = nearest(p.x, p.y, 120); if (t) zap(p.x, p.y, t, p.dmg * 0.6, { wid: p.wid, col: '#fff59d' }); }
   if (p.flak) { for (let i = 0; i < p.shards; i++) { const a = p.ang + (i - (p.shards - 1) / 2) * 0.18; const q = mkProj({ kind: 'shard', x: p.x, y: p.y, vx: Math.cos(a) * 460, vy: Math.sin(a) * 460, ang: a, r: 4, dmg: p.shardDmg, pierce: 1, life: 0.35, col: p.col, wid: p.wid, size: .9, noTr: 1 }); if (hitE) q.hit.add(hitE.id); } effects.push({ type: 'flash', x: p.x, y: p.y, ang: p.ang, col: p.col, t: 0, dur: 0.08, size: 2 }); AU.sfx('hmg', 1.4); }
   else if (p.shards) shardBurst(p.x, p.y, p.shards, p.shardDmg || p.dmg * 0.25, p.col, p.wid, p.split2, hitE && hitE.id);
@@ -2587,6 +2602,7 @@ function projCollide(p) {
       if (p.kind === 'plasma' || p.kind === 'disc') { hitEnemy(e, p.dmg, { silent: p.kind === 'plasma', wid: p.wid, burn: p.burn, kb: 40, ang: p.ang }); if (p.blastT && Math.random() < .5) explode(e.x, e.y, 26, p.dmg * 0.35, true, p.trCol || '#ff9100', { wid: p.wid, noTrait: 1 }); continue; }
       if (p.harp) { hitEnemy(e, p.dmg, { wid: p.wid, ang: p.ang, kb: 0 }); if (!e.boss && !e.static) { const dx = P.x - e.x, dy = P.y - e.y, d = Math.hypot(dx, dy) || 1; const pull = Math.min(d - 40, 260); e.kx += dx / d * pull * 4; e.ky += dy / d * pull * 4; e.stunT = Math.max(e.stunT, p.stunT || 0.6); } effects.push({ type: 'shock', x: e.x, y: e.y, r: e.r * 1.6, t: 0, dur: .25, col: p.col }); if (p.splitT) { shardBurst(e.x, e.y, 3, p.dmg * 0.35, p.trCol || p.col, p.wid, 0, e.id); } if (p.blastT) explode(e.x, e.y, 30, p.dmg * 0.4, true, p.trCol || '#ff9100', { wid: p.wid, noTrait: 1 }); p.dead = true; break; }
       hitEnemy(e, p.dmg, { kb: p.kb || 50, ang: p.ang, ap: p.ap, wid: p.wid, shred: p.shred, burn: p.burn });
+      if (p.vfx && p.kind === 'lbolt' && !e.dead) vehLaserHit(p, e);
       if (p.boom && p.kind !== 'cball' && !p.flak) { explode(p.x, p.y, p.boom, p.dmg * 0.6, true, p.col, { wid: p.wid }); }
       if (p.blastT) explode(p.x, p.y, 28, p.dmg * 0.4, true, p.trCol || '#ff9100', { wid: p.wid, noTrait: 1 });
       if (p.splitT && !p.splitDone) { p.splitDone = 1; for (let i = -1; i <= 1; i++) { const a = p.ang + i * 0.5; const q = mkProj({ kind: 'shard', x: p.x, y: p.y, vx: Math.cos(a) * 420, vy: Math.sin(a) * 420, ang: a, r: 4, dmg: p.dmg * 0.35, pierce: 1, life: 0.35, col: p.trCol || p.col, wid: p.wid, size: .8, noTr: 1 }); q.hit.add(e.id); } }
@@ -2690,8 +2706,10 @@ function updatePotBadge() { $('potN').textContent = G.potions; $('bPot').classLi
 /* ------------------------- 보스 AI ------------------------- */
 function bossUpdate(e, dt) {
   const b = e.bdef, dx = P.x - e.x, dy = P.y - e.y, dist = Math.hypot(dx, dy) || 1;
-  if (!e.p2 && e.hp < e.maxHp * 0.5) { e.p2 = true; if (DF().pat >= 1 && b.summon) for (let i = 0; i < 6 + DF().pat * 2; i++) { const a = i / (6 + DF().pat * 2) * TAU; later(.3, () => { if (G.state === 'play' && !e.dead) spawnEnemy(b.summon, e.x + Math.cos(a) * 80, e.y + Math.sin(a) * 80); }); } G.shake = 12; G.flash = 0.4; G.flashCol = '255,0,60'; AU.sfx('rage'); toast('💢 ' + b.name + ' 분노! (2페이즈)', 1.8, '#ff1744'); if (b.final) e.armor = 0.25; }
-  if (b.special && !e.p3 && e.hp < e.maxHp * 0.25) { e.p3 = true; e.armor = 0.3; G.shake = 16; G.flash = 0.5; G.flashCol = '255,215,0'; AU.sfx('rage'); toast('🔥 ' + b.name + ' 최종 페이즈!', 2, '#ffd600'); e.pats3 = [...new Set([...b.pats, 'spiral', 'laser', 'slam'])]; }
+  bossBarUpdate(e);
+  if (e.stagger > 0) { e.stagger -= dt; e.face = dx >= 0 ? 1 : -1; return; }
+  if (!e.p2 && (e.bars ? e.bar >= 1 : e.hp < e.maxHp * 0.5)) { e.p2 = true; if (DF().pat >= 1 && b.summon) for (let i = 0; i < 6 + DF().pat * 2; i++) { const a = i / (6 + DF().pat * 2) * TAU; later(.3, () => { if (G.state === 'play' && !e.dead) spawnEnemy(b.summon, e.x + Math.cos(a) * 80, e.y + Math.sin(a) * 80); }); } G.shake = 12; G.flash = 0.4; G.flashCol = '255,0,60'; AU.sfx('rage'); toast('💢 ' + b.name + ' 분노! (2페이즈)', 1.8, '#ff1744'); if (b.final) e.armor = 0.25; }
+  if (!e.p3 && (e.bars >= 3 ? e.bar >= 2 : b.special && e.hp < e.maxHp * 0.25)) { e.p3 = true; e.armor = 0.3; G.shake = 16; G.flash = 0.5; G.flashCol = '255,215,0'; AU.sfx('rage'); toast('🔥 ' + b.name + ' 최종 페이즈!', 2, '#ffd600'); e.pats3 = [...new Set([...b.pats, 'spiral', 'laser', 'slam', 'barrage', 'sweep', 'missile'])]; }
   if (e.exposeT > 0) e.exposeT -= dt;
   const rate = (e.p3 ? 1.6 : e.p2 ? 1.35 : 1) * (1 + DF().pat * 0.1);
   e.face = dx >= 0 ? 1 : -1;
@@ -2956,10 +2974,10 @@ function update(dt) {
 
 /* ------------------------- 난이도 ------------------------- */
 const DIFFS = [
-  { k: 'easy', n: '쉬움', ic: '🌱', col: '#69f0ae', hp: .8, dmg: .72, cnt: .95, spd: .95, elite: .8, potT: 26, gold: .8, xp: 1, boss: .85, rescue: .85, pat: 0 },
-  { k: 'normal', n: '보통', ic: '⚔️', col: '#90caf9', hp: 1.05, dmg: 1.15, cnt: 1.3, spd: 1.03, elite: 1.3, potT: 34, gold: 1.1, xp: 1.05, boss: 1.15, rescue: 1, pat: 1 },
-  { k: 'hard', n: '어려움', ic: '🔥', col: '#ffb74d', hp: 1.45, dmg: 1.4, cnt: 1.55, spd: 1.08, elite: 1.65, potT: 44, gold: 1.4, xp: 1.12, boss: 1.4, rescue: 1.12, pat: 2 },
-  { k: 'hell', n: '지옥', ic: '👹', col: '#ff5252', hp: 1.95, dmg: 1.8, cnt: 1.8, spd: 1.15, elite: 2.1, potT: 54, gold: 1.9, xp: 1.25, boss: 1.8, rescue: 1.25, pat: 3 }
+  { k: 'easy', n: '쉬움', ic: '🌱', col: '#69f0ae', hp: .8, dmg: .77, cnt: 1.02, spd: .98, elite: .8, potT: 26, gold: .8, xp: 1, boss: .85, rescue: .85, pat: 0 },
+  { k: 'normal', n: '보통', ic: '⚔️', col: '#90caf9', hp: 1.05, dmg: 1.23, cnt: 1.39, spd: 1.06, elite: 1.3, potT: 34, gold: 1.1, xp: 1.05, boss: 1.15, rescue: 1, pat: 1 },
+  { k: 'hard', n: '어려움', ic: '🔥', col: '#ffb74d', hp: 1.45, dmg: 1.5, cnt: 1.66, spd: 1.11, elite: 1.65, potT: 44, gold: 1.4, xp: 1.12, boss: 1.4, rescue: 1.12, pat: 2 },
+  { k: 'hell', n: '지옥', ic: '👹', col: '#ff5252', hp: 1.95, dmg: 1.93, cnt: 1.93, spd: 1.18, elite: 2.1, potT: 54, gold: 1.9, xp: 1.25, boss: 1.8, rescue: 1.25, pat: 3 }
 ];
 function diffIdx() { const d = save.settings.diff; return d >= 0 && d <= 3 ? d : 1; }
 function DF() { return DIFFS[diffIdx()]; }
@@ -2974,7 +2992,7 @@ function setDiff(i) {
       e.hp *= r; e.maxHp *= r; if (e.bud !== undefined) e.bud *= r;
       if (!e.boss) e.spd *= nw.spd / old.spd;
     }
-    recalc();
+    recalc(); G.adapt = computeAdapt();
     toast(`${nw.ic} 난이도: ${nw.n}`, 1.2, nw.col);
   }
 }
@@ -3261,7 +3279,7 @@ function exitVehicle(destroyed) {
     for (let i = 0; i < 26; i++) addPart(P.x, P.y, rand(-260, 260), rand(-260, 120), pick(['#455a64', '#263238', '#ff9800', v.def.col.a]), rand(.5, 1), rand(3, 6), 300);
     toast('💥 탑승 장비 파괴! 자동 하차', 1.6, '#ff8a65');
   } else {
-    v.x = P.x; v.y = P.y; P.x += 30; AU.sfx('clank'); toast('하차', 0.8, '#b0bec5');
+    v.x = P.x; v.y = P.y; P.x += 30; v.noAuto = true; AU.sfx('clank'); toast('하차 (다시 타려면 탑승 버튼)', 1, '#b0bec5');
   }
   setRideBtn(); setSkillBtn(); setUltBtn();
 }
@@ -3333,7 +3351,8 @@ function vWeapon(v, key, i, dt) {
     case 'mlrs': { const list = enemies.filter(e => !e.dead && onScreen(e, -10)); const K4 = W.k + 3 * tier; for (let k = 0; k < K4; k++) later(k * 0.07, () => { if (G.state !== 'play' || !G.veh || !list.length) return; const t = pick(list); if (t.dead) return; const aa = -Math.PI / 2 + rand(-.6, .6); const [x, y] = vMuzzle(v, aa); mkProj({ kind: 'missile', x, y, vx: Math.cos(aa) * 220, vy: Math.sin(aa) * 220, ang: aa, acc: 480, r: 5, dmg: W.dmg * dm * W.k * (1 + .2 * tier) / K4, pierce: 1, life: 2.4, col, boom: W.boom, homing: 4.5, target: t, explodeEnd: 1, size: .9 }); vFlash(x, y, aa, '#ffd180', 1); }); AU.sfx('missile', .8); v.recoil = 3; break; }
     case 'beam': { S.beamT = W.dur; S.tick = 0; AU.sfx('beam', 1); break; }
   }
-  if (key !== 'homing' && key !== 'mortar' && key !== 'mlrs' && key !== 'beam' && key !== 'rail') AU.sfx(W.s[0], W.s[1]);
+  if (key !== 'homing' && key !== 'mortar' && key !== 'mlrs' && key !== 'beam' && key !== 'rail') { AU.sfx(W.s[0], W.s[1] * (v.ch.r >= 25 ? 0.72 : v.ch.r <= 17 ? 1.3 : 1)); if (v.ch.r >= 25 || key === 'shell') AU.sfx('boom', 1); }
+  if (key === 'rocket' || key === 'plasma' || key === 'grenade') G.shake = Math.max(G.shake, 2.2);
 }
 function updateVehicle(dt) {
   const v = G.veh;
@@ -3447,7 +3466,7 @@ function allyHit(a, e, base, o = {}) {
 function allyShoot(a, t, dm, rk = 1) {
   const c = a.c, ang = Math.atan2(t.y - a.y, t.x - a.x), x = a.x + Math.cos(ang) * 12, y = a.y - 6 + Math.sin(ang) * 12, p = a.spec.perk;
   a.aim = ang; a.atkT = .2; if (Math.abs(Math.cos(ang)) > .2) a.face = Math.cos(ang) > 0 ? 1 : -1;
-  const sz = 1 + .08 * (rk - 1); const pr = (o) => { if (o.size) o.size *= sz; if (o.r) o.r *= sz; const q = mkProj(o); q.ally = a; return q; };
+  const sz = 1 + .08 * (rk - 1); const pr = (o) => { if (o.size) o.size *= sz; if (o.r) o.r *= sz; o.ally = a; return mkProj(o); };
   switch (a.cls) {
     case 'rifle': for (let k = 0; k < (rk >= 4 ? 4 : 3); k++) later(k * 0.08, () => { if (G.state !== 'play' || a.down > 0 || a.seated) return; const aa = Math.atan2(t.y - a.y, t.x - a.x) + rand(-.06, .06); pr({ kind: 'tracer', x: a.x + Math.cos(aa) * 12, y: a.y - 6 + Math.sin(aa) * 12, vx: Math.cos(aa) * 720, vy: Math.sin(aa) * 720, ang: aa, r: 4, dmg: 8 * dm, pierce: (p === 'pierce' ? 3 : 1) + (rk >= 3 ? 1 : 0), life: c.range / 720, col: rk >= 3 ? '#80deea' : '#ffe082', size: .9, kb: 25 }); AU.sfx('rifle', 1.25); }); break;
     case 'sniper': pr({ kind: 'slug', x, y, vx: Math.cos(ang) * 1200, vy: Math.sin(ang) * 1200, ang, r: 4, dmg: 62 * dm, pierce: 5 + rk, boom: rk >= 4 ? 34 : 0, life: c.range / 1200, col: '#fff176', size: 1.3, kb: 100, ap: .4 }); effects.push({ type: 'rail', x1: x, y1: y, x2: x + Math.cos(ang) * 120, y2: y + Math.sin(ang) * 120, w: 2, col: '#fff59d', t: 0, dur: .12 }); AU.sfx('rifle', .6); break;
@@ -3665,7 +3684,7 @@ function extDirector(dt) {
   if (G.bossState !== 0 || G.clearing) return;
   const n = activeAllies();
   // 동료 3명 이상 → 정예 출현 소폭 증가 / 난이도별 정예 빈도
-  G.allyEliteT -= dt * (DF().elite + (n >= 3 ? 0.35 : 0)) * 0.5;
+  G.allyEliteT -= dt * (DF().elite + (n >= 3 ? 0.35 : 0) + (G.adapt || 0) * 2) * 0.5;
   if (G.allyEliteT <= 0) { G.allyEliteT = 55; if (DF().elite > 1 || n >= 3) spawnElite(); }
   // 동료 4명 이상 → 적의 협동 포위 공격
   if (n >= 4 || DF().pat >= 2) {
@@ -3687,7 +3706,7 @@ function extDirector(dt) {
 }
 // 어려움·지옥: 체력만 높이는 것이 아니라 새로운 공격 패턴 추가
 function diffAI(e, dt, pdist) {
-  const pat = DF().pat; if (!pat || e.stunT > 0 || e.forceDash) return;
+  const pat = Math.min(3, DF().pat + ((G.adapt || 0) > 0.12 ? 1 : 0)); if (!pat || e.stunT > 0 || e.forceDash) return;
   if (e.dT === undefined) e.dT = rand(3, 7);
   e.dT -= dt; if (e.dT > 0 || !onScreen(e, -10)) return;
   e.dT = pat >= 2 ? rand(3, 5) : rand(5, 8);
@@ -3731,7 +3750,7 @@ function bossGovern(e, dmg) {
   e.bud = Math.min(cap, e.bud + rate * (now - e.budT)); e.budT = now;
   if (dmg > e.bud) { const over = dmg - e.bud; dmg = e.bud + over * 0.3; e.bud = 0; } else e.bud -= dmg;
   const ft = now - e.spT;
-  if (ft > 100) { if (!e.weakMsg) { e.weakMsg = 1; toast('💢 보스 약점 노출! 받는 피해 증가', 1.6, '#ffd54f'); } dmg *= 1 + Math.min(1.5, (ft - 100) / 60); }
+  if (ft > 75) { if (!e.weakMsg) { e.weakMsg = 1; toast('💢 보스 약점 노출! 받는 피해 증가', 1.6, '#ffd54f'); } dmg *= 1 + Math.min(1.5, (ft - 75) / 45); }
   return dmg;
 }
 function bossExtStart(e, pat) {
@@ -3801,6 +3820,7 @@ function extUpdate(dt) {
     if (Math.hypot(P.x - H.x, P.y - H.y) < H.r) { H.q.cur += dt; H.spawnT = (H.spawnT || 0) - dt; if (H.spawnT <= 0) { H.spawnT = 2; for (let i = 0; i < 3 + Math.floor(G.stage / 8) && aliveCount() < maxEnemies(); i++) { const [x, y] = edgePos(); spawnEnemy(wpick(G.st.mobs), x, y); } } if (H.q.cur >= H.q.sec) completeQuest(H.q); }
   }
   // 탑승 버튼 표시
+  autoBoard();
   const nv = nearVeh(); if (nv !== G.rideNear) { G.rideNear = nv; setRideBtn(); }
   if (G.veh) setSkillCd();
   updateSquadHud();
@@ -3816,7 +3836,7 @@ function extArrows(list) {
 function setRideBtn() {
   const b = $('bRide'); if (!b) return;
   if (G.veh) { b.style.display = 'flex'; b.classList.add('exit'); b.innerHTML = '<span class="ic">⏏</span><span class="lb">하차</span>'; }
-  else if (G.rideNear) { b.style.display = 'flex'; b.classList.remove('exit'); b.innerHTML = '<span class="ic">🚘</span><span class="lb">탑승</span>'; }
+  else if (G.rideNear && G.rideNear.noAuto) { b.style.display = 'flex'; b.classList.remove('exit'); b.innerHTML = '<span class="ic">🚘</span><span class="lb">탑승</span>'; }
   else b.style.display = 'none';
 }
 let skLast = '';
@@ -3894,8 +3914,8 @@ function onKill(e) {
   if (COMBO_MS.includes(G.combo) || (G.combo > 100 && G.combo % 50 === 0)) comboMilestone(G.combo);
   // 짧은 시간에 여러 마리를 쓰러뜨리면 연쇄 폭발 (실제 범위 피해)
   G.kwin.push(G.time); while (G.kwin.length && G.kwin[0] < G.time - 0.3) G.kwin.shift();
-  if (G.kwin.length >= 6 && G.chainCd <= 0 && onScreen(e, 0)) {
-    G.chainCd = 0.14; const r = 44 + Math.min(30, G.kwin.length * 2), x = e.x, y = e.y, dmg = Math.max(e.lastDmg || 0, e.maxHp * 0.5) * 0.5;
+  if (G.kwin.length >= (G.veh ? 4 : 6) && G.chainCd <= 0 && onScreen(e, 0)) {
+    G.chainCd = G.veh ? 0.1 : 0.14; const r = (G.veh ? 58 : 44) + Math.min(30, G.kwin.length * 2), x = e.x, y = e.y, dmg = Math.max(e.lastDmg || 0, e.maxHp * 0.5) * 0.5;
     later(0.06, () => { if (G.state === 'play') explode(x, y, r, dmg, true, pick(TH().cols), { noTrait: 1 }); });
     if (Math.random() < .25 && texts.length < 70) texts.push({ x, y: y - 16, t: 0, v: '연쇄 폭발!', col: '#ffab40', big: 1 });
   }
@@ -4126,6 +4146,112 @@ function xpUpdate(dt) {
 }
 
 /* =====================================================================
+   업데이트: 다중 체력바 보스 · 무기 계승 · 강화 수준 기반 난이도 보정 ·
+             차량 자동 탑승 · 차량 무기 임팩트 강화
+   ===================================================================== */
+const BOSS_HP_X = 2.5;                         // 최종 보스 총 체력 배율 (체력바 합계 기준)
+const BAR_COLS = ['#e53935', '#ff9800', '#8e24aa'];  // 1번째 빨강 → 2번째 주황 → 3번째 보라
+const BAR_NAMES = ['빨간', '주황', '보라'];
+function bossBarsFor(n, special) { return special || n >= 16 ? 3 : 2; }
+
+/* ------------------------- 다중 체력바 ------------------------- */
+function initBossBars(e) { if (e.mini) return; e.bars = bossBarsFor(G.stage, e.bdef.special); e.bar = 0; }
+function bossBarUpdate(e) {
+  if (!e.bars) return;
+  const per = e.maxHp / e.bars, idx = Math.min(e.bars - 1, Math.floor((e.maxHp - Math.max(0, e.hp)) / per));
+  if (idx > e.bar && e.hp > 0) { e.bar = idx; barBreak(e); }
+}
+function barBreak(e) {
+  const left = e.bars - e.bar;
+  G.barFlash = 0.7; G.shake = Math.max(G.shake, 10); G.flash = 0.35; G.flashCol = e.bar >= 2 ? '180,60,255' : '255,140,0';
+  effects.push({ type: 'xring', x: e.x, y: e.y, r: e.r * 3.2, t: 0, dur: 0.6, col: BAR_COLS[Math.min(2, e.bar)] });
+  effects.push({ type: 'nova', x: e.x, y: e.y, r: e.r * 4, t: 0, dur: 0.6, col: BAR_COLS[Math.min(2, e.bar)] });
+  for (let i = 0; i < 30; i++) addPart(e.x, e.y, rand(-260, 260), rand(-260, 120), BAR_COLS[Math.min(2, e.bar)], rand(.5, 1), rand(3, 6), 200);
+  // 체력바 전환: 잠깐 멈춰 섰다가(회피 시간) 새 패턴 시작
+  e.ps = 'idle'; e.pt = 1.6; e.stagger = 1.0;
+  AU.sfx('rage'); AU.sfx('bigboom');
+  toast(`💢 ${e.bdef.name} — 체력바 ${left}줄 남음!<br><span style="font-size:15px">${e.bar === 1 ? '공격 속도 증가 · 새로운 공격 패턴' : '강력한 특수 공격 · 광역 공격'}</span>`, 2, BAR_COLS[Math.min(2, e.bar)]);
+}
+
+/* ------------------------- 무기 계승 ------------------------- */
+function inheritValid(ih) { return ih && typeof ih === 'object' && WMAP[ih.id] ? ih : null; }
+function applyInherit() {
+  const ih = inheritValid(save.inherit); if (!ih) return;
+  let w = G.weapons.find(x => x.id === ih.id); if (!w) w = addWeapon(ih.id);
+  w.lv = clamp(ih.lv | 0, 1, WMAX); w.evo = !!ih.evo && !!EVOS[ih.id]; w.inh = true;
+  const c = codexOf(w.id); c.maxLv = Math.max(c.maxLv || 1, w.lv);
+  later(1.2, () => toast(`🔁 계승 무기 장착: ${w.evo ? EVOS[w.id].n : WMAP[w.id].nm} Lv${w.lv}${w.evo ? ' (진화)' : ''}`, 1.8, '#80deea'));
+}
+function inheritLabel(ih) { ih = inheritValid(ih); if (!ih) return '없음'; return `${WMAP[ih.id].ic} ${ih.evo && EVOS[ih.id] ? EVOS[ih.id].n : WMAP[ih.id].nm} Lv${ih.lv}${ih.evo ? ' 🔥진화' : ''}`; }
+function openInherit() {
+  const list = G.weapons.slice().sort((a, b) => (b.evo - a.evo) || (b.lv - a.lv) || (WMAP[b.id].t - WMAP[a.id].t));
+  const box = $('ihCards'); box.innerHTML = '';
+  const add = (html, fn, cls) => { const b = document.createElement('button'); b.className = 'card ' + (cls || ''); b.innerHTML = html; b.addEventListener('click', () => { AU.sfx('button'); fn(); }, { once: true }); box.appendChild(b); };
+  for (const w of list) {
+    const W_ = WMAP[w.id], nm = w.evo ? EVOS[w.id].n : W_.nm;
+    const trs = W_.tr && W_.tr.length ? W_.tr.map(k => TRAIT_MAP[k] ? TRAIT_MAP[k].adj : k).join('·') : '';
+    add(`<div class="ci">${w.evo ? EVOS[w.id].ic : W_.ic}</div><div><div class="cn" style="color:${TIER_COL[W_.t]}">${nm}<em>Lv ${w.lv}${w.evo ? ' · 진화' : ''}</em></div><div class="cd">${TIER_NAME[W_.t]} · ${CLASS_NAME[W_.c]}${trs ? ' · 특성: ' + trs : ''}</div><div class="pips">${'★'.repeat(w.lv)}${'☆'.repeat(WMAX - w.lv)}</div></div>`, () => pickInherit(w));
+  }
+  add(`<div class="ci">✖️</div><div><div class="cn">계승하지 않음</div><div class="cd">${inheritValid(save.inherit) ? '기존 계승 무기도 해제됩니다' : '다음 스테이지를 기본 무기로 시작'}</div></div>`, () => pickInherit(null), 'gray');
+  $('ihCur').innerHTML = inheritValid(save.inherit) ? `현재 계승 중: <b>${inheritLabel(save.inherit)}</b>` : '';
+  showScreen('scrInherit');
+}
+function pickInherit(w) {
+  save.inherit = w ? { id: w.id, lv: w.lv, evo: !!w.evo, from: G.stage } : null; writeSave();
+  const el = $('rInh'); if (el) el.innerHTML = w ? `🔁 다음 스테이지 계승 무기: <b>${inheritLabel(save.inherit)}</b>` : '🔁 계승 무기 없음';
+  showScreen('scrResult');
+}
+
+/* ------------------------- 강화 수준 기반 난이도 보정 (상한 있음) ------------------------- */
+// 플레이어가 골드 강화·계승 무기로 강해진 만큼, 다음 스테이지 적을 '일부만' 강화 (난이도별 상한 15~25%, 누적 없음)
+function adaptStrength() {
+  const u = save.up; let S = 0.75 * u.atk / 15 + 0.45 * u.hp / 15 + 0.3 * u.armor / 10 + 0.1 * u.spd / 10;
+  const ih = inheritValid(save.inherit); if (ih) S += 0.06 * ih.lv + (ih.evo ? 0.15 : 0) + (WMAP[ih.id].t >= 3 ? 0.05 : 0);
+  return S;
+}
+function adaptCap() { return [0.15, 0.18, 0.22, 0.25][diffIdx()]; }
+function computeAdapt() { return Math.min(adaptCap(), adaptStrength() * 0.15); }
+function CNT() { return DF().cnt * (1 + (G.adapt || 0) * 0.5); }
+
+/* ------------------------- 차량 자동 탑승 ------------------------- */
+function autoBoard() {
+  for (const v of vehs) if (v.noAuto && !v.dead && Math.hypot(v.x - P.x, v.y - P.y) > 110) v.noAuto = false;
+  if (G.veh || P.hp <= 0 || G.state !== 'play' || P.dashT > 0) return;
+  const v = nearVeh(); if (!v || v.noAuto || v.dead || v.drop) return;
+  // 탑승 연출: 캐릭터가 차량으로 뛰어오르는 잔상
+  const x0 = P.x, y0 = P.y;
+  for (let i = 1; i <= 4; i++) { const k = i / 5; effects.push({ type: 'ghost', x: lerp(x0, v.x, k), y: lerp(y0, v.y, k) - Math.sin(k * Math.PI) * 24, face: P.face, t: -i * 0.03, dur: 0.3 }); }
+  boardVehicle(v);
+}
+
+/* ------------------------- 차량 무기 임팩트 ------------------------- */
+// 차량 발사체 표시: 크기·폭발 반경 확대 + 대형 폭발 연출 (피해량 계산은 기존 차량 화력 규칙 유지)
+function vehProj(o) {
+  if (!G.veh || o.wid || o.ally) return;
+  o.vfx = 1; o.size = (o.size || 1) * 1.35; if (o.r) o.r *= 1.25; if (o.boom) o.boom *= 1.18; if (o.len) o.len *= 1.4;
+}
+function vehBoomFx(x, y, r) {
+  if (!onScreen({ x, y }, r + 60)) return;
+  if (effects.length < FXCAP) effects.push({ type: 'xring', x, y, r: r * 1.5, t: 0, dur: 0.42, col: '#fff3e0' });
+  for (let i = 0; i < (Q.level ? 8 : 3); i++) { const a = rand(0, TAU), s = rand(120, 300); addPart(x, y, Math.cos(a) * s, Math.sin(a) * s - 60, pick(['#ffeb3b', '#ff9800', '#ff5722', '#ffffff']), rand(.4, .7), rand(3, 5.5), 300); }
+  G.shake = Math.max(G.shake, Math.min(5, 1.5 + r / 35));
+}
+function vehLaserHit(p, e) {
+  if (effects.length < FXCAP && Q.level) effects.push({ type: 'ering', x: e.x, y: e.y, r: e.r * 2.2, t: 0, dur: .25, col: p.col });
+  for (const o of query(e.x, e.y, 34)) if (o !== e && !o.dead) hitEnemy(o, p.dmg * 0.3, { silent: true, tick: 1 });
+}
+
+/* ------------------------- 후반 스테이지 몬스터 조합 다양화 ------------------------- */
+for (let n = 21; n <= 40; n++) {
+  const st = STAGES[n - 1]; if (st.main.some(q => q.k === 'killTag') || st.side.some(q => q.k === 'killTag')) continue;
+  const have = new Set(st.mobs.map(m => m[0]));
+  for (const s2 of [STAGES[n - 11], STAGES[n - 16]]) {
+    const m = s2.mobs.find(m => !have.has(m[0]) && !ET[m[0]].sig && ET[m[0]].ai !== 'summon' && ET[m[0]].ai !== 'heal');
+    if (m) { st.mobs.push([m[0], 1]); have.add(m[0]); }
+  }
+}
+
+/* =====================================================================
    렌더링
    ===================================================================== */
 function render() {
@@ -4194,6 +4320,7 @@ function render() {
       ctx.font = '900 9px "Noto Sans KR",sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffd54f'; ctx.strokeStyle = '#000'; ctx.lineWidth = 2.5; ctx.strokeText('정예 ' + e.d.n, e.x, e.y - e.r * 1.5 - 12); ctx.fillText('정예 ' + e.d.n, e.x, e.y - e.r * 1.5 - 12);
     }
     if (e.elx) drawElxDeco(e);
+    if (e.boss && e.bars) drawBossTag(e);
     if (e.buffT > 0 && Q.level && !e.elite) { ctx.strokeStyle = 'rgba(255,82,82,.55)'; ctx.lineWidth = 1.5; circ(ctx, e.x, e.y + e.r * .7, e.r * .8); ctx.stroke(); }
     if (e.shieldT > 0) { ctx.globalAlpha = .35 + .15 * Math.sin(G.time * 12); ctx.fillStyle = '#40c4ff'; circ(ctx, e.x, e.y, e.r * 1.35); ctx.fill(); ctx.globalAlpha = 1; ctx.strokeStyle = '#e1f5fe'; ctx.lineWidth = 2; circ(ctx, e.x, e.y, e.r * 1.35); ctx.stroke(); }
     if (e.burn > 0 && e.burn > 1.6 && Q.level) { ctx.globalAlpha = .7; ctx.fillStyle = '#ff6d00'; ctx.beginPath(); const fx = e.x, fy = e.y - e.r * .2, fl = Math.sin(G.time * 25 + e.seed) * 2; ctx.moveTo(fx - 5, fy); ctx.quadraticCurveTo(fx, fy - 14 - fl, fx + 5, fy); ctx.fill(); ctx.globalAlpha = 1; }
@@ -4543,7 +4670,8 @@ function drawHUD() {
   // 보스 체력바
   let qy = hy + (G.veh ? 92 : 68);
   const boss = (G.boss && !G.boss.dead && G.bossState === 2) ? G.boss : (G.mini && !G.mini.dead ? G.mini : null);
-  if (boss) {
+  if (boss && boss.bars) { qy += drawBossBars(boss, qy + 10, W) + 10; }
+  else if (boss) {
     const bw = Math.min(W - 40 - SAFE.l - SAFE.r, 360), bx = (W - bw) / 2, by = qy;
     ctx.fillStyle = 'rgba(0,0,0,.7)'; rr(ctx, bx - 3, by - 3, bw + 6, 20, 6); ctx.fill();
     const gr = ctx.createLinearGradient(bx, 0, bx + bw, 0); gr.addColorStop(0, boss.p2 ? '#ff1744' : '#7b1fa2'); gr.addColorStop(1, boss.p2 ? '#ff8a80' : '#e040fb');
@@ -5046,6 +5174,41 @@ function drawHudX(W) {
   if (G.sup && G.sup.t > 0) { const S = SUPK[G.sup.k]; ctx.textAlign = 'center'; ctx.font = '900 11px "Noto Sans KR",sans-serif'; ctx.lineWidth = 3; ctx.strokeStyle = '#000'; const tx = W / 2, ty = H * .2 + SAFE.t; const s = `${S.ic} ${S.n} ${Math.ceil(G.sup.t)}초${G.veh ? ' (하차 후)' : ''}`; ctx.strokeText(s, tx, ty); ctx.fillStyle = '#ffd54f'; ctx.fillText(s, tx, ty); }
 }
 
+/* ------------------------- 보스 다중 체력바 (던전앤파이터식) ------------------------- */
+function drawBossBars(b, y, W) {
+  const bw = Math.min(W - 30 - SAFE.l - SAFE.r, 380), bx = (W - bw) / 2, h = 18;
+  const per = b.maxHp / b.bars, cur = Math.min(b.bars - 1, b.bar || 0), left = b.bars - cur;
+  const inBar = clamp((Math.max(0, b.hp) - (b.bars - 1 - cur) * per) / per, 0, 1);
+  if (G.barFlash > 0) G.barFlash -= 0.016;
+  ctx.fillStyle = 'rgba(0,0,0,.78)'; rr(ctx, bx - 4, y - 4, bw + 8, h + 26, 7); ctx.fill();
+  // 아래에 다음 줄 색을 깔고, 현재 줄을 위에 그림
+  ctx.fillStyle = left > 1 ? BAR_COLS[Math.min(2, cur + 1)] : '#263238'; rr(ctx, bx, y, bw, h, 6); ctx.fill();
+  if (left > 1) { ctx.fillStyle = 'rgba(0,0,0,.35)'; rr(ctx, bx, y, bw, h, 6); ctx.fill(); }
+  // 지연 감소 표시(흰색) → 현재 체력
+  b.trail = b.trail === undefined || b.trailBar !== cur ? inBar : Math.max(inBar, b.trail - 0.008); b.trailBar = cur;
+  ctx.fillStyle = 'rgba(255,255,255,.75)'; rr(ctx, bx, y, Math.max(3, bw * b.trail), h, 6); ctx.fill();
+  const col = BAR_COLS[Math.min(2, cur)], gr = ctx.createLinearGradient(0, y, 0, y + h); gr.addColorStop(0, '#ffffff55'); gr.addColorStop(.35, col); gr.addColorStop(1, col);
+  ctx.fillStyle = gr; rr(ctx, bx, y, Math.max(3, bw * inBar), h, 6); ctx.fill();
+  for (let i = 1; i < 10; i++) { ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fillRect(bx + bw * i / 10, y + 2, 1, h - 4); }
+  if (G.barFlash > 0) { ctx.globalAlpha = Math.min(1, G.barFlash * 1.6); ctx.fillStyle = '#fff'; rr(ctx, bx, y, bw, h, 6); ctx.fill(); ctx.globalAlpha = 1; }
+  ctx.strokeStyle = b.exposeT > 0 ? '#ffd54f' : 'rgba(255,255,255,.5)'; ctx.lineWidth = b.exposeT > 0 ? 3 : 1.5; rr(ctx, bx, y, bw, h, 6); ctx.stroke();
+  // 남은 줄 수 (x3) + 이름
+  ctx.textAlign = 'right'; ctx.font = '900 17px "Black Han Sans","Noto Sans KR",sans-serif'; ctx.lineWidth = 4; ctx.strokeStyle = '#000';
+  ctx.strokeText('x' + left, bx + bw - 6, y + 15); ctx.fillStyle = '#fff'; ctx.fillText('x' + left, bx + bw - 6, y + 15);
+  ctx.textAlign = 'left'; ctx.font = '900 11px "Noto Sans KR",sans-serif'; ctx.lineWidth = 3;
+  const label = `👑 ${b.bdef.name}${b.exposeT > 0 ? '  ⚡약점!' : ''}`; ctx.strokeText(label, bx + 6, y + 13); ctx.fillText(label, bx + 6, y + 13);
+  // 남은 체력바 아이콘
+  for (let i = 0; i < b.bars; i++) { const on = i >= cur; ctx.fillStyle = on ? BAR_COLS[i] : 'rgba(255,255,255,.15)'; rr(ctx, bx + i * 22, y + h + 5, 18, 8, 3); ctx.fill(); }
+  ctx.font = '700 9px "Noto Sans KR",sans-serif'; ctx.fillStyle = '#eee'; ctx.textAlign = 'left'; ctx.fillText(`체력바 ${left}/${b.bars} · ${['1페이즈', '2페이즈', '3페이즈'][cur]}`, bx + b.bars * 22 + 4, y + h + 12);
+  return h + 30;
+}
+// 보스 머리 위 남은 체력바 개수
+function drawBossTag(e) {
+  if (!e.bars) return; const left = e.bars - (e.bar || 0);
+  ctx.font = '900 13px "Black Han Sans","Noto Sans KR",sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 4; ctx.strokeStyle = '#000';
+  const y = e.y - e.r - 26 - (e.z || 0); ctx.strokeText('x' + left, e.x, y); ctx.fillStyle = BAR_COLS[Math.min(2, e.bar || 0)]; ctx.fillText('x' + left, e.x, y);
+}
+
 /* =====================================================================
    UI / 메뉴 / 입력 / 메인 루프
    ===================================================================== */
@@ -5159,12 +5322,13 @@ function stageWin() {
     (G.newFound.length ? `<p class="unl">✨ 새로 발견한 무기: ${G.newFound.map(id => WMAP[id].ic + ' ' + WMAP[id].nm).join(', ')}</p>` : '') +
     (newUnlocks.length ? `<p class="unl">🔓 다음 스테이지 신규 무기: ${newUnlocks.map(id => WMAP[id].ic + ' ' + WMAP[id].nm).join(', ')}</p>` : '') +
     (G.newVeh ? `<p class="unl">🚘 새로 탑승한 장비 ${G.newVeh}종 · 장비 도감 ${Object.keys(save.vfound).length} / ${VEH.length}</p>` : '') +
-    (n === 40 ? '<p class="unl">🎉 40개 스테이지를 모두 정복했습니다!</p>' : '');
+    (n === 40 ? '<p class="unl">🎉 40개 스테이지를 모두 정복했습니다!</p>' : '') + `<p class="unl" id="rInh">🔁 계승 무기: ${inheritLabel(save.inherit)}</p>`;
   const btns = $('rBtns'); btns.innerHTML = '';
   if (n < 40) addBtn(btns, '다음 스테이지 ▶', '', () => startStage(n + 1));
   addBtn(btns, '🔧 강화소', 'blue', () => openShop('result'));
   addBtn(btns, '스테이지 선택', 'gray', openStageSelect);
   showScreen('scrResult');
+  if (G.weapons.length && !window.__botPick) openInherit();
 }
 function stageLose() {
   G.state = 'result'; $('gameUI').classList.remove('on'); finishRun(false); AU.bgm('lose');
@@ -5184,7 +5348,7 @@ function statRows(rows) { return rows.map(([a, b]) => `<div class="stat"><span>$
 function addBtn(parent, label, cls, fn) { const b = document.createElement('button'); b.className = 'btn ' + cls; b.textContent = label; b.addEventListener('click', () => { AU.sfx('button'); fn(); }); parent.appendChild(b); }
 
 /* ------------------------- 화면 전환 ------------------------- */
-const SCREENS = ['scrTitle', 'scrStage', 'scrLevel', 'scrPause', 'scrResult', 'scrSet', 'scrHelp', 'scrShop', 'scrCodex', 'scrChest', 'scrShare', 'modal'];
+const SCREENS = ['scrInherit', 'scrTitle', 'scrStage', 'scrLevel', 'scrPause', 'scrResult', 'scrSet', 'scrHelp', 'scrShop', 'scrCodex', 'scrChest', 'scrShare', 'modal'];
 function showScreen(id) { for (const s of SCREENS) $(s).classList.toggle('on', s === id); }
 let toastTimer = null;
 function toast(html, dur = 1.5, col = '#fff') { const t = $('toast'); t.innerHTML = html; t.style.color = col; t.style.opacity = 1; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.style.opacity = 0, dur * 1000); }
@@ -5219,7 +5383,7 @@ function renderStageInfo(lockedN) {
     🚘 탑승 장비: ${VEH_ST[s.n].map(v => `<span style="color:${save.vfound[v.id] ? '#80deea' : '#b0bec5'}">${s.n <= save.cleared + 1 ? v.name : '???'}</span>`).join(', ')}<br>
     🤝 구조 대상: ${ALLY_ST[s.n].slice(0, 2).map(a => ACL[a.cls].ic + ' ' + a.name + ' <small>(' + APERK[a.perk].n + ')</small>').join(', ')}<br>
     👾 ${mobs}<br>🔫 주력 무기: ${s.wp.map(id => `<span style="color:${TIER_COL[WMAP[id].t]}">${WMAP[id].ic}${WMAP[id].nm}</span>`).join(', ')}
-    ${best ? `<br>🏅 최고 기록: ${fmtTime(best.time)}` : ''}</div>`;
+    ${best ? `<br>🏅 최고 기록: ${fmtTime(best.time)}` : ''}<br>🔁 계승 무기: ${inheritLabel(save.inherit)}<br>👑 보스 체력바: ${bossBarsFor(s.n, s.special)}줄</div>`;
   $('sGo').style.visibility = 'visible';
   [...$('sGrid').children].forEach((c, i) => c.style.outline = i + 1 === selStage ? '3px solid #fff' : '');
   // 출전 무기 선택 (도감에서 발견한 무기 중)
@@ -5304,7 +5468,7 @@ bindSeg('segDmg', v => save.settings.dmgNum = +v);
 bindSeg('segFast', v => save.settings.fast = +v);
 bindSeg('segDiffP', v => setDiff(+v));
 bindSeg('segDiffS', v => { setDiff(+v); renderDiffNote(); });
-function renderDiffNote() { const d = DF(); $('diffNote').innerHTML = `${d.ic} <b style="color:${d.col}">${d.n}</b> — 적 체력 ${Math.round(d.hp * 100)}% · 공격력 ${Math.round(d.dmg * 100)}% · 등장 수 ${Math.round(d.cnt * 100)}% · 골드 x${d.gold}`; }
+function renderDiffNote() { const d = DF(); $('diffNote').innerHTML = `${d.ic} <b style="color:${d.col}">${d.n}</b> — 적 체력 ${Math.round(d.hp * 100)}% · 공격력 ${Math.round(d.dmg * 100)}% · 등장 수 ${Math.round(d.cnt * 100)}% · 골드 x${d.gold}${adaptStrength() > 0 ? ` · 💪 강화 보정 +${Math.round(computeAdapt() * 100)}% (상한 ${Math.round(adaptCap() * 100)}%)` : ''}`; }
 $('vMusic').addEventListener('input', e => { save.settings.music = e.target.value / 100; AU.applyVol(); });
 $('vSfx').addEventListener('input', e => { save.settings.sfx = e.target.value / 100; AU.applyVol(); });
 $('vMusic').addEventListener('change', writeSave); $('vSfx').addEventListener('change', () => { writeSave(); AU.sfx('coin'); });

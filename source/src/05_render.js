@@ -67,6 +67,7 @@ function render() {
       ctx.font = '900 9px "Noto Sans KR",sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffd54f'; ctx.strokeStyle = '#000'; ctx.lineWidth = 2.5; ctx.strokeText('정예 ' + e.d.n, e.x, e.y - e.r * 1.5 - 12); ctx.fillText('정예 ' + e.d.n, e.x, e.y - e.r * 1.5 - 12);
     }
     if (e.elx) drawElxDeco(e);
+    if (e.boss && e.bars) drawBossTag(e);
     if (e.buffT > 0 && Q.level && !e.elite) { ctx.strokeStyle = 'rgba(255,82,82,.55)'; ctx.lineWidth = 1.5; circ(ctx, e.x, e.y + e.r * .7, e.r * .8); ctx.stroke(); }
     if (e.shieldT > 0) { ctx.globalAlpha = .35 + .15 * Math.sin(G.time * 12); ctx.fillStyle = '#40c4ff'; circ(ctx, e.x, e.y, e.r * 1.35); ctx.fill(); ctx.globalAlpha = 1; ctx.strokeStyle = '#e1f5fe'; ctx.lineWidth = 2; circ(ctx, e.x, e.y, e.r * 1.35); ctx.stroke(); }
     if (e.burn > 0 && e.burn > 1.6 && Q.level) { ctx.globalAlpha = .7; ctx.fillStyle = '#ff6d00'; ctx.beginPath(); const fx = e.x, fy = e.y - e.r * .2, fl = Math.sin(G.time * 25 + e.seed) * 2; ctx.moveTo(fx - 5, fy); ctx.quadraticCurveTo(fx, fy - 14 - fl, fx + 5, fy); ctx.fill(); ctx.globalAlpha = 1; }
@@ -416,7 +417,8 @@ function drawHUD() {
   // 보스 체력바
   let qy = hy + (G.veh ? 92 : 68);
   const boss = (G.boss && !G.boss.dead && G.bossState === 2) ? G.boss : (G.mini && !G.mini.dead ? G.mini : null);
-  if (boss) {
+  if (boss && boss.bars) { qy += drawBossBars(boss, qy + 10, W) + 10; }
+  else if (boss) {
     const bw = Math.min(W - 40 - SAFE.l - SAFE.r, 360), bx = (W - bw) / 2, by = qy;
     ctx.fillStyle = 'rgba(0,0,0,.7)'; rr(ctx, bx - 3, by - 3, bw + 6, 20, 6); ctx.fill();
     const gr = ctx.createLinearGradient(bx, 0, bx + bw, 0); gr.addColorStop(0, boss.p2 ? '#ff1744' : '#7b1fa2'); gr.addColorStop(1, boss.p2 ? '#ff8a80' : '#e040fb');
