@@ -106,7 +106,7 @@ function stageWin() {
   finishRun(true); AU.bgm('win');
   $('rTitle').textContent = n === 40 ? '최종 승리!' : 'STAGE CLEAR!'; $('rTitle').className = 'res-t win';
   const qrows = G.quests.map(q => `<div class="stat"><span>${q.done ? '✔' : '✖'} ${q.main ? '' : q.sp ? '[특별] ' : '[보조] '}${qLabel(q)}</span><span style="color:${q.done ? '#69f0ae' : '#ef9a9a'}">${q.done ? '완료' : '미완료'}</span></div>`).join('');
-  $('rStats').innerHTML = statRows([['스테이지', `${n}. ${G.st.name}`], ['난이도', `${DF().ic} ${DF().n} (보상 x${dmul.toFixed(2)})`], ['클리어 시간', fmtTime(G.t)], ['도달 레벨', 'Lv ' + G.lv], ['처치 수', G.kills], ['구출한 동료', G.rescued + '명'], ['탑승한 장비', G.vehUsed + '회']]) + qrows +
+  $('rStats').innerHTML = statRows([['스테이지', `${n}. ${G.st.name}`], ['난이도', `${DF().ic} ${DF().n} (보상 x${dmul.toFixed(2)})`], ['클리어 시간', fmtTime(G.t)], ['도달 레벨', 'Lv ' + G.lv], ['처치 수', G.kills], ['최대 콤보', (G.comboMax || 0) + ' 연속'], ['구출한 동료', G.rescued + '명'], ['탑승한 장비', G.vehUsed + '회']]) + qrows +
     statRows([['클리어 보상', '+' + clearG + 'G'], ...(sideG ? [['보조 목표 보상', '+' + sideG + 'G']] : []), ...(special ? [[n % 10 === 0 ? '🏆 10스테이지 전설 보급' : '🎖️ 5스테이지 특별 보상', '+' + special + 'G']] : []), ['획득 골드 합계', '💰 ' + G.gold], ['보유 골드', '💰 ' + save.gold]]) +
     (G.newFound.length ? `<p class="unl">✨ 새로 발견한 무기: ${G.newFound.map(id => WMAP[id].ic + ' ' + WMAP[id].nm).join(', ')}</p>` : '') +
     (newUnlocks.length ? `<p class="unl">🔓 다음 스테이지 신규 무기: ${newUnlocks.map(id => WMAP[id].ic + ' ' + WMAP[id].nm).join(', ')}</p>` : '') +
@@ -244,13 +244,14 @@ let setReturn = 'scrTitle';
 function openSettings(ret) {
   setReturn = ret; const s = save.settings;
   $('vMusic').value = Math.round(s.music * 100); $('vSfx').value = Math.round(s.sfx * 100);
-  segSet('segQ', s.quality); segSet('segShake', String(s.shake)); segSet('segDmg', String(s.dmgNum)); segSet('segFast', String(s.fast));
+  segSet('segQ', s.quality); segSet('segShake', String(s.shake)); segSet('segFps', String(s.fps30 ? 1 : 0)); segSet('segDmg', String(s.dmgNum)); segSet('segFast', String(s.fast));
   showScreen('scrSet');
 }
 function segSet(id, v) { [...$(id).children].forEach(b => b.classList.toggle('on', b.dataset.v === v)); }
 function bindSeg(id, fn) { $(id).addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; AU.sfx('button'); segSet(id, b.dataset.v); fn(b.dataset.v); writeSave(); }); }
 bindSeg('segQ', v => { save.settings.quality = v; applyQualitySetting(); });
 bindSeg('segShake', v => save.settings.shake = +v);
+bindSeg('segFps', v => save.settings.fps30 = +v);
 bindSeg('segDmg', v => save.settings.dmgNum = +v);
 bindSeg('segFast', v => save.settings.fast = +v);
 bindSeg('segDiffP', v => setDiff(+v));
@@ -279,7 +280,7 @@ $('pResume').addEventListener('click', () => { AU.sfx('button'); resumeGame(); }
 $('pSet').addEventListener('click', () => { AU.sfx('button'); openSettings('scrPause'); });
 $('pQuit').addEventListener('click', () => { AU.sfx('button'); confirmBox('포기하기', '지금까지 모은 골드는 보관됩니다.<br>스테이지를 포기할까요?', () => { finishRun(false); openStageSelect(); }, () => showScreen('scrPause')); });
 function bindPress(id, fn) { $(id).addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); fn(); }); }
-bindPress('bSk1', useSkill1); bindPress('bSk2', useSkill2); bindPress('bPot', usePotion); bindPress('bRide', () => { AU.sfx('button'); rideToggle(); });
+bindPress('bSk1', useSkill1); bindPress('bSk2', useSkill2); bindPress('bPot', usePotion); bindPress('bRide', () => { AU.sfx('button'); rideToggle(); }); bindPress('bUlt', useVehUlt);
 bindPress('bPause', () => { AU.sfx('button'); pauseGame(); });
 
 /* ------------------------- 터치 조이스틱 ------------------------- */
@@ -298,7 +299,7 @@ const joyEnd = e => { if (e.pointerId === joy.id) { joy.id = null; joy.mag = 0; 
 cv.addEventListener('pointerup', joyEnd); cv.addEventListener('pointercancel', joyEnd); cv.addEventListener('lostpointercapture', joyEnd);
 window.addEventListener('keydown', e => {
   const k = e.key.length === 1 ? e.key.toLowerCase() : e.key; keys[k] = true;
-  if (k === 'j') useSkill1(); if (k === 'k') useSkill2(); if (k === 'l' || k === 'q') usePotion(); if (k === 'e' || k === 'f') rideToggle();
+  if (k === 'j') useSkill1(); if (k === 'k') useSkill2(); if (k === 'l' || k === 'q') usePotion(); if (k === 'e' || k === 'f') rideToggle(); if (k === 'r') useVehUlt();
   if (k === 'Escape' || k === 'p') { if (G.state === 'play') pauseGame(); else if (G.state === 'pause') resumeGame(); }
 });
 window.addEventListener('keyup', e => { const k = e.key.length === 1 ? e.key.toLowerCase() : e.key; keys[k] = false; });
@@ -312,11 +313,12 @@ window.addEventListener('pagehide', writeSave);
 G.lastFrame = performance.now();
 function frame(now) {
   requestAnimationFrame(frame);
+  if (save.settings.fps30 && now - G.lastFrame < 30) return;
   let dt = (now - G.lastFrame) / 1000; G.lastFrame = now;
   if (!(dt > 0)) dt = 0.016; dt = Math.min(dt, 0.05);
   try {
     if (G.state === 'play') { update(dt); updateButtons(); }
-    else if (G.state === 'dying') { G.deadT -= dt; for (const q of parts) { q.life -= dt; q.x += q.vx * dt; q.y += q.vy * dt; } parts = parts.filter(q => q.life > 0); if (G.deadT <= 0) stageLose(); }
+    else if (G.state === 'dying') { G.deadT -= dt; for (const q of parts) { q.life -= dt; q.x += q.vx * dt; q.y += q.vy * dt; } compactParts(); if (G.deadT <= 0) stageLose(); }
     render();
   } catch (err) { console.error(err); }
   if (Q.auto && G.state === 'play') {

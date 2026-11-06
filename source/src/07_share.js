@@ -1,7 +1,7 @@
 /* ------------------------- 카카오톡 / 링크 공유 ------------------------- */
 const SHARE = {
-  title: '데스 서바이버: 전설의 귀환',
-  text: '설치 없이 터치 한 번으로 바로 플레이! 현대 화기 280종 · 40스테이지 생존 슈팅 RPG',
+  title: '데스 서바이버 확장팩',
+  text: '설치 없이 터치 한 번으로 바로 플레이! 무기 360종 · 탑승 장비 120종 · 40스테이지 대량 처치 액션',
   url() {
     const c = (window.GAME_CONFIG && GAME_CONFIG.url) || '';
     if (/^https?:/.test(location.protocol) && !/claude|localhost|127\.0\.0\.1/.test(location.hostname)) return location.origin + location.pathname.replace(/index\.html$/, '');
@@ -22,7 +22,7 @@ const SHARE = {
     });
   },
   kakao() {
-    const url = this.url(), img = url.replace(/\/?$/, '/') + 'og.jpg';
+    const url = this.url(), img = url.replace(/\/?$/, '/') + 'og.jpg?v=5';
     return this.loadKakao().then(() => {
       Kakao.Share.sendDefault({
         objectType: 'feed',

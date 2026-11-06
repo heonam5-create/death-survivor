@@ -173,8 +173,9 @@ function drawVehicle(g, v, x, y, mounted) {
   const air = ch.cat === 'air', hov = ch.cat === 'hover';
   let alt = air ? 16 + Math.sin(t * 3) * 2 : hov ? 5 + Math.sin(t * 4) * 1.5 : 0;
   if (v.hoverT > 0) alt += 22 * Math.sin(Math.min(1, (1.4 - v.hoverT) / 0.3) * Math.PI / 2) * Math.min(1, v.hoverT / 0.3);
+  const dk = v.drop ? Math.min(1, v.drop.t / v.drop.dur) : 1; if (v.drop) alt += (1 - dk) * 300;
   g.save(); g.translate(x, y + ch.r * 0.55); g.scale(1.15, 1.15);
-  g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.ellipse(0, 0, ch.r * (air ? .9 : 1.15), ch.r * .3, 0, 0, TAU); g.fill();
+  g.fillStyle = `rgba(0,0,0,${.12 + .18 * dk})`; g.beginPath(); g.ellipse(0, 0, ch.r * (air ? .9 : 1.15) * (.5 + .5 * dk), ch.r * .3 * (.5 + .5 * dk), 0, 0, TAU); g.fill();
   if (mounted) { g.strokeStyle = 'rgba(120,220,255,.6)'; g.lineWidth = 2; g.beginPath(); g.ellipse(0, 0, ch.r * 1.25, ch.r * .38, 0, 0, TAU); g.stroke(); }
   if (mounted && P.inv > 0 && P.dashT <= 0 && Math.floor(G.time * 20) % 2) g.globalAlpha = .55;
   g.translate(0, -alt);
@@ -193,9 +194,16 @@ function drawVehicle(g, v, x, y, mounted) {
   const a1 = mounted ? v.aim : (face > 0 ? 0 : Math.PI);
   if (ch.cat === 'mech' && v.def.ch !== 'spider') { drawMount(v.def.wp, a1, ch.r * .55, -ch.mh * .85, big); if (v.def.sub) drawMount(v.def.sub, mounted ? v.aim2 : a1, -ch.r * .55, -ch.mh * .85, big * .8); }
   else { drawMount(v.def.wp, a1, ch.r * .1, -ch.mh - (air ? -10 : 2), big); if (v.def.sub) drawMount(v.def.sub, mounted ? v.aim2 : a1, -ch.r * .45, -ch.mh - (air ? -14 : 6), .8); }
+  if (v.drop) { // 낙하산
+    const sw = Math.sin(G.time * 2.4 + v.bob) * .12; g.save(); g.rotate(sw); const top = -ch.mh - 70;
+    g.strokeStyle = '#eceff1'; g.lineWidth = 1.2; g.beginPath(); for (const sx of [-34, -12, 12, 34]) { g.moveTo(sx, top); g.lineTo(sx * .35, -ch.mh * .8); } g.stroke();
+    g.beginPath(); g.moveTo(-40, top); g.quadraticCurveTo(-36, top - 46, 0, top - 50); g.quadraticCurveTo(36, top - 46, 40, top); g.quadraticCurveTo(20, top - 8, 0, top - 2); g.quadraticCurveTo(-20, top - 8, -40, top); g.closePath(); fs(g, '#ff7043', 1.6);
+    g.fillStyle = '#fff3e0'; g.beginPath(); g.moveTo(-14, top - 5); g.quadraticCurveTo(-10, top - 44, 0, top - 48); g.quadraticCurveTo(10, top - 44, 14, top - 5); g.closePath(); g.fill(); g.restore();
+  }
   g.restore(); g.globalAlpha = 1;
   // 주차된 장비: 탑승 안내
-  if (!mounted) {
+  if (!mounted && v.drop) { g.font = '900 11px "Noto Sans KR",sans-serif'; g.textAlign = 'center'; g.lineWidth = 3; g.strokeStyle = '#000'; const ty = y - ch.mh - 40; g.strokeText('🪂 투하 중 ' + Math.max(0, v.drop.dur - v.drop.t).toFixed(1) + '초', x, ty); g.fillStyle = '#ffccbc'; g.fillText('🪂 투하 중 ' + Math.max(0, v.drop.dur - v.drop.t).toFixed(1) + '초', x, ty); }
+  else if (!mounted) {
     const near = G.rideNear === v, by = y - ch.mh - 30 - Math.abs(Math.sin(G.time * 4)) * 6;
     g.fillStyle = near ? '#64ffda' : '#4dd0e1'; g.beginPath(); g.moveTo(x - 7, by - 10); g.lineTo(x + 7, by - 10); g.lineTo(x, by); g.closePath(); g.fill(); g.strokeStyle = '#000'; g.lineWidth = 1.5; g.stroke();
     g.font = '900 10px "Noto Sans KR",sans-serif'; g.textAlign = 'center'; g.lineWidth = 3; g.strokeStyle = '#000';
@@ -311,6 +319,7 @@ function drawWorldExt(layer) {
   } else {
     for (const a of allies) if (!a.seated && a.c.fly && vis(a.x, a.y, 40)) drawAlly(ctx, a, a.x, a.y, false);
     const v = G.veh;
+    if (v && v.ultBeam) { const [x1, y1, x2, y2] = v.ultBeam, w = 46 + Math.sin(G.time * 50) * 6; ctx.lineCap = 'round'; if (QC.glow) { ctx.globalAlpha = .35; ctx.strokeStyle = '#ff4081'; ctx.lineWidth = w * 2.2; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); } ctx.globalAlpha = 1; ctx.strokeStyle = '#ff80ab'; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = w * .35; ctx.stroke(); }
     if (v && v.beam) { const [x1, y1, x2, y2, col] = v.beam; ctx.lineCap = 'round'; if (QC.glow) { ctx.globalAlpha = .35; ctx.strokeStyle = col; ctx.lineWidth = 22; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); } ctx.globalAlpha = 1; ctx.strokeStyle = col; ctx.lineWidth = 9 + Math.sin(G.time * 40) * 2; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.stroke(); }
     if (v) for (const S of v.sl) if (S && S.on && QC.glow && v.def.wp === 'flame') { ctx.globalAlpha = .16; ctx.fillStyle = '#ff6d00'; ctx.beginPath(); ctx.moveTo(P.x, P.y - v.ch.mh * .55); ctx.arc(P.x, P.y - v.ch.mh * .55, VWPN.flame.range, S.ang - .5, S.ang + .5); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1; }
   }
@@ -335,6 +344,12 @@ function drawPickupExt(p) {
     ctx.save(); ctx.translate(p.x, p.y - bob); rr(ctx, -12, -9, 24, 17, 3); fs(ctx, '#00838f', 1.6); rr(ctx, -5, -13, 10, 5, 2); fs(ctx, '#006064', 1.2);
     ctx.font = '13px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('🔧', 0, 5); ctx.restore(); return true;
   }
+  if (p.kind === 'wsup') {
+    if (QC.glow) { ctx.globalAlpha = .55 + .2 * Math.sin(G.time * 6); ctx.drawImage(glowSprite('#ffd54f'), p.x - 34, p.y - 38, 68, 68); ctx.globalAlpha = 1; }
+    ctx.globalAlpha = .45; const gr = ctx.createLinearGradient(p.x, p.y - 120, p.x, p.y); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(1, '#ffd54f'); ctx.fillStyle = gr; ctx.fillRect(p.x - 7, p.y - 120, 14, 120); ctx.globalAlpha = 1;
+    ctx.save(); ctx.translate(p.x, p.y - bob); rr(ctx, -15, -12, 30, 23, 3); fs(ctx, '#5d4037', 1.8); rr(ctx, -15, -12, 30, 7, 2); fs(ctx, '#ffb300', 1.4);
+    ctx.font = '13px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('🔫', 0, 8); ctx.restore(); return true;
+  }
   if (p.kind === 'scrate') {
     if (QC.glow) { ctx.globalAlpha = .45 + .2 * Math.sin(G.time * 4); ctx.drawImage(glowSprite('#90caf9'), p.x - 32, p.y - 36, 64, 64); ctx.globalAlpha = 1; }
     ctx.globalAlpha = .45; const gr = ctx.createLinearGradient(p.x, p.y - 110, p.x, p.y); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(1, '#90caf9'); ctx.fillStyle = gr; ctx.fillRect(p.x - 7, p.y - 110, 14, 110); ctx.globalAlpha = 1;
@@ -354,6 +369,7 @@ function drawScreenExt(cx, cy) {
   }
 }
 function drawHudExt(L, hy, W) {
+  drawHudX(W);
   ctx.textAlign = 'center';
   // 난이도 표시
   const d = DF(); ctx.font = '900 10px "Noto Sans KR",sans-serif'; ctx.fillStyle = d.col; ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
@@ -366,7 +382,11 @@ function drawHudExt(L, hy, W) {
     const bw = pw - 12, k = clamp(v.hp / v.maxHp, 0, 1); ctx.fillStyle = '#000a'; rr(ctx, L + 6, hy + 40, bw, 10, 5); ctx.fill();
     ctx.fillStyle = k < .3 ? '#ff5252' : '#26c6da'; rr(ctx, L + 6, hy + 40, Math.max(10, bw * k), 10, 5); ctx.fill();
     ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.font = '900 9px sans-serif'; ctx.fillText(`내구도 ${Math.ceil(v.hp)} / ${v.maxHp}${v.repairs ? '  🔧' + v.repairs + '/2' : ''}`, L + 6 + bw / 2, hy + 48.5);
-    if (v.ovT > 0) { ctx.fillStyle = '#ffd54f'; ctx.fillText('⏩ 과부하 ' + Math.ceil(v.ovT) + 's', L + pw / 2, hy + 66); }
+    const tk = clamp(v.time / v.maxTime, 0, 1), warn = v.time <= 5;
+    ctx.fillStyle = 'rgba(0,30,40,.7)'; rr(ctx, L, hy + 58, pw, 18, 7); ctx.fill();
+    ctx.fillStyle = warn && Math.floor(G.time * 6) % 2 ? '#ff1744' : '#ffd54f'; rr(ctx, L + 3, hy + 61, Math.max(8, (pw - 6) * tk), 12, 5); ctx.fill();
+    ctx.fillStyle = '#000'; ctx.font = '900 10px "Noto Sans KR",sans-serif'; ctx.fillText(`⏱ 남은 사용시간 ${Math.ceil(v.time)}초`, L + pw / 2, hy + 71);
+    if (v.ovT > 0) { ctx.fillStyle = '#ffd54f'; ctx.fillText('⏩ 과부하 ' + Math.ceil(v.ovT) + 's', L + pw / 2, hy + 88); }
   }
   // 구조 진행 게이지 (화면 하단 중앙)
   let rr0 = null; for (const r of rescues) if (r.active && !r.done) rr0 = r;
@@ -381,3 +401,66 @@ function drawHudExt(L, hy, W) {
   }
 }
 function H_() { return H; }
+
+/* ------------------------- 확장팩 연출 ------------------------- */
+function drawEffectX(f, k) {
+  switch (f.type) {
+    case 'xring': ctx.globalAlpha = (1 - k) * .85; ctx.strokeStyle = f.col; ctx.lineWidth = 7 * (1 - k) + 1.5; circ(ctx, f.x, f.y, f.r * (.35 + k * .75)); ctx.stroke(); ctx.globalAlpha = (1 - k) * .18; ctx.fillStyle = f.col; ctx.fill(); ctx.globalAlpha = 1; break;
+    case 'ering': ctx.globalAlpha = 1 - k; ctx.strokeStyle = f.col; ctx.lineWidth = 3; circ(ctx, f.x, f.y, f.r * (.3 + k)); ctx.stroke(); ctx.lineWidth = 2; ctx.beginPath(); const L = f.r * (1.4 - k * .4); ctx.moveTo(f.x - L, f.y); ctx.lineTo(f.x + L, f.y); ctx.moveTo(f.x, f.y - L); ctx.lineTo(f.x, f.y + L); ctx.stroke(); ctx.globalAlpha = 1; break;
+    case 'hitx': {
+      ctx.save(); ctx.translate(f.x, f.y); ctx.globalAlpha = 1 - k;
+      if (f.cls === 'energy' || f.cls === 'future') { ctx.strokeStyle = f.col; ctx.lineWidth = 2.5; circ(ctx, 0, 0, 4 + k * f.r * .9); ctx.stroke(); ctx.fillStyle = '#fff'; circ(ctx, 0, 0, 3 * (1 - k)); ctx.fill(); }
+      else if (f.cls === 'special') { ctx.fillStyle = f.col; for (let i = 0; i < 5; i++) { const a = i * 1.26 + f.x, d = 3 + k * 12; circ(ctx, Math.cos(a) * d, Math.sin(a) * d, 2.2 * (1 - k)); ctx.fill(); } }
+      else { ctx.rotate(f.ang); ctx.strokeStyle = '#fff8e1'; ctx.lineWidth = 2; ctx.beginPath(); for (let i = -2; i <= 2; i++) { const a = Math.PI + i * .45, d = 4 + k * 14; ctx.moveTo(Math.cos(a) * 3, Math.sin(a) * 3); ctx.lineTo(Math.cos(a) * d, Math.sin(a) * d); } ctx.stroke(); ctx.fillStyle = f.col; circ(ctx, 0, 0, 4 * (1 - k)); ctx.fill(); }
+      ctx.restore(); ctx.globalAlpha = 1; break; }
+    case 'combo': {
+      const T = ['연속 처치!', '콤보 폭발!', '학살 모드!', '대량 처치 보너스!'], cols = ['#fff59d', '#ffab40', '#ff5252', '#ffd54f'];
+      const y = P.y - 60 - k * 40, sc = 1 + (k < .15 ? (.15 - k) * 4 : 0) + f.lv * .15;
+      ctx.save(); ctx.translate(P.x, y); ctx.scale(sc, sc); ctx.globalAlpha = k > .7 ? (1 - k) / .3 : 1; ctx.textAlign = 'center';
+      ctx.font = '900 20px "Black Han Sans","Noto Sans KR",sans-serif'; ctx.lineWidth = 5; ctx.strokeStyle = '#000';
+      ctx.strokeText(`${f.c} COMBO`, 0, 0); ctx.fillStyle = cols[f.lv]; ctx.fillText(`${f.c} COMBO`, 0, 0);
+      ctx.font = '900 13px "Noto Sans KR",sans-serif'; ctx.lineWidth = 4; ctx.strokeText(T[f.lv], 0, 18); ctx.fillStyle = '#fff'; ctx.fillText(T[f.lv], 0, 18);
+      ctx.restore(); ctx.globalAlpha = 1; break; }
+  }
+}
+// 정예 고유 장식 (외형 차별화)
+function drawElxDeco(e) {
+  const r = e.r, x = e.x, y = e.y, t = G.time, pal = PAL[e.pal] || {}, d = e.elx.deco;
+  ctx.save(); ctx.translate(x, y); ctx.scale(e.face || 1, 1); ctx.lineJoin = 'round';
+  switch (d) {
+    case 'armor': rr(ctx, -r * .7, -r * .6, r * 1.4, r * .35, 3); fs(ctx, '#78909c', 1.5); ctx.fillStyle = '#ff1744'; ctx.fillRect(-r * .3, -r * .52, r * .6, r * .12); break;
+    case 'spikes': ctx.fillStyle = '#cfd8dc'; for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(i * r * .3 - 4, -r * .8); ctx.lineTo(i * r * .3, -r * 1.25); ctx.lineTo(i * r * .3 + 4, -r * .8); ctx.fill(); } break;
+    case 'pods': for (const s of [-1, 1]) { rr(ctx, s * r * .75 - 6, -r * .9, 12, 14, 2); fs(ctx, '#546e7a', 1.3); ctx.fillStyle = '#ff7043'; circ(ctx, s * r * .75, -r * .82, 2.5); ctx.fill(); } break;
+    case 'tanks': case 'tubes': for (const s of [-1, 1]) { rr(ctx, -r * .95, -r * .4 + s * 8, 8, 14, 3); fs(ctx, d === 'tanks' ? '#9ccc65' : '#4dd0e1', 1.2); } break;
+    case 'drill': ctx.save(); ctx.translate(r * .95, 0); ctx.rotate(Math.sin(t * 20) * .1); ctx.beginPath(); ctx.moveTo(0, -7); ctx.lineTo(16, 0); ctx.lineTo(0, 7); ctx.closePath(); fs(ctx, '#ffca28', 1.4); ctx.restore(); break;
+    case 'spores': ctx.fillStyle = pal.s || '#b2ff59'; for (let i = 0; i < 5; i++) { const a = t * 1.5 + i * 1.26; circ(ctx, Math.cos(a) * r * 1.1, Math.sin(a) * r * .6 - r * .3, 3); ctx.fill(); } break;
+    case 'tail': ctx.strokeStyle = pal.b || '#333'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(-r * .7, 0); ctx.quadraticCurveTo(-r * 1.4, -r * 1.2 + Math.sin(t * 4) * 4, -r * .4, -r * 1.3); ctx.stroke(); ctx.fillStyle = '#ff1744'; circ(ctx, -r * .4, -r * 1.3, 4); ctx.fill(); break;
+    case 'ice': ctx.fillStyle = 'rgba(179,229,252,.9)'; for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(i * r * .4 - 5, -r * .75); ctx.lineTo(i * r * .4, -r * 1.3 - Math.abs(i) * -4); ctx.lineTo(i * r * .4 + 5, -r * .75); ctx.closePath(); ctx.fill(); } break;
+    case 'lava': ctx.strokeStyle = `rgba(255,${120 + Math.sin(t * 8) * 60},0,.9)`; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(-r * .5, -r * .3); ctx.lineTo(-r * .1, r * .1); ctx.lineTo(r * .3, -r * .2); ctx.moveTo(-r * .2, r * .4); ctx.lineTo(r * .4, r * .3); ctx.stroke(); break;
+    case 'core': ctx.fillStyle = pal.glow || '#ff1744'; ctx.globalAlpha = .6 + .4 * Math.sin(t * 6); circ(ctx, 0, -r * .2, r * .28); ctx.fill(); ctx.globalAlpha = 1; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; circ(ctx, 0, -r * .2, r * .28); ctx.stroke(); break;
+    case 'scope': rr(ctx, r * .2, -r * .9, r * .9, 6, 2); fs(ctx, '#263238', 1.2); ctx.fillStyle = '#ff1744'; circ(ctx, r * 1.1, -r * .87, 2.5); ctx.fill(); break;
+    case 'antenna': line(ctx, 0, -r * .8, 0, -r * 1.5, 2, '#90a4ae'); ctx.fillStyle = Math.sin(t * 8) > 0 ? '#ff1744' : '#ffeb3b'; circ(ctx, 0, -r * 1.5, 3.5); ctx.fill(); break;
+    case 'coil': for (let i = 0; i < 3; i++) { circ(ctx, -r * .3 + i * r * .3, -r * .95, 4); fs(ctx, '#b0bec5', 1); } if (Math.random() < .5) { ctx.strokeStyle = '#80d8ff'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-r * .3, -r * .95); ctx.lineTo(rand(-r, r), -r * 1.4); ctx.stroke(); } break;
+    case 'neon': ctx.strokeStyle = pal.c || '#00e5ff'; ctx.lineWidth = 2; ctx.globalAlpha = .7; ctx.beginPath(); ctx.ellipse(0, r * .2, r * 1.2, r * .45, 0, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1; break;
+    case 'crown': ctx.fillStyle = '#ffd54f'; ctx.beginPath(); ctx.moveTo(-9, -r * .9); ctx.lineTo(-9, -r * 1.25); ctx.lineTo(-4, -r * 1.05); ctx.lineTo(0, -r * 1.35); ctx.lineTo(4, -r * 1.05); ctx.lineTo(9, -r * 1.25); ctx.lineTo(9, -r * .9); ctx.closePath(); ctx.fill(); ctx.strokeStyle = OL; ctx.lineWidth = 1.2; ctx.stroke(); break;
+    case 'void': ctx.fillStyle = 'rgba(30,0,50,.55)'; for (let i = 0; i < 4; i++) { const a = -t * 2 + i * 1.57; circ(ctx, Math.cos(a) * r * 1.05, Math.sin(a) * r * .5, 4); ctx.fill(); } break;
+    case 'wings': ctx.fillStyle = pal.b || '#555'; for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(0, -r * .4); ctx.lineTo(s * r * 1.5, -r * .9 + Math.sin(t * 10) * 5); ctx.lineTo(s * r * .8, -r * .1); ctx.closePath(); ctx.fill(); } break;
+    case 'crystal': ctx.fillStyle = 'rgba(234,128,252,.85)'; for (const [cx, h] of [[-r * .5, 14], [0, 20], [r * .5, 12]]) { ctx.beginPath(); ctx.moveTo(cx - 5, -r * .7); ctx.lineTo(cx, -r * .7 - h); ctx.lineTo(cx + 5, -r * .7); ctx.closePath(); ctx.fill(); } break;
+  }
+  ctx.restore();
+  if (e.elx.aura) { ctx.globalAlpha = .25 + .1 * Math.sin(t * 4); ctx.strokeStyle = '#ff5252'; ctx.lineWidth = 2; ctx.setLineDash([4, 6]); circ(ctx, x, y, 150); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; }
+}
+function drawHudX(W) {
+  // 콤보
+  if (G.combo >= 5) {
+    const x = W - SAFE.r - 14, y = (G.veh ? 236 : 150) + SAFE.t; ctx.textAlign = 'right';
+    const big = G.combo >= 100 ? 26 : G.combo >= 50 ? 23 : G.combo >= 30 ? 21 : 19;
+    ctx.font = `900 ${big}px "Black Han Sans","Noto Sans KR",sans-serif`; ctx.lineWidth = 4; ctx.strokeStyle = '#000';
+    const col = G.combo >= 100 ? '#ffd54f' : G.combo >= 50 ? '#ff5252' : G.combo >= 30 ? '#ffab40' : '#fff59d';
+    ctx.strokeText(`🔥${G.combo}`, x, y); ctx.fillStyle = col; ctx.fillText(`🔥${G.combo}`, x, y);
+    ctx.font = '900 9px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText('COMBO', x, y + 11);
+    ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(x - 44, y + 15, 44, 3); ctx.fillStyle = col; ctx.fillRect(x - 44, y + 15, 44 * clamp(G.comboT / 2.4, 0, 1), 3);
+  }
+  // 전투 보급 효과
+  if (G.sup && G.sup.t > 0) { const S = SUPK[G.sup.k]; ctx.textAlign = 'center'; ctx.font = '900 11px "Noto Sans KR",sans-serif'; ctx.lineWidth = 3; ctx.strokeStyle = '#000'; const tx = W / 2, ty = H * .2 + SAFE.t; const s = `${S.ic} ${S.n} ${Math.ceil(G.sup.t)}초${G.veh ? ' (하차 후)' : ''}`; ctx.strokeText(s, tx, ty); ctx.fillStyle = '#ffd54f'; ctx.fillText(s, tx, ty); }
+}

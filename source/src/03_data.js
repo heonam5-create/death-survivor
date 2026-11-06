@@ -68,7 +68,8 @@ const WEAPONS = [
 ];
 for (const w of WEAPONS) { w.st = OLD_ST[w.id]; w.tr = w.tr || []; }
 WEAPONS.push(...genWeapons(WEAPONS));
-for (const w of WEAPONS) w.cal = (typeof CAL !== 'undefined' && CAL[w.id]) || 1;
+WEAPONS.push(...genWeaponsX(WEAPONS)); // 확장팩 신규 80종
+for (const w of WEAPONS) w.cal = (typeof CAL !== 'undefined' && CAL[w.id]) || (typeof CALX !== 'undefined' && CALX[w.id]) || 1;
 const WMAP = {}; WEAPONS.forEach((w, i) => { w.idx = i; WMAP[w.id] = w; });
 function stageWeapons(n) { return WEAPONS.filter(w => w.st === n).map(w => w.id); }
 const WMAX = 5, WSLOTS = 5;

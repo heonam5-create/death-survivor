@@ -6,18 +6,18 @@
 <meta name="theme-color" content="#1a1030">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="description" content="설치 없이 바로 플레이! 탑승 장비 120종 · 동료 구출 · 현대 화기 280종으로 40개 지역을 돌파하는 모바일 생존 슈팅 RPG">
+<meta name="description" content="설치 없이 바로 플레이! 탑승 장비 120종 · 동료 구출 · 현대 화기 360종으로 40개 지역을 돌파하는 모바일 생존 슈팅 RPG">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="데스 서바이버">
-<meta property="og:title" content="데스 서바이버: 전설의 귀환">
-<meta property="og:description" content="설치 없이 터치 한 번으로 바로 플레이! 탑승 장비 120종 · 동료 구출 · 난이도 4단계 · 40스테이지 생존 슈팅 RPG">
+<meta property="og:title" content="데스 서바이버 확장팩">
+<meta property="og:description" content="설치 없이 터치 한 번으로 바로 플레이! 무기 360종 · 탑승 장비 120종 · 정예 40종 · 동료 구출 · 40스테이지 대량 처치 액션">
 <meta property="og:url" content="https://heonam5-create.github.io/death-survivor/">
-<meta property="og:image" content="https://heonam5-create.github.io/death-survivor/og.jpg">
+<meta property="og:image" content="https://heonam5-create.github.io/death-survivor/og.jpg?v=5">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://heonam5-create.github.io/death-survivor/og.jpg">
+<meta name="twitter:image" content="https://heonam5-create.github.io/death-survivor/og.jpg?v=5">
 <link rel="canonical" href="https://heonam5-create.github.io/death-survivor/">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -25,7 +25,7 @@
 <meta name="apple-mobile-web-app-title" content="데스 서바이버">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
-<title>데스 서바이버: 전설의 귀환</title>
+<title>데스 서바이버 확장팩</title>
 <script>window.GAME_CONFIG = { url: 'https://heonam5-create.github.io/death-survivor/', kakaoKey: '' };</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -59,6 +59,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
 #bRide{width:60px;height:60px;right:calc(22px + env(safe-area-inset-right));bottom:calc(182px + env(safe-area-inset-bottom));display:none;background:radial-gradient(circle at 50% 35%,#26a69a,#004d40);animation:ridePulse 1s ease-in-out infinite}
 #bRide.exit{animation:none;background:radial-gradient(circle at 50% 35%,#78909c,#263238);width:50px;height:50px;right:calc(28px + env(safe-area-inset-right))}
 @keyframes ridePulse{0%,100%{box-shadow:0 4px 0 rgba(0,0,0,.35),0 0 0 0 rgba(100,255,218,.7)}50%{box-shadow:0 4px 0 rgba(0,0,0,.35),0 0 0 10px rgba(100,255,218,0)}}
+#bUlt{width:58px;height:58px;right:calc(92px + env(safe-area-inset-right));bottom:calc(100px + env(safe-area-inset-bottom));display:none;background:radial-gradient(circle at 50% 35%,#ff1744,#6a0010);animation:ridePulse 1.2s ease-in-out infinite}
 #bSk1.vsp{background:radial-gradient(circle at 50% 35%,#ff8f00,#6d2c00)}
 #squad{position:absolute;left:calc(10px + env(safe-area-inset-left));bottom:calc(168px + env(safe-area-inset-bottom));display:flex;gap:4px;pointer-events:none}
 #squad .ally{width:28px;height:28px;border-radius:50%;background:rgba(10,40,20,.7);border:2px solid #69f0ae;display:flex;align-items:center;justify-content:center;font-size:15px}
@@ -198,6 +199,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
   <button class="gbtn" id="bPause" aria-label="일시정지">⏸</button>
   <button class="gbtn" id="bPot"><span class="ic" style="font-size:22px">🧪</span><span class="badge" id="potN">3</span><span class="cdv"></span></button>
   <button class="gbtn" id="bSk2"><span class="ic">💨</span><span class="lb">질주</span><span class="cdv"></span></button>
+  <button class="gbtn" id="bUlt"><span class="ic">💥</span><span class="lb">필살기</span></button>
   <button class="gbtn" id="bRide"><span class="ic">🚘</span><span class="lb">탑승</span></button>
   <div id="squad"></div>
   <button class="gbtn" id="bSk1"><span class="ic" style="font-size:32px">🌀</span><span class="lb">회오리</span><span class="cdv"></span></button>
@@ -209,13 +211,13 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
   <div class="logo">
    <div class="skull">💀</div>
    <div class="l1 title-font">데스 서바이버</div>
-   <div class="l2 title-font">전설의 귀환</div>
+   <div class="l2 title-font">확장팩</div>
   </div>
   <button class="btn" id="tStart">⚔️ 게임 시작</button>
   <button class="btn blue" id="tCodex">📖 무기 도감</button>
   <button class="btn blue" id="tHelp">🎮 조작 방법</button>
   <div class="trow"><button class="btn gray sm" id="tSet">⚙️ 설정</button><button class="btn kakao sm" id="tShare">💬 카카오톡 공유</button></div>
-  <div class="ver">v4 · 탑승 장비 120종 · 동료 구출 · 40스테이지</div>
+  <div class="ver">확장팩 v5 · 무기 360종 · 탑승 장비 120종 · 정예 40종 · 40스테이지</div>
  </div>
 
  <!-- 스테이지 선택 -->
@@ -266,7 +268,8 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
    <div class="row"><span>🎵 배경음악</span><input type="range" id="vMusic" min="0" max="100"></div>
    <div class="row"><span>🔊 효과음</span><input type="range" id="vSfx" min="0" max="100"></div>
    <div class="row"><span>✨ 그래픽</span><div class="seg" id="segQ"><button data-v="auto">자동</button><button data-v="high">높음</button><button data-v="low">낮음</button></div></div>
-   <div class="row"><span>📳 화면 흔들림</span><div class="seg" id="segShake"><button data-v="1">켬</button><button data-v="0">끔</button></div></div>
+   <div class="row"><span>📳 화면 흔들림</span><div class="seg" id="segShake"><button data-v="1">보통</button><button data-v="0.5">약하게</button><button data-v="0">끔</button></div></div>
+   <div class="row"><span>🎞️ 프레임<br><small style="opacity:.7;font-weight:500">발열·배터리 절약</small></span><div class="seg" id="segFps"><button data-v="0">60FPS</button><button data-v="1">30FPS</button></div></div>
    <div class="row"><span>🔢 데미지 숫자</span><div class="seg" id="segDmg"><button data-v="1">켬</button><button data-v="0">끔</button></div></div>
    <div class="row"><span>🧪 테스트 모드<br><small style="opacity:.7;font-weight:500">퀘스트 목표·보스 체력 축소</small></span><div class="seg" id="segFast"><button data-v="0">끔</button><button data-v="1">켬</button></div></div>
    <div class="center" style="margin-top:10px">
@@ -292,12 +295,15 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
    <p>👑 모든 스테이지는 목표 달성 후 고유 보스가 등장합니다. 보스를 처치하면 그 스테이지의 새 무기를 확정 획득!</p>
    <p>✨ <b>전설 보물상자</b> — 스테이지마다 1개 등장. 화살표를 따라가 열면 보상 3개 중 1개 선택.</p>
    <p>⚠ <b>정예 몬스터</b> — 크고 고유 기술을 씁니다. 처치 시 무기를 떨어뜨릴 수 있어요.</p>
-   <p>🚘 <b>탑승 장비</b> — 스테이지마다 새로운 차량·로봇·비행 장비 3종이 맵에 있습니다. 가까이 가면 <b>탑승</b> 버튼! 탑승 중에는 장비 전용 무기로 자동 공격하고 🌀 버튼이 <b>특수능력</b>으로 바뀝니다. 내구도가 0이 되면 자동 하차.</p>
+   <p>🪂 <b>특수 전투 장비</b> — 스테이지 중반~후반에 차량·로봇·비행 장비가 낙하산으로 투하됩니다. 착륙하면 <b>탑승</b>! 짧은 시간(20~40초) 동안 엄청난 화력으로 적을 쓸어버리세요. 🌀 버튼은 <b>특수능력</b>, 💥 버튼은 탑승마다 1번 쓰는 <b>필살기</b>. 시간이 끝나거나 내구도가 0이 되면 하차합니다.</p>
+   <p>🔥 <b>콤보</b> — 빠르게 연속 처치하면 콤보! 10·30·50·100 콤보마다 보너스. 한꺼번에 여러 마리를 쓰러뜨리면 <b>연쇄 폭발</b>이 일어납니다.</p>
+   <p>🎖️ <b>정예 몬스터</b> — 스테이지마다 고유한 정예가 등장합니다. 빨간 경고를 피하고 처치하면 <b>보상 선택</b>!</p>
+   <p>🎁 <b>무기 보급 상자</b> — 20초 동안 화력·발사체·연사 강화.</p>
    <p>🤝 <b>동료 구출</b> — 철창·캡슐에 갇힌 아군 근처에서 몇 초 버티면 구출! 동료는 따라다니며 함께 싸우고, 서로 다른 동료 조합은 <b>합동 공격</b>을 씁니다.</p>
    <p>🧪 <b>회복 물약</b> — 맵에 빨간 물약이 주기적으로 나타납니다. 체력이 가득하면 물약 가방에 보관.</p>
    <p>🏅 <b>특별 임무</b> — 구출·보급품·지휘관·구역 사수 등 선택형 임무. 완료 즉시 보상!</p>
    <p>⚙️ <b>난이도</b> — 쉬움·보통·어려움·지옥. 높을수록 보상(골드)이 커집니다. 일시정지 메뉴에서 언제든 변경.</p>
-   <p>⌨️ PC: WASD/방향키 이동, J 회오리(탑승 시 특수능력), K 질주, L 물약, E 탑승/하차, ESC 일시정지</p>
+   <p>⌨️ PC: WASD/방향키 이동, J 회오리(탑승 시 특수능력), K 질주, L 물약, E 탑승/하차, R 필살기, ESC 일시정지</p>
    <div class="center"><button class="btn" id="helpClose">닫기</button></div>
   </div>
  </div>
@@ -1332,6 +1338,66 @@ function buildWeapon(ty, trs, t, s, idx) {
 /* 자동 보정표: 280종 무기 실측 DPS(단일/군중/접근) 기반 피해 보정 */
 const CAL = {"rifle":1.706,"smg":1.314,"hmg":1.236,"minigun":1.376,"lmg":1.107,"tactical":1.306,"twinmg":1.341,"prifle":1.1,"exrifle":1.503,"gatling":0.824,"gl":1.062,"rocket":0.942,"mlrs":1.283,"cannon":0.879,"mortar":0.895,"agl":1.621,"cluster":1.501,"flamecannon":1.294,"railcannon":1.349,"gravcannon":1.331,"laser":1.188,"lrifle":1.533,"plaser":2.075,"slaser":1.685,"spinlaser":0.939,"prifle2":1.178,"pcannon":1.013,"emp":1.719,"chaincannon":1.192,"doomlaser":1.214,"flamer":1.071,"freezer":2.308,"gas":1.959,"acid":0.938,"tazer":1.637,"homing":1.651,"droneg":2.743,"turret":2.156,"mines":1.294,"orbital":0.93,"quantum":1.256,"blackhole":0.926,"ion":1.01,"accel":0.964,"fusion":0.632,"storm":0.998,"gcollapse":0.508,"dimlaser":0.99,"thunder":1.303,"doomcannon":0.972,"w1_rkt_exec":1.029,"w1_tesla_poison":1.277,"w1_lasc_leech":1.161,"w1_gl_heavy_burn":1.132,"w2_mine_shock":1.157,"w2_flame_mark":0.972,"w2_drone_crit":1.941,"w2_gl_stun_freeze":1.694,"w3_cryo_shred":2.164,"w3_lasc_homing":1.194,"w3_tesla_rapid":1.192,"w3_rkt_vortex_knock":1.187,"w4_mortar_wide":0.789,"w4_mg_long":1.464,"w4_disc_pierce":0.988,"w4_msl_nova_multi":1.299,"w5_turr_blast":1.048,"w5_gas_rapid":1.575,"w5_emc_shock":0.941,"w5_shk_vortex":0.887,"w6_acid_ric":0.35,"w6_plas_burn":1.139,"w6_wave_split":1.423,"w6_emc_mark":0.987,"w6_mortar_nova_poison":1.112,"w7_cryo_wide":2.261,"w7_msl_freeze":1.4,"w7_wave_stun":1.552,"w7_mortar_multi_shred":0.562,"w8_lbeam_exec":0.969,"w8_cannon_pierce":0.723,"w8_saw_blast":1.586,"w8_harp_knock_split":2.144,"w9_ar_ric":0.67,"w9_spinl_crit":0.58,"w9_incd_leech":1.099,"w9_flak_long":2.254,"w9_pulse_heavy_mark":0.851,"w10_shot_homing":1.892,"w10_flak_heavy":1.693,"w10_cannon_poison":0.723,"w10_plas_nova":1.246,"w10_lbeam_stun_shred":1.027,"w11_snip_burn":0.756,"w11_shk_leech":0.784,"w11_spinl_freeze":0.777,"w11_drone_knock":2.539,"w11_pulse_vortex_wide":0.666,"w12_hcan_crit":1.019,"w12_clus_shock":1.158,"w12_mine_exec":0.882,"w12_flame_wide":0.912,"w12_saw_multi_blast":1.93,"w13_mini_rapid":1.548,"w13_atg_pierce":0.886,"w13_howit_burn":0.642,"w13_rail_long":0.781,"w13_barr_knock_leech":0.648,"w14_storm_heavy":0.377,"w14_twin_homing":1.155,"w14_swarm_nova":1.34,"w14_splc_poison":0.735,"w14_incd_multi_stun":0.693,"w15_needle_ric":0.428,"w15_atg_crit":0.636,"w15_howit_mark":0.578,"w15_barr_exec":0.52,"w15_turr_shock":1.381,"w15_swarm_rapid":1.35,"w16_part_freeze":0.82,"w16_clus_shred":0.946,"w16_storm_vortex":0.531,"w16_harp_split":1.912,"w16_disc_blast":0.987,"w17_smg_ric":0.801,"w17_rail_mark":0.691,"w17_splc_homing":0.702,"w17_gas_burn":1.696,"w17_wave_long":1.315,"w18_anti_shock":0.623,"w18_ionc_poison":0.55,"w18_orb_multi":0.35,"w18_gravc_rapid":0.54,"w18_acid_pierce":0.436,"w18_howit_knock":0.627,"w19_dimc_stun":0.471,"w19_mg_split":1.218,"w19_orb_wide":0.465,"w19_ionc_nova":0.574,"w19_anti_vortex":0.701,"w20_shot_leech":2.128,"w20_part_crit":0.708,"w20_gravc_shred":0.447,"w20_clus_freeze":1.101,"w20_lbeam_heavy":0.852,"w21_dimc_exec":0.412,"w21_mini_long":1.292,"w21_gl_shred":1.192,"w21_flak_blast":1.962,"w21_spinl_poison":0.744,"w21_disc_rapid":0.89,"w22_twin_split":0.908,"w22_splc_nova":0.758,"w22_rkt_freeze":1.1,"w22_atg_long":0.997,"w22_tesla_leech":1.293,"w22_orb_burn":0.54,"w23_ar_homing":1.41,"w23_turr_heavy":1.321,"w23_barr_shock":0.534,"w23_part_stun":0.883,"w23_plas_wide":0.764,"w23_pulse_mark":0.985,"w24_needle_pierce":0.76,"w24_storm_exec":0.5,"w24_incd_vortex":0.99,"w24_rail_crit":0.639,"w24_flame_knock":1.796,"w24_mine_wide":0.825,"w25_smg_pierce":1.102,"w25_harp_blast":1.983,"w25_emc_vortex":1.109,"w25_cryo_knock":3,"w25_cannon_stun":0.724,"w25_drone_multi":1.49,"w25_ionc_burn_heavy":0.674,"w26_hcan_ric":0.586,"w26_shk_rapid":0.83,"w26_lasc_split":1.064,"w26_saw_poison":1.675,"w26_dimc_crit":0.396,"w26_swarm_shock":1.32,"w27_snip_homing":0.699,"w27_gas_leech":1.711,"w27_msl_long":1.243,"w27_gravc_freeze":0.572,"w27_anti_mark":0.654,"w27_plas_shred":1.069,"w27_ionc_nova_exec":0.606,"w28_needle_blast":0.863,"w28_cannon_long":0.73,"w28_flak_leech":2.258,"w28_storm_burn":0.507,"w28_rkt_multi":0.893,"w28_dimc_heavy":0.35,"w28_orb_exec_crit":0.539,"w29_hcan_split":0.897,"w29_wave_pierce":1.378,"w29_emc_knock":1.137,"w29_gravc_mark":0.423,"w29_lbeam_poison":1.054,"w29_spinl_stun":0.738,"w29_saw_shock_vortex":1.667,"w30_mg_ric":0.737,"w30_tesla_nova":1.27,"w30_lasc_ric":0.765,"w30_gas_multi":0.714,"w30_shk_shred":0.702,"w30_pulse_wide":0.602,"w30_anti_freeze_rapid":0.819,"w31_twin_ric":0.535,"w31_splc_mark":0.63,"w31_howit_shred":0.583,"w31_barr_crit":0.464,"w31_msl_poison":1.301,"w31_rail_shock":0.785,"w31_harp_blast_split":1.555,"w32_smg_homing":1.547,"w32_disc_stun":1.037,"w32_incd_rapid":1.026,"w32_swarm_burn":1.373,"w32_atg_nova":0.991,"w32_flame_leech":1.193,"w32_part_exec_vortex":1.002,"w33_mini_homing":1.172,"w33_drone_freeze":2.733,"w33_mortar_multi":0.613,"w33_turr_knock":1.462,"w33_mine_heavy":0.534,"w33_cryo_vortex":2.907,"w33_dimc_wide_long":0.376,"w34_snip_pierce":0.714,"w34_clus_burn":1.169,"w34_shk_poison":0.767,"w34_harp_crit":2.301,"w34_emc_rapid":0.895,"w34_flame_shock":1.165,"w34_anti_knock_heavy":0.45,"w35_ar_blast":1.03,"w35_gl_multi":0.764,"w35_flak_exec":2.342,"w35_msl_leech":1.204,"w35_cannon_shred":0.659,"w35_barr_nova":0.506,"w35_pulse_freeze_wide":0.675,"w36_shot_split":1.628,"w36_howit_stun":0.631,"w36_ionc_mark":0.455,"w36_swarm_long":1.235,"w36_atg_rapid":0.856,"w36_lbeam_leech":0.974,"w36_spinl_nova_burn":0.796,"w37_acid_homing":0.64,"w37_gas_knock":1.536,"w37_disc_crit":0.822,"w37_storm_poison":0.507,"w37_rkt_heavy":0.713,"w37_wave_blast":1.328,"w37_rail_mark_freeze":0.9,"w38_shot_ric":1.055,"w38_mortar_shock":0.913,"w38_tesla_stun":1.331,"w38_plas_homing":1.152,"w38_mine_shred":1.083,"w38_part_vortex":0.859,"w38_saw_exec_blast":2.074,"w39_ar_pierce":1.043,"w39_lasc_pierce":1.113,"w39_cryo_mark":2.107,"w39_gravc_wide":0.455,"w39_drone_leech":2.599,"w39_incd_multi":0.574,"w39_orb_freeze_burn":0.7,"w40_acid_split":0.609,"w40_splc_long":0.701,"w40_gl_shock":1.199,"w40_turr_stun":1.514,"w40_cannon_vortex":0.751,"w40_emc_wide":1.146,"w40_ionc_shred_crit":0.495};
 
+/* 확장팩 신규 무기 80종 실측 보정표 (군중 상대 실측 피해량을 같은 스테이지·같은 등급 기존 무기에 맞춤, 과보정 방지 0.6~1.8) */
+const CALX = {"x1_0_mgl": 1.01, "x1_1_hrkt": 1.03, "x2_0_hmini": 0.987, "x2_1_mgl": 0.951, "x3_0_lmg": 1.052, "x3_1_pshot": 0.98, "x4_0_hrkt": 1.261, "x4_1_pshot": 0.952, "x5_0_elas": 0.797, "x5_1_chainc": 1.254, "x6_0_lmg": 1.111, "x6_1_hmini": 1.159, "x7_0_mmsl": 1.096, "x7_1_fcan": 0.96, "x8_0_elas": 0.716, "x8_1_fcan": 0.612, "x9_0_chainc": 1.8, "x9_1_mmsl": 1.169, "x10_0_bdrone": 1.143, "x10_1_emrail": 0.903, "x16_0_lmg": 1.8, "x16_1_pnova": 0.758, "x17_0_mmsl": 1.123, "x17_1_elas": 0.92, "x18_0_gbomb": 0.895, "x18_1_mgl": 0.897, "x19_0_hrkt": 1.102, "x19_1_fcan": 1.1, "x20_0_qdisc": 1.241, "x20_1_pshot": 0.663, "x11_0_bdrone": 0.99, "x11_1_emrail": 1.135, "x12_0_bdrone": 0.907, "x12_1_emrail": 0.957, "x13_0_chainc": 0.762, "x13_1_hmini": 0.982, "x14_0_pnova": 0.931, "x14_1_gbomb": 0.754, "x15_0_pnova": 0.6, "x15_1_gbomb": 0.6, "x21_0_qdisc": 1.8, "x21_1_pnova": 0.712, "x22_0_qdisc": 1.338, "x22_1_gbomb": 0.778, "x23_0_bdrone": 1.077, "x23_1_emrail": 0.987, "x24_0_fcan": 1.001, "x24_1_qdisc": 1.398, "x25_0_hrkt": 0.6, "x25_1_elas": 0.686, "x31_0_pnova": 0.883, "x31_1_gbomb": 0.866, "x32_0_chainc": 1.8, "x32_1_emrail": 0.955, "x33_0_mmsl": 1.8, "x33_1_pshot": 1.003, "x34_0_hrkt": 0.632, "x34_1_lmg": 1.8, "x35_0_elas": 0.682, "x35_1_mgl": 0.6, "x36_0_bdrone": 0.8, "x36_1_pnova": 0.609, "x37_0_fcan": 0.784, "x37_1_mmsl": 1.8, "x38_0_qdisc": 1.02, "x38_1_lmg": 1.8, "x39_0_elas": 1.756, "x39_1_chainc": 1.8, "x40_0_gbomb": 0.6, "x40_1_hmini": 0.854, "x26_0_chainc": 0.965, "x26_1_hmini": 0.837, "x27_0_pshot": 1.232, "x27_1_mmsl": 1.8, "x28_0_lmg": 1.008, "x28_1_mgl": 0.88, "x29_0_hmini": 1.108, "x29_1_fcan": 0.877, "x30_0_bdrone": 0.762, "x30_1_qdisc": 1.294};
+
+/* =====================================================================
+   확장팩 신규 무기 80종 (40스테이지 × 2종)
+   - 확장 발사 타입 14종 × 특수 특성 조합. (타입+특성) 조합은 기존 280종과도 겹치지 않음
+   - 스테이지가 오를수록 등급·발사 수·효과 크기가 발전 (단, 등급·스테이지 배율은 기존 규칙과 동일)
+   ===================================================================== */
+const WTYPES_X = [
+  { k: 'x_hrkt', nm: '자동 유도 로켓', ic: '🎯', c: 'blast', m: 'rocket', minS: 1, gun: 'blast', dmg: 15, n: 2, salvo: .12, cd: 1.5, spd: 360, range: 420, boom: 38, homing: 4.5, pk: 'rocket', col: '#ff7043', s: ['rocket', 1.15], d: '2연발 자동 유도 로켓' },
+  { k: 'x_hmini', nm: '초고속 회전 기관총', ic: '🌀', c: 'rifle', m: 'gun', minS: 1, gun: 'minigun', dmg: 2.1, cd: .04, spd: 820, range: 280, spread: .15, spin: 1, pierce: 2, pk: 'tracer', size: .85, col: '#fff176', s: ['mini', 1.25], d: '예열 후 관통 탄막 난사' },
+  { k: 'x_mgl', nm: '다연장 유탄 발사기', ic: '🎳', c: 'blast', m: 'lob', minS: 1, gun: 'blast', dmg: 10, n: 3, cd: 1.6, range: 320, flight: .5, boom: 34, pk: 'grenade', col: '#9ccc65', s: ['gl', 1.2], d: '유탄 3발 동시 투척' },
+  { k: 'x_lmg', nm: '초고속 레이저 기관총', ic: '🔆', c: 'energy', m: 'laser', minS: 3, gun: 'energy', dmg: 3.3, cd: .1, spd: 1300, range: 340, pierce: 1, len: 14, col: '#ff5252', s: ['laser', 1.6], d: '쉼 없이 쏟아지는 레이저탄' },
+  { k: 'x_pshot', nm: '플라즈마 산탄포', ic: '🟣', c: 'energy', m: 'gun', minS: 3, gun: 'energy', dmg: 6.5, n: 5, fanG: .15, cd: 1.0, spd: 430, range: 230, spread: .03, splash: 26, pk: 'plasma', size: 1.6, kb: 90, col: '#e040fb', s: ['plasma', 1.4], d: '부채꼴 플라즈마 5발 + 범위 피해' },
+  { k: 'x_elas', nm: '관통형 에너지 레이저', ic: '📏', c: 'energy', m: 'laser', minS: 5, gun: 'energy', dmg: 12, cd: .62, spd: 1500, range: 460, pierce: 7, len: 42, col: '#18ffff', s: ['laser', .8], d: '일렬로 선 적을 모두 꿰뚫는 레이저' },
+  { k: 'x_chainc', nm: '연쇄 번개 캐논', ic: '🌩️', c: 'energy', m: 'chain', minS: 5, gun: 'cannon', dmg: 24, cd: 1.45, range: 340, targets: 1, chain: 6, col: '#ffff8d', s: ['zap', .7], d: '한 줄기 번개가 6번 튕김' },
+  { k: 'x_mmsl', nm: '다중 추적 미사일', ic: '🎆', c: 'blast', m: 'rocket', minS: 7, gun: 'mlrs', dmg: 7, n: 6, salvo: .045, cd: 2.0, spd: 340, range: 470, boom: 24, homing: 6.5, pk: 'missile', col: '#ffab91', s: ['missile', 1.1], d: '서로 다른 적을 쫓는 미사일 6발' },
+  { k: 'x_fcan', nm: '대형 화염 캐논', ic: '☄️', c: 'special', m: 'lob', minS: 7, gun: 'cannon', dmg: 26, cd: 2.3, range: 360, flight: .42, boom: 60, field: { k: 'fire', r: 70, dur: 4, dps: 12 }, burn: 6, pk: 'fireshell', size: 1.5, col: '#ff3d00', s: ['cannon', 1.1], d: '거대한 화염탄 + 넓은 불바다' },
+  { k: 'x_emrail', nm: '전자기 레일건', ic: '🧲', c: 'energy', m: 'rail', minS: 10, gun: 'cannon', dmg: 34, cd: 1.55, range: 580, w: 9, n: 2, fan: .07, charge: .12, ap: .8, col: '#82b1ff', s: ['rail', 1.25], d: '2줄 전자기 관통탄' },
+  { k: 'x_bdrone', nm: '전술 폭격 드론', ic: '🛩️', c: 'special', m: 'barrage', minS: 10, gun: 'special', dmg: 16, n: 4, cd: 2.4, boom: 44, col: '#ffa726', s: ['mortar', 1.3], d: '드론이 적 무리에 폭탄 4발 투하' },
+  { k: 'x_gbomb', nm: '중력 폭탄 발사기', ic: '🪐', c: 'future', m: 'lob', minS: 14, gun: 'future', dmg: 40, cd: 3.2, range: 360, flight: .7, boom: 66, grav: { r: 115, dur: 1.3, pull: 200 }, pk: 'gravball', col: '#7c4dff', s: ['hole', 1.3], d: '적을 끌어모은 뒤 폭발' },
+  { k: 'x_pnova', nm: '플라즈마 충격 방출기', ic: '💥', c: 'energy', m: 'nova', minS: 14, gun: 'energy', dmg: 26, cd: 2.0, r: 150, col: '#ea80fc', s: ['plasma', .9], d: '넓은 범위 전기 충격파' },
+  { k: 'x_qdisc', nm: '양자 분열 원반', ic: '💠', c: 'future', m: 'split', minS: 20, gun: 'future', dmg: 26, cd: 1.0, spd: 560, range: 400, shards: 9, shardDmg: 8, col: '#64ffda', s: ['quantum', 1.2], d: '명중 시 파편 9개로 분열' }
+];
+function genWeaponsX(all) {
+  let seed = 20261107; const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const used = new Set(all.map(w => (w.type || w.id) + '|' + (w.tr || []).slice().sort().join('+')));
+  const typeUse = {}, traitUse = {}, out = [];
+  for (let s = 1; s <= 40; s++) {
+    const tiers = [2, s % 5 === 0 ? 3 : 2];
+    const usedT = new Set();
+    tiers.forEach((t, slot) => {
+      let pool = WTYPES_X.filter(ty => ty.minS <= s && !usedT.has(ty.k));
+      // 스테이지가 오를수록 최신 타입 우선
+      pool.sort((a, b) => ((typeUse[a.k] || 0) - (typeUse[b.k] || 0)) * 1.2 - (a.minS - b.minS) * 0.04 + (rnd() - .5) * 1.4);
+      let made = null;
+      for (const ty of pool) {
+        const trs = WTRAITS.filter(tr => traitOk(tr, ty)).sort((a, b) => (traitUse[a.k] || 0) - (traitUse[b.k] || 0) + (rnd() - .5) * 2);
+        const nt = t >= 3 || s >= 25 ? 2 : 1;
+        for (let i = 0; i < trs.length && !made; i++) {
+          const pk = [trs[i]];
+          if (nt === 2) { const sec = trs.find(x => x !== trs[i] && !((x.k === 'rapid' && trs[i].k === 'heavy') || (x.k === 'heavy' && trs[i].k === 'rapid'))); if (!sec) continue; pk.push(sec); }
+          const combo = ty.k + '|' + pk.map(x => x.k).sort().join('+');
+          if (used.has(combo)) continue;
+          used.add(combo); made = { ty, tr: pk };
+        }
+        if (made) break;
+      }
+      usedT.add(made.ty.k); typeUse[made.ty.k] = (typeUse[made.ty.k] || 0) + 1; for (const x of made.tr) traitUse[x.k] = (traitUse[x.k] || 0) + 1;
+      const w = buildWeapon(made.ty, made.tr, t, s, 900 + out.length);
+      w.id = 'x' + s + '_' + slot + '_' + made.ty.k.slice(2); w.type = made.ty.k; w.xp = 1;
+      w.nm = (t === 3 ? '전설의 ' : '') + made.tr.map(x => x.adj).join('·') + ' ' + made.ty.nm + ' EX-' + (s * 10 + slot + 1);
+      // 스테이지 진행에 따라 외형·효과 발전 (발사체 크기·폭발 범위 소폭 확대)
+      const g = Math.floor((s - 1) / 10); w.size = (w.size || 1) * (1 + g * 0.08); if (w.boom) w.boom *= 1 + g * 0.06;
+      out.push(w);
+    });
+  }
+  return out;
+}
+
 /* =====================================================================
    게임 데이터
    ===================================================================== */
@@ -1402,7 +1468,8 @@ const WEAPONS = [
 ];
 for (const w of WEAPONS) { w.st = OLD_ST[w.id]; w.tr = w.tr || []; }
 WEAPONS.push(...genWeapons(WEAPONS));
-for (const w of WEAPONS) w.cal = (typeof CAL !== 'undefined' && CAL[w.id]) || 1;
+WEAPONS.push(...genWeaponsX(WEAPONS)); // 확장팩 신규 80종
+for (const w of WEAPONS) w.cal = (typeof CAL !== 'undefined' && CAL[w.id]) || (typeof CALX !== 'undefined' && CALX[w.id]) || 1;
 const WMAP = {}; WEAPONS.forEach((w, i) => { w.idx = i; WMAP[w.id] = w; });
 function stageWeapons(n) { return WEAPONS.filter(w => w.st === n).map(w => w.id); }
 const WMAX = 5, WSLOTS = 5;
@@ -1722,6 +1789,7 @@ function recalc() {
   P.magnet = 75 * (1 + 0.35 * (p.magnet || 0));
   P.greed = (1 + 0.2 * (p.greed || 0)) * (1 + 0.05 * u.gain) * DF().gold; P.xpMul = (1 + 0.05 * u.gain) * DF().xp;
   if (G.allyAura) P.cdMul /= 1 + 0.06 * G.allyAura;
+  supApply();
   const b = G.buff || {}; P.dmgMul *= 1 + (b.atk || 0); P.cdMul /= 1 + (b.aspd || 0); P.crit += b.crit || 0; P.spd *= 1 + (b.spd || 0);
 }
 function codexOf(id) { return save.codex[id] || (save.codex[id] = { found: 1, maxLv: 1, kills: 0 }); }
@@ -1749,7 +1817,7 @@ function startStage(n) {
   enemies = []; projs = []; eprojs = []; pickups = []; parts = []; texts = []; effects = []; hazards = []; fields = []; turrets = []; mines = []; gens = []; laterQ = [];
   joy.id = null; joy.mag = 0;
   initQuests(st);
-  extStageStart();
+  extStageStart(); xpStageStart();
   G.paused = false; G.state = 'play';
   showScreen(null); $('gameUI').classList.add('on'); updatePotBadge();
   AU.bgm(st.mu, st.muVar);
@@ -1844,7 +1912,7 @@ function spawnEnemy(type, x, y, o = {}) {
   if (o.tgtGen) e.tgtGen = true;
   enemies.push(e); return e;
 }
-function maxEnemies() { return Math.min(Q.level === 0 ? 240 : 640, Math.round((Q.level === 0 ? 130 : 200 + G.stage * 4) * G.st.crowd * DF().cnt)); }
+function maxEnemies() { return Math.min(Q.level === 0 ? 210 : Q.level === 1 ? 420 : 640, Math.round((Q.level === 0 ? 130 : 200 + G.stage * 4) * G.st.crowd * DF().cnt)); }
 function aliveCount() { let n = 0; for (const e of enemies) if (!e.dead) n++; return n; }
 function director(dt) {
   const st = G.st, p = progress();
@@ -1896,6 +1964,7 @@ function eliteSkill(e, dt, pdist) {
     case 'missile': e.skT = 4; for (let i = -1; i <= 1; i += 2) { eShot(e.x, e.y, a + i * 0.9, 120, e.dmg * 0.5, 'fire'); const b = eprojs[eprojs.length - 1]; b.hom = 1; b.life = 4; } AU.sfx('missile', 1.4); break;
     case 'blink': e.skT = 5; effects.push({ type: 'poof', x: e.x, y: e.y, r: e.r * 1.4, t: 0, dur: .3 }); { const b2 = rand(0, TAU); e.x = P.x + Math.cos(b2) * 110; e.y = P.y + Math.sin(b2) * 110; } e.stunT = 0.4; for (let i = 0; i < 8; i++) eShot(e.x, e.y, i / 8 * TAU, 130, e.dmg * 0.4, 'plasma'); AU.sfx('portal'); break;
     case 'shield': e.skT = 6; e.shieldT = 2.5; AU.sfx('clank'); break;
+    default: eliteSkillX(e, a); break;
   }
   if (e.skill2) { const t = e.skill; e.skill = e.skill2; e.skill2 = t; e.skT *= 0.8; }
 }
@@ -1937,10 +2006,10 @@ function ringWave() {
 }
 function spawnElite() {
   const pool = G.st.mobs.filter(m => ET[m[0]].ai !== 'bomb' && ET[m[0]].ai !== 'summon');
-  const type = Math.random() < 0.6 && ET[G.st.sig].ai !== 'bomb' ? G.st.sig : wpick(pool.length ? pool : G.st.mobs);
-  const [x, y] = edgePos(); const e = spawnEnemy(type, x, y, { elite: true });
-  const SKN = { nova: '충격 폭발', charge: '돌진', summon: '소환', missile: '유도탄', blink: '순간이동', shield: '보호막' };
-  toast(`⚠ 정예 출현: ${e.d.n}<br><span style="font-size:16px">기술: ${SKN[e.skill] || ''}</span>`, 1.6, '#ff9800');
+  const isX = G.st.elx && Math.random() < 0.7;
+  const type = isX ? G.st.elx : Math.random() < 0.6 && ET[G.st.sig].ai !== 'bomb' ? G.st.sig : wpick(pool.length ? pool : G.st.mobs);
+  const [x, y] = edgePos(); const e = spawnEnemy(type, x, y, { elite: true }); if (isX) setupElx(e);
+  toast(`⚠ 정예 출현: ${e.d.n}<br><span style="font-size:16px">기술: ${SKN_X[e.skill] || ''}${e.skill2 ? ' · ' + SKN_X[e.skill2] : ''}${e.elx && e.elx.aura ? ' · 주변 강화' : e.elx && e.elx.flank ? ' · 포위' : ''}</span>`, 1.6, '#ff9800');
   AU.sfx('alarm'); G.flash = Math.max(G.flash, 0.18); G.flashCol = '255,120,0';
 }
 function startBossWarning() {
@@ -2047,8 +2116,10 @@ function hitEnemy(e, base, o = {}) {
   if (!o.tick && Q.level) {
     const hc = (W_ && W_.col) || '#fff59d';
     if (crit) { if (effects.length < 160) effects.push({ type: 'crit', x: e.x, y: e.y - e.r * .3, r: e.r, t: 0, dur: 0.22, col: hc }); AU.sfx('crit'); }
-    else if (parts.length < QC.particles * 0.7) for (let i = 0; i < 2; i++) addPart(e.x + rand(-4, 4), e.y - e.r * .3, rand(-110, 110), rand(-110, 60), hc, 0.18, 2.5);
+    else { if (parts.length < QC.particles * 0.7) for (let i = 0; i < 2; i++) addPart(e.x + rand(-4, 4), e.y - e.r * .3, rand(-110, 110), rand(-110, 60), hc, 0.18, 2.5); hitFx(e, W_, o); }
+    if ((crit || dmg > e.maxHp * .35) && !e.boss && W_ && (W_.dmg || 0) > 25) G.shake = Math.max(G.shake, 1.5);
   }
+  if (!o.tick && !e.boss && !e.static) e.hitT = Math.max(e.hitT || 0, crit || dmg > e.maxHp * .3 ? .14 : .08);
   if (!o.silent && !crit) AU.sfx(arm > 0.25 ? 'clank' : W_ && W_.c === 'energy' ? 'hitE' : W_ && (W_.c === 'blast' || (W_.dmg || 0) > 30) ? 'hitH' : 'hit');
   if (e.hp <= 0) killEnemy(e);
 }
@@ -2061,6 +2132,7 @@ function killEnemy(e) {
   for (let i = 0; i < n; i++) addPart(e.x, e.y, rand(-120, 120) * (e.boss ? 2 : big ? 1.4 : 1), rand(-140, 80) * (e.boss ? 2 : 1), col || '#fff', rand(0.3, 0.6), rand(2, 4.5), 200);
   if (big && !e.boss && effects.length < 150) { effects.push({ type: 'shock', x: e.x, y: e.y, r: e.r * 2.2, t: 0, dur: 0.3, col: W_ ? W_.col : '#ffccbc' }); if (e.elite || (e.lastDmg || 0) > 80) G.shake = Math.max(G.shake, 2.5); }
   else effects.push({ type: 'poof', x: e.x, y: e.y, r: e.r, t: 0, dur: 0.3 });
+  killFx(e, W_);
   AU.sfx('die');
   if (e.lastW) { G.wkills[e.lastW] = (G.wkills[e.lastW] || 0) + 1; }
   if (e.boss) { bossDefeated(e); return; }
@@ -2070,7 +2142,7 @@ function killEnemy(e) {
     if (e.type === 'device') { qAdd('device'); explode(e.x, e.y, 70, 0, false, '#ffd600'); toast('⚙️ 장치 파괴!', 1, '#ffd600'); }
     dropGem(e.x, e.y, e.d.xp); return;
   }
-  G.kills++;
+  G.kills++; onKill(e);
   qAdd('kill');
   const tag = e.d.tag; G.tagKills[tag] = (G.tagKills[tag] || 0) + 1;
   qAdd('killTag', 1, q => q.tag === tag);
@@ -2079,7 +2151,7 @@ function killEnemy(e) {
   if (G.buff && G.buff.vamp && Math.random() < 0.25) P.hp = Math.min(P.maxHp, P.hp + 1 + G.stage * 0.05);
   if (tr && tr.includes('nova') && Math.random() < 0.35) explode(e.x, e.y, 50, (e.lastDmg || 10) * 0.7, true, '#ffab40', { wid: e.lastW, noTrait: 1 });
   if (e.elite) {
-    G.elitesKilled++; qAdd('elite');
+    G.elitesKilled++; qAdd('elite'); eliteDeathFx(e);
     if (e.cmd) { qAdd('commander'); G.cmdKilled = true; dropPickup('chest', e.x - 16, e.y); }
     if (Math.random() < 0.15) dropPickup('hpot', e.x - 12, e.y + 6);
     if (G.veh && G.veh.repairs < 2 && Math.random() < 0.08) dropPickup('rkit', e.x + 12, e.y + 6);
@@ -2130,6 +2202,7 @@ function acquireWeapon(id, src) {
 }
 function explode(x, y, r, dmg, friendly, col = '#ff9800', o = {}) {
   effects.push({ type: 'boom', x, y, r, t: 0, dur: 0.35, col });
+  explodeFx(x, y, r, col);
   const np = Q.level ? Math.min(22, 8 + r / 6) : 6;
   for (let i = 0; i < np; i++) { const a = rand(0, TAU), s = rand(40, 180) * r / 50; addPart(x, y, Math.cos(a) * s, Math.sin(a) * s, pick(['#ffeb3b', '#ff9800', '#ff5722', col]), rand(0.25, 0.55), rand(2.5, 5)); }
   AU.sfx(r > 85 ? 'bigboom' : 'boom');
@@ -2163,7 +2236,11 @@ function collect(p) {
   }
 }
 function heal(v) { const before = P.hp; P.hp = Math.min(P.maxHp, P.hp + v); AU.sfx('heal'); texts.push({ x: P.x, y: P.y - 22, t: 0, v: '+' + Math.round(P.hp - before), col: '#69f0ae', pl: 1 }); for (let i = 0; i < 10; i++) addPart(P.x + rand(-12, 12), P.y + rand(-5, 10), 0, rand(-60, -30), '#69f0ae', 0.6, 3); }
-function addPart(x, y, vx, vy, col, life, size, grav = 0) { if (parts.length >= QC.particles) return; parts.push({ x, y, vx, vy, col, life, max: life, size, grav }); }
+// 입자 오브젝트 풀 (가장 많이 생성되는 객체를 재사용)
+const PPOOL = [];
+function newPart(x, y, vx, vy, col, life, size, grav, grow) { const q = PPOOL.pop() || {}; q.x = x; q.y = y; q.vx = vx; q.vy = vy; q.col = col; q.life = life; q.max = life; q.size = size; q.grav = grav || 0; q.grow = grow || 0; return q; }
+function addPart(x, y, vx, vy, col, life, size, grav = 0) { if (parts.length >= QC.particles) return; parts.push(newPart(x, y, vx, vy, col, life, size, grav)); }
+function compactParts() { let j = 0; for (let i = 0; i < parts.length; i++) { const q = parts[i]; if (q.life > 0) parts[j++] = q; else if (PPOOL.length < 900) PPOOL.push(q); } parts.length = j; }
 
 /* =====================================================================
    무기 50종 — 발사 방식 엔진
@@ -2493,7 +2570,7 @@ function updateProjs(dt) {
     if (p.homT) { const t = p.htg && !p.htg.dead ? p.htg : (p.htg = nearest(p.x, p.y, 260, p.hit)); if (t) { const sp = Math.hypot(p.vx, p.vy), ta = Math.atan2(t.y - p.y, t.x - p.x); p.ang += clamp(angDiff(ta, p.ang), -p.homT * dt, p.homT * dt); p.vx = Math.cos(p.ang) * sp; p.vy = Math.sin(p.ang) * sp; } }
     if (p.boomer) { p.tt = (p.tt || 0) + dt; if (!p.back && p.tt >= p.out) { p.back = 1; p.hit.clear(); } if (p.back) { const dx = P.x - p.x, dy = P.y - p.y, d = Math.hypot(dx, dy) || 1, sp = Math.hypot(p.vx, p.vy) * 1.05; p.vx = dx / d * sp; p.vy = dy / d * sp; if (d < 18) { p.dead = true; continue; } } p.ang += dt * 18; }
     if (p.wave) { p.tt += dt; p.bx += p.vx * dt; p.by += p.vy * dt; const nx = -Math.sin(p.ang), ny = Math.cos(p.ang), off = Math.sin(p.tt * p.freq + p.ph) * p.amp; const ox = p.x, oy = p.y; p.x = p.bx + nx * off; p.y = p.by + ny * off; p.life -= dt; projCollide(p); if (Q.level && Math.random() < .4) addPart(ox, oy, 0, 0, p.col, .25, 3); if (p.life <= 0) p.dead = true; continue; }
-    if (p.acc && Q.level && Math.random() < 0.7) parts.length < QC.particles && parts.push({ x: p.x - Math.cos(p.ang) * 10, y: p.y - Math.sin(p.ang) * 10, vx: rand(-10, 10), vy: rand(-10, 10), col: 'rgba(200,200,200,.55)', life: 0.6, max: 0.6, size: 4, grav: 0, grow: 2.2 });
+    if (p.acc && Q.level && Math.random() < 0.7) parts.length < QC.particles && parts.push(newPart(p.x - Math.cos(p.ang) * 10, p.y - Math.sin(p.ang) * 10, rand(-10, 10), rand(-10, 10), 'rgba(200,200,200,.55)', 0.6, 4, 0, 2.2));
     if (p.trCol && Q.level >= 2 && Math.random() < 0.25) addPart(p.x, p.y, rand(-20, 20), rand(-20, 20), p.trCol, 0.25, 2.5);
     const steps = Math.min(5, Math.max(1, Math.ceil(Math.hypot(p.vx, p.vy) * dt / (p.r + 9))));
     p.life -= dt;
@@ -2714,7 +2791,7 @@ function updateEnemies(dt) {
     if (e.slowT > 0) { e.slowT -= dt; if (e.slowT <= 0) e.slowF = 1; }
     let tx = P.x, ty = P.y;
     if (e.tgtGen) { let bd = 1e9; for (const g of gens) { if (g.dead) continue; const d = (g.x - e.x) ** 2 + (g.y - e.y) ** 2; if (d < bd) { bd = d; tx = g.x; ty = g.y; } } if (bd === 1e9) e.tgtGen = false; }
-    if (!e.tgtGen && !e.boss && !e.static && allies.length) { const at = allyTarget(e); if (at) { tx = at.x; ty = at.y; } }
+    if (!e.tgtGen && !e.boss && !e.static && (allies.length || e.flankA !== undefined)) { const at = extTarget(e); if (at) { tx = at[0]; ty = at[1]; } }
     const dx = tx - e.x, dy = ty - e.y; const dist = Math.hypot(dx, dy) || 1; const nx = dx / dist, ny = dy / dist;
     const pdist = Math.hypot(P.x - e.x, P.y - e.y);
     if (e.boss) { if (e.stunT > 0) e.stunT = 0; bossUpdate(e, dt); }
@@ -2760,6 +2837,9 @@ function updateEnemies(dt) {
           break;
         case 'flee': { vx = -nx * e.spd; vy = -ny * e.spd; e.life -= dt; if (Math.random() < .3) addPart(e.x, e.y, rand(-20, 20), rand(-30, 0), '#ffd54f', .5, 3); if (e.life <= 0) { e.dead = true; effects.push({ type: 'poof', x: e.x, y: e.y, r: e.r * 2, t: 0, dur: .4 }); } break; }
       }
+      if (e.hitT > 0) { e.hitT -= dt; vx *= .3; vy *= .3; }
+      if (e.buffT > 0) { e.buffT -= dt; vx *= 1.25; vy *= 1.25; }
+      if (e.rushT > 0) { e.rushT -= dt; vx *= 2.2; vy *= 2.2; if (Q.level && Math.random() < .5) addPart(e.x, e.y + e.r * .5, rand(-30, 30), rand(-30, 0), '#ff5252', .3, 3); }
       if (e.slowT > 0) { vx *= e.slowF; vy *= e.slowF; }
       e.x += (vx + e.kx) * dt; e.y += (vy + e.ky) * dt;
       const kd = Math.pow(0.002, dt); e.kx *= kd; e.ky *= kd;
@@ -2838,7 +2918,7 @@ function update(dt) {
   director(dt);
   buildGrid();
   if (!G.veh) updateWeapons(dt); updateProjs(dt); updateFields(dt); updateTurrets(dt); updateMines(dt);
-  extUpdate(dt);
+  extUpdate(dt); xpUpdate(dt);
   buildGrid();
   updateEnemies(dt); updateEProjs(dt); updateHazards(dt); updateGens(dt);
   if (G.state !== 'play') return;
@@ -2848,7 +2928,7 @@ function update(dt) {
     if (p.dead) continue; p.t += dt;
     if (p.kind !== 'gem' && p.z !== undefined && p.t < 0.5) { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 300 * dt; }
     const dx = P.x - p.x, dy = P.y - p.y, d2 = dx * dx + dy * dy;
-    const big = p.kind === 'hpot' || p.kind === 'rkit' || p.kind === 'scrate' || p.kind === 'chest' || p.kind === 'meat' || p.kind === 'magnet' || p.kind === 'crate' || p.kind === 'secret' || p.kind === 'power' || p.kind === 'wdrop' || p.kind === 'legend';
+    const big = p.kind === 'hpot' || p.kind === 'rkit' || p.kind === 'wsup' || p.kind === 'scrate' || p.kind === 'chest' || p.kind === 'meat' || p.kind === 'magnet' || p.kind === 'crate' || p.kind === 'secret' || p.kind === 'power' || p.kind === 'wdrop' || p.kind === 'legend';
     const rng = big ? 24 * 24 : p.kind === 'qitem' ? Math.max(mg2, 55 * 55) : mg2;
     if (p.t > 0.4 && d2 < rng) p.mag = true;
     if (p.mag) { const d = Math.sqrt(d2) || 1, sp = 260 + p.t * 60; p.x += dx / d * sp * dt; p.y += dy / d * sp * dt; if (d < P.r + 6) { p.dead = true; collect(p); } }
@@ -2860,10 +2940,11 @@ function update(dt) {
   if (G.shake > 0) G.shake = Math.max(0, G.shake - dt * 30);
   if (G.flash > 0) G.flash -= dt;
   if (G.time % 0.25 < dt) { enemies = enemies.filter(e => !e.dead); eprojs = eprojs.filter(b => !b.dead); pickups = pickups.filter(p => !p.dead); hazards = hazards.filter(h => !h.dead); }
-  parts = parts.filter(q => q.life > 0); texts = texts.filter(t => t.t < (t.big ? 1.4 : t.crit ? 0.9 : 0.7)); effects = effects.filter(f => f.t < f.dur);
+  compactParts(); texts = texts.filter(t => t.t < (t.big ? 1.4 : t.crit ? 0.9 : 0.7)); effects = effects.filter(f => f.t < f.dur);
   projs = projs.filter(p => !p.dead);
   if (G.swapQ && G.swapQ.length && G.state === 'play' && P.hp > 0) openSwap(G.swapQ.shift());
   else if (G.pendingLv > 0 && G.state === 'play' && P.hp > 0 && G.clearing === 0) openLevelUp();
+  else if (G.eliteRw > 0 && G.state === 'play' && P.hp > 0 && G.clearing === 0) openEliteReward();
   if (G.bossState === 3) { G.winT -= dt; if (G.winT <= 0 && G.state === 'play') stageWin(); }
 }
 
@@ -2875,10 +2956,10 @@ function update(dt) {
 
 /* ------------------------- 난이도 ------------------------- */
 const DIFFS = [
-  { k: 'easy', n: '쉬움', ic: '🌱', col: '#69f0ae', hp: .75, dmg: .70, cnt: .80, spd: .93, elite: .7, potT: 26, gold: .8, xp: 1, boss: .8, rescue: .85, pat: 0 },
-  { k: 'normal', n: '보통', ic: '⚔️', col: '#90caf9', hp: 1, dmg: 1, cnt: 1, spd: 1, elite: 1, potT: 36, gold: 1, xp: 1, boss: 1, rescue: 1, pat: 0 },
-  { k: 'hard', n: '어려움', ic: '🔥', col: '#ffb74d', hp: 1.45, dmg: 1.35, cnt: 1.25, spd: 1.07, elite: 1.35, potT: 46, gold: 1.35, xp: 1.1, boss: 1.3, rescue: 1.12, pat: 1 },
-  { k: 'hell', n: '지옥', ic: '👹', col: '#ff5252', hp: 2.0, dmg: 1.75, cnt: 1.5, spd: 1.14, elite: 1.8, potT: 58, gold: 1.8, xp: 1.2, boss: 1.7, rescue: 1.25, pat: 2 }
+  { k: 'easy', n: '쉬움', ic: '🌱', col: '#69f0ae', hp: .8, dmg: .72, cnt: .95, spd: .95, elite: .8, potT: 26, gold: .8, xp: 1, boss: .85, rescue: .85, pat: 0 },
+  { k: 'normal', n: '보통', ic: '⚔️', col: '#90caf9', hp: 1.05, dmg: 1.15, cnt: 1.3, spd: 1.03, elite: 1.3, potT: 34, gold: 1.1, xp: 1.05, boss: 1.15, rescue: 1, pat: 1 },
+  { k: 'hard', n: '어려움', ic: '🔥', col: '#ffb74d', hp: 1.45, dmg: 1.4, cnt: 1.55, spd: 1.08, elite: 1.65, potT: 44, gold: 1.4, xp: 1.12, boss: 1.4, rescue: 1.12, pat: 2 },
+  { k: 'hell', n: '지옥', ic: '👹', col: '#ff5252', hp: 1.95, dmg: 1.8, cnt: 1.8, spd: 1.15, elite: 2.1, potT: 54, gold: 1.9, xp: 1.25, boss: 1.8, rescue: 1.25, pat: 3 }
 ];
 function diffIdx() { const d = save.settings.diff; return d >= 0 && d <= 3 ? d : 1; }
 function DF() { return DIFFS[diffIdx()]; }
@@ -2908,23 +2989,23 @@ function diffRewardMul() {
 // cat: ground 지상 / hover 부양 / mech 보행 로봇 / air 비행
 // link: 동료 연동 — A 동승 전투(2석), A1 1석(50% 확률), B 호위 전투, C 공중+지상 지원
 const VCH = {
-  bike: { n: '전투 오토바이', cat: 'ground', spd: 210, hp: 150, ar: .10, r: 16, crush: 10, link: 'B', open: 1, mh: 10 },
-  buggy: { n: '전투 버기', cat: 'ground', spd: 190, hp: 190, ar: .14, r: 18, crush: 14, link: 'A1', open: 1, mh: 12 },
-  jeep: { n: '경장갑 차량', cat: 'ground', spd: 170, hp: 235, ar: .18, r: 20, crush: 16, link: 'A1', open: 1, mh: 16 },
-  rover: { n: '6륜 장갑 로버', cat: 'ground', spd: 145, hp: 300, ar: .24, r: 22, crush: 20, link: 'A', mh: 20 },
-  apc: { n: '장갑차', cat: 'ground', spd: 130, hp: 340, ar: .28, r: 24, crush: 22, link: 'A', mh: 20 },
-  tank: { n: '중형 전차', cat: 'ground', spd: 108, hp: 400, ar: .32, r: 25, crush: 30, link: 'B', mh: 18 },
-  hbike: { n: '호버 바이크', cat: 'hover', spd: 232, hp: 150, ar: .08, r: 16, crush: 8, link: 'B', open: 1, mh: 14 },
-  htank: { n: '호버 전차', cat: 'hover', spd: 145, hp: 370, ar: .30, r: 25, crush: 24, link: 'B', mh: 22 },
-  minibot: { n: '소형 전투 로봇', cat: 'mech', spd: 155, hp: 220, ar: .18, r: 18, crush: 12, link: 'B', mh: 22 },
-  mech: { n: '중형 전투 로봇', cat: 'mech', spd: 135, hp: 310, ar: .25, r: 22, crush: 18, link: 'B', mh: 28 },
-  spider: { n: '다족 보행 메카', cat: 'mech', spd: 150, hp: 290, ar: .24, r: 23, crush: 16, link: 'B', mh: 22 },
-  titan: { n: '거대 메카', cat: 'mech', spd: 102, hp: 480, ar: .32, r: 31, crush: 34, link: 'B', mh: 40 },
-  heli: { n: '전투 헬리콥터', cat: 'air', spd: 175, hp: 210, ar: .14, r: 23, crush: 0, link: 'C', mh: 30 },
-  jet: { n: '고속 전투기', cat: 'air', spd: 252, hp: 170, ar: .10, r: 21, crush: 0, link: 'C', mh: 30 },
-  dpod: { n: '드론 탑승 장비', cat: 'air', spd: 192, hp: 190, ar: .12, r: 19, crush: 0, link: 'C', mh: 30 },
-  gunship: { n: '중형 건쉽', cat: 'air', spd: 140, hp: 320, ar: .22, r: 27, crush: 0, link: 'A', mh: 32 },
-  saucer: { n: '반중력 비행체', cat: 'air', spd: 196, hp: 270, ar: .20, r: 23, crush: 0, link: 'C', mh: 32 }
+  bike: { n: '전투 오토바이', cat: 'ground', spd: 210, hp: 100, time: 25, ar: .10, r: 16, crush: 10, link: 'B', open: 1, mh: 10 },
+  buggy: { n: '전투 버기', cat: 'ground', spd: 190, hp: 125, time: 25, ar: .14, r: 18, crush: 14, link: 'A1', open: 1, mh: 12 },
+  jeep: { n: '경장갑 차량', cat: 'ground', spd: 170, hp: 150, time: 35, ar: .18, r: 20, crush: 16, link: 'A1', open: 1, mh: 16 },
+  rover: { n: '6륜 장갑 로버', cat: 'ground', spd: 145, hp: 205, time: 35, ar: .24, r: 22, crush: 20, link: 'A', mh: 20 },
+  apc: { n: '장갑차', cat: 'ground', spd: 130, hp: 255, time: 35, ar: .28, r: 24, crush: 22, link: 'A', mh: 20 },
+  tank: { n: '중형 전차', cat: 'ground', spd: 108, hp: 285, time: 40, ar: .32, r: 25, crush: 30, link: 'B', mh: 18 },
+  hbike: { n: '호버 바이크', cat: 'hover', spd: 232, hp: 100, time: 25, ar: .08, r: 16, crush: 8, link: 'B', open: 1, mh: 14 },
+  htank: { n: '호버 전차', cat: 'hover', spd: 145, hp: 250, time: 40, ar: .30, r: 25, crush: 24, link: 'B', mh: 22 },
+  minibot: { n: '소형 전투 로봇', cat: 'mech', spd: 155, hp: 150, time: 25, ar: .18, r: 18, crush: 12, link: 'B', mh: 22 },
+  mech: { n: '중형 전투 로봇', cat: 'mech', spd: 135, hp: 205, time: 35, ar: .25, r: 22, crush: 18, link: 'B', mh: 28 },
+  spider: { n: '다족 보행 메카', cat: 'mech', spd: 150, hp: 190, time: 35, ar: .24, r: 23, crush: 16, link: 'B', mh: 22 },
+  titan: { n: '거대 메카', cat: 'mech', spd: 102, hp: 310, time: 40, ar: .32, r: 31, crush: 34, link: 'B', mh: 40 },
+  heli: { n: '전투 헬리콥터', cat: 'air', spd: 175, hp: 165, time: 30, ar: .14, r: 23, crush: 0, link: 'C', mh: 30 },
+  jet: { n: '고속 전투기', cat: 'air', spd: 252, hp: 105, time: 24, ar: .10, r: 21, crush: 0, link: 'C', mh: 30 },
+  dpod: { n: '드론 탑승 장비', cat: 'air', spd: 192, hp: 120, time: 25, ar: .12, r: 19, crush: 0, link: 'C', mh: 30 },
+  gunship: { n: '중형 건쉽', cat: 'air', spd: 140, hp: 215, time: 30, ar: .22, r: 27, crush: 0, link: 'A', mh: 32 },
+  saucer: { n: '반중력 비행체', cat: 'air', spd: 196, hp: 175, time: 30, ar: .20, r: 23, crush: 0, link: 'C', mh: 32 }
 };
 const VCAT_NAME = { ground: '지상', hover: '부양', mech: '보행', air: '비행' };
 // 차량 무기 14종: 발사체 크기·속도·방향·폭발 범위·이펙트가 모두 다름
@@ -2970,7 +3051,13 @@ const VCOMP = {
   dpod: ['homing', 'laser', 'tesla', 'plasma', 'mg', 'beam'], gunship: ['minigun', 'mlrs', 'shell', 'homing', 'beam', 'rocket'],
   saucer: ['beam', 'plasma', 'tesla', 'laser', 'rail', 'homing']
 };
-const VSUBS = { rover: 1, apc: 1, tank: 1, htank: 1, titan: 1, gunship: 1, mech: 1 };
+const VSIG = { bike: 'mg', buggy: 'rocket', jeep: 'grenade', rover: 'mortar', apc: 'minigun', tank: 'shell', hbike: 'tesla', htank: 'rail', minibot: 'laser', mech: 'laser',
+  spider: 'flame', titan: 'plasma', heli: 'mlrs', jet: 'homing', dpod: 'tesla', gunship: 'shell', saucer: 'beam' };
+const VSUBTIER = [[], ['mg', 'grenade', 'rocket'], ['homing', 'tesla', 'minigun'], ['rail', 'mlrs', 'plasma']];
+// 차량 필살기 (탑승마다 1회)
+const VULT = { tank: 'bigshell', htank: 'bigshell', gunship: 'bigshell', heli: 'carpet', jet: 'strafe', mech: 'megalaser', minibot: 'megalaser', titan: 'megalaser', spider: 'megalaser',
+  apc: 'barrage', rover: 'barrage', jeep: 'barrage', buggy: 'barrage', bike: 'barrage', hbike: 'emstorm', saucer: 'emstorm', dpod: 'emstorm' };
+const VULT_NAME = { bigshell: '초대형 포격', carpet: '미사일 융단폭격', strafe: '전방 대규모 폭격', megalaser: '초대형 레이저', barrage: '전방 집중 기관포 난사', emstorm: '전자기 폭풍' };
 const VSPPOOL = { ground: ['nitro', 'smoke', 'ram', 'shield', 'repair', 'overdrive', 'airstrike'], hover: ['hover', 'nitro', 'shield', 'emp', 'overdrive', 'flare'],
   mech: ['stomp', 'shield', 'overdrive', 'emp', 'salvo', 'repair'], air: ['salvo', 'flare', 'airstrike', 'emp', 'overdrive', 'shield'] };
 const VMODEL = {
@@ -3005,12 +3092,12 @@ const VEH = [], VEH_ST = [];
     prev = chs.slice().sort().join();
     const list = [], stW = new Set();
     chs.forEach((c, k) => {
-      const comp = VCOMP[c].slice().sort(() => rnd() - .5);
-      let wp = comp.find(w => !stW.has(w) && !usedCW.has(c + w)) || comp.find(w => !stW.has(w)) || comp[0];
-      stW.add(wp); usedCW.add(c + wp);
+      // 차체마다 고정된 전용 무기 (오토바이=쌍열 기관총, 전차=초대형 포탄, 헬기=다연장 미사일 …)
+      let wp = VSIG[c]; stW.add(wp); usedCW.add(c + wp);
       const cat = VCH[c].cat, spp = VSPPOOL[cat].slice().sort(() => rnd() - .5);
       let sp = spp.find(s => !used.has(c + wp + s)) || spp[0];
-      let sub = null; if (VSUBS[c]) { const subs = ['mg', 'homing', 'minigun', 'grenade', 'tesla', 'rocket'].filter(x => x !== wp); sub = subs[Math.floor(rnd() * subs.length)]; }
+      // 스테이지가 높아질수록 새로운 보조 무기 해금 (같은 차체라도 공격 방식이 달라짐)
+      let sub = null; if (g >= 1) { const subs = VSUBTIER[g].filter(x => x !== wp); sub = subs[(n + k) % subs.length]; }
       used.add(c + wp + sp);
       const kp = VKITS.filter(x => (x !== 'wings' || cat === 'air' || cat === 'hover') && (x !== 'spikes' || cat === 'ground' || cat === 'mech')).sort(() => rnd() - .5);
       const mi = mcount[c] = (mcount[c] || 0) + 1, ml = VMODEL[c];
@@ -3020,7 +3107,7 @@ const VEH = [], VEH_ST = [];
         : g === 1 ? { a: hsl(190 + (n * 17 + k * 40) % 80, 18, 46), b: hsl(200 + (n * 17) % 60, 20, 28), c: hsl(h, 90, 55), gl: '#80deea' }
           : g === 2 ? { a: hsl(h, 50, 40), b: hsl(h + 20, 45, 22), c: hsl(h + 170, 95, 60), gl: '#e1bee7' }
             : { a: hsl(h, 12, 86), b: hsl(h, 14, 55), c: hsl(h + 180, 95, 58), gl: '#ffecb3' };
-      const def = { id: `v${n}_${k}`, st: n, k, ch: c, wp, sub, sp, kit: kp.slice(0, 2), col, name: model + ' ' + VCH[c].n, idx: VEH.length };
+      const def = { id: `v${n}_${k}`, st: n, k, tier: g, ch: c, wp, sub, sp, kit: kp.slice(0, 2), col, name: model + ' ' + VCH[c].n, idx: VEH.length };
       VEH.push(def); list.push(def);
     });
     VEH_ST[n] = list;
@@ -3094,12 +3181,12 @@ function extStageStart() {
   const n = G.stage;
   G.diffAcc = [0, 0, 0, 0]; G.veh = null; G.rkit = 0; G.comboCd = 8; G.comboT = {}; G.cmdSpawned = false; G.cmdKilled = false;
   G.hpotT = DF().potT * 0.6; G.lastHpot = 0; G.rkitT = 40; G.radio = null; G.stormT = 0; G.stormWarn = 0; G.artT = 0; G.artTick = 0; G.surroundT = 30;
-  G.extEvT = rand(55, 70); G.pdps = 40; G.pAcc = 0; G.pdT = 0; G.allyEliteT = 40; G.hold = null; G.rescued = 0; G.vehUsed = 0; G.lungeN = 0; G.spDone = 0;
+  G.extEvT = rand(55, 70); G.allyRank = 1; G.allyBoost = 1; G.pdps = 40; G.pAcc = 0; G.pdT = 0; G.allyEliteT = 40; G.hold = null; G.rescued = 0; G.vehUsed = 0; G.lungeN = 0; G.spDone = 0;
   allies = []; vehs = []; rescues = [];
   P.baseR = P.r;
-  // 탑승 장비 3종 배치
-  const defs = VEH_ST[n], a0 = rand(0, TAU), dists = [250, 520, 800];
-  defs.forEach((d, i) => { const a = a0 + i * TAU / 3 + rand(-.3, .3); vehs.push(mkVeh(d, Math.cos(a) * dists[i], Math.sin(a) * dists[i])); });
+  // 탑승 장비: 스테이지 진행률 45~75% 구간에 낙하산으로 투하 (3종 중 스테이지별 확률로 1종)
+  const a0 = rand(0, TAU);
+  G.vdropT = G.st.D * rand(0.45, 0.75); G.vdropDone = false;
   // 구조 대상 2명
   const al = ALLY_ST[n], b0 = a0 + Math.PI / 3;
   for (let i = 0; i < 2; i++) { const a = b0 + i * Math.PI + rand(-.4, .4), d = rand(380, 640); rescues.push(mkRescue(al[i], Math.cos(a) * d, Math.sin(a) * d, ['cage', 'capsule', 'chains'][(n + i) % 3])); }
@@ -3114,8 +3201,8 @@ function extStageStart() {
 
 /* ------------------------- 탑승 장비 ------------------------- */
 function mkVeh(def, x, y) {
-  const ch = VCH[def.ch], hp = Math.round(ch.hp * (1 + (G.stage - 1) * 0.075) * (1 + 0.03 * save.up.hp));
-  return { def, ch, x, y, hp, maxHp: hp, repairs: 0, aim: 0, aim2: 0, face: 1, walkT: 0, recoil: 0, skCd: 2, ovT: 0, nitroT: 0, hoverT: 0, ramT: 0, sl: [], seats: [], dead: false, flash: 0, bob: rand(0, 6), seen: false };
+  const ch = VCH[def.ch], hp = Math.round(ch.hp * (1 + (G.stage - 1) * 0.075) * (1 + 0.03 * save.up.hp) / Math.sqrt(DF().dmg));
+  return { def, ch, x, y, hp, maxHp: hp, time: ch.time, maxTime: ch.time, tier: def.tier || 0, ultUsed: false, ultT: 0, repairs: 0, aim: 0, aim2: 0, face: 1, walkT: 0, recoil: 0, skCd: 2, ovT: 0, nitroT: 0, hoverT: 0, ramT: 0, sl: [], seats: [], dead: false, flash: 0, bob: rand(0, 6), seen: false };
 }
 // 실측(군중 상대) 피해량 기준 무기별 보정 — 단일 대상 무기는 덜 깎아 보스전 가치를 유지
 const VW_MEAS = { mg: 300, minigun: 304, rocket: 801, homing: 829, grenade: 845, shell: 1336, mortar: 1603, laser: 329, plasma: 1044, flame: 1458, rail: 1355, tesla: 568, mlrs: 667, beam: 688 };
@@ -3133,14 +3220,14 @@ function playerPow() { return Math.max((G.pdps || 40) / P.dmgMul * (G.veh ? 0.85
 // 탑승 장비 화력: 주인공 화력의 약 1.35배, 단 스테이지 초반에도 의미 있도록 적 체력 기반 하한
 function vehDmg(key, slot) {
   if (window.__VDM) return window.__VDM;
-  const fl = 36 * enemyH() / Math.sqrt(DF().hp), target = clamp(1.35 * playerPow(), fl, fl * 5); // 하한 + 상한(눈덩이 방지)
+  const fl = 60 * enemyH() / Math.sqrt(DF().hp), target = clamp(2.6 * playerPow(), fl, fl * 8); // 시간제한형 고화력 (하한 + 상한)
   const share = G.veh && G.veh.def.sub ? (slot ? 0.38 : 0.72) : 1;
   return target / 300 * (key ? VW_F[key] : 1) * share;
 }
 function vehSpd() { const v = G.veh; return v.ch.spd * (1 + 0.02 * save.up.spd) * (v.nitroT > 0 ? 2.1 : 1) * (P.slowT > 0 ? 0.7 : 1); }
 function nearVeh() {
   if (G.veh) return null; let best = null, bd = 64 * 64;
-  for (const v of vehs) { if (v.dead) continue; const d = (v.x - P.x) ** 2 + (v.y - P.y) ** 2; if (d < bd) { bd = d; best = v; } }
+  for (const v of vehs) { if (v.dead || v.drop) continue; const d = (v.x - P.x) ** 2 + (v.y - P.y) ** 2; if (d < bd) { bd = d; best = v; } }
   return best;
 }
 function rideToggle() {
@@ -3149,21 +3236,26 @@ function rideToggle() {
   const v = nearVeh(); if (v) boardVehicle(v);
 }
 function boardVehicle(v) {
-  G.veh = v; G.lvAtMount = G.lv; P.x = v.x; P.y = v.y; P.r = v.ch.r * 0.8; P.inv = Math.max(P.inv, 0.6);
+  G.veh = v; G.lvAtMount = G.lv; recalc(); P.x = v.x; P.y = v.y; P.r = v.ch.r * 0.8; P.inv = Math.max(P.inv, 0.6);
   if (!save.vfound[v.def.id]) { save.vfound[v.def.id] = 1; G.newVeh = (G.newVeh || 0) + 1; }
   G.vehUsed++; qAdd('ride');
   AU.sfx('power'); G.shake = Math.max(G.shake, 4);
   effects.push({ type: 'shock', x: P.x, y: P.y, r: v.ch.r * 2.2, t: 0, dur: .4, col: v.def.col.c });
   const L = linkAllies(v);
-  toast(`🚘 탑승: ${v.def.name}<br><span style="font-size:14px">${VWPN[v.def.wp].n}${v.def.sub ? ' + ' + VWPN[v.def.sub].n : ''} · 특수: ${VSP[v.def.sp].n}${L ? '<br>' + L : ''}</span>`, 2.2, v.def.col.c);
-  setRideBtn(); setSkillBtn();
+  toast(`🚘 탑승: ${v.def.name} (${Math.ceil(v.time)}초)<br><span style="font-size:14px">${VWPN[v.def.wp].n}${v.def.sub ? ' + ' + VWPN[v.def.sub].n : ''} · 특수: ${VSP[v.def.sp].n} · 필살기: ${VULT_NAME[VULT[v.def.ch]]}${L ? '<br>' + L : ''}</span>`, 2.4, v.def.col.c);
+  setRideBtn(); setSkillBtn(); setUltBtn();
 }
 function exitVehicle(destroyed) {
   const v = G.veh; if (!v) return;
-  G.veh = null; P.r = P.baseR || 12;
+  G.veh = null; P.r = P.baseR || 12; recalc();
   for (const a of allies) if (a.seated === v) { a.seated = null; const ang = rand(0, TAU); a.x = P.x + Math.cos(ang) * 34; a.y = P.y + Math.sin(ang) * 34; }
   v.seats = [];
-  if (destroyed) {
+  if (destroyed === 'time') {
+    v.dead = true; P.inv = Math.max(P.inv, 1.2); AU.sfx('clank'); G.shake = Math.max(G.shake, 4);
+    for (let i = 0; i < 18; i++) addPart(P.x + rand(-20, 20), P.y - 10, rand(-60, 60), rand(-120, -40), 'rgba(90,90,90,.7)', 1.2, 6);
+    effects.push({ type: 'shock', x: P.x, y: P.y, r: 70, t: 0, dur: .4, col: '#b0bec5' });
+    toast('⏱️ 사용 시간 종료 — 장비 전투 불능<br><span style="font-size:14px">안전하게 하차했습니다</span>', 1.8, '#b0bec5');
+  } else if (destroyed) {
     v.dead = true; P.inv = Math.max(P.inv, 1.6);
     explode(P.x, P.y, 90, 120 * vehDmg(), true, '#ff6d00'); G.shake = 14; G.flash = 0.35; G.flashCol = '255,120,0';
     for (let i = 0; i < 26; i++) addPart(P.x, P.y, rand(-260, 260), rand(-260, 120), pick(['#455a64', '#263238', '#ff9800', v.def.col.a]), rand(.5, 1), rand(3, 6), 300);
@@ -3171,7 +3263,7 @@ function exitVehicle(destroyed) {
   } else {
     v.x = P.x; v.y = P.y; P.x += 30; AU.sfx('clank'); toast('하차', 0.8, '#b0bec5');
   }
-  setRideBtn(); setSkillBtn();
+  setRideBtn(); setSkillBtn(); setUltBtn();
 }
 function vehHit(dmg, src) {
   const v = G.veh;
@@ -3200,12 +3292,12 @@ function vFlash(x, y, a, col, size) { if (effects.length < 170) effects.push({ t
 function vWeapon(v, key, i, dt) {
   const W = VWPN[key], S = vSlot(v, i), dm = vehDmg(key, i), rate = (v.ovT > 0 ? 2 : 1) * (1 / P.cdMul);
   if (key === 'flame') {
-    const t = nearest(P.x, P.y, W.range + 20); S.on = !!t; if (!t) return;
+    const FR = W.range * (1 + .15 * (v.tier || 0)); const t = nearest(P.x, P.y, FR + 20); S.on = !!t; if (!t) return;
     const ta = Math.atan2(t.y - P.y, t.x - P.x); S.ang += angDiff(ta, S.ang) * Math.min(1, dt * 8); if (!i) v.aim = S.ang; else v.aim2 = S.ang;
     S.tick -= dt * rate;
     const [mx, my] = vMuzzle(v, S.ang);
     if (Q.level && Math.random() < 0.9) for (let k = 0; k < Q.level; k++) { const aa = S.ang + rand(-.4, .4), sp = rand(200, 320); addPart(mx, my, Math.cos(aa) * sp, Math.sin(aa) * sp, pick(['#ff9800', '#ffeb3b', '#ff5722', '#fff3e0']), .38, rand(3, 6)); }
-    if (S.tick <= 0) { S.tick = 0.1; for (const e of query(P.x, P.y, W.range).slice()) { const ea = Math.atan2(e.y - P.y, e.x - P.x); if (Math.abs(angDiff(ea, S.ang)) < 0.5) hitEnemy(e, W.dps * 0.1 * dm, { tick: 1, silent: true, noCrit: true, burn: W.dps * 0.25 * dm, kb: 10, ang: S.ang }); } AU.sfx('flame', 1.1); }
+    if (S.tick <= 0) { S.tick = 0.1; for (const e of query(P.x, P.y, FR).slice()) { const ea = Math.atan2(e.y - P.y, e.x - P.x); if (Math.abs(angDiff(ea, S.ang)) < 0.5) hitEnemy(e, W.dps * 0.1 * dm, { tick: 1, silent: true, noCrit: true, burn: W.dps * 0.25 * dm, kb: 10, ang: S.ang }); } AU.sfx('flame', 1.1); }
     return;
   }
   if (S.beamT > 0) {
@@ -3214,7 +3306,7 @@ function vWeapon(v, key, i, dt) {
     if (!i) v.aim = S.ang; else v.aim2 = S.ang;
     S.tick -= dt; const [x1, y1] = vMuzzle(v, S.ang), x2 = x1 + Math.cos(S.ang) * W.range, y2 = y1 + Math.sin(S.ang) * W.range;
     v.beam = [x1, y1, x2, y2, W.col];
-    if (S.tick <= 0) { S.tick = 0.1; for (const e of query((x1 + x2) / 2, (y1 + y2) / 2, W.range / 2 + 10).slice()) if (segDist2(e.x, e.y, x1, y1, x2, y2) < (8 + e.r) ** 2) hitEnemy(e, W.dps * 0.1 * dm, { tick: 1, silent: true }); AU.sfx('beam', 1.2); }
+    if (S.tick <= 0) { S.tick = 0.1; for (const e of query((x1 + x2) / 2, (y1 + y2) / 2, W.range / 2 + 10).slice()) if (segDist2(e.x, e.y, x1, y1, x2, y2) < (8 + 4 * (v.tier || 0) + e.r) ** 2) hitEnemy(e, W.dps * 0.1 * dm, { tick: 1, silent: true }); AU.sfx('beam', 1.2); }
     if (Math.random() < .6) addPart(x2, y2, rand(-90, 90), rand(-90, 90), W.col, .25, 3);
     if (S.beamT <= 0) v.beam = null;
     return;
@@ -3225,26 +3317,30 @@ function vWeapon(v, key, i, dt) {
   const a = Math.atan2(tgt.y - P.y, tgt.x - P.x); S.ang = a; if (!i) v.aim = a; else v.aim2 = a;
   if (Math.abs(Math.cos(a)) > 0.25 && !i) v.face = Math.cos(a) > 0 ? 1 : -1;
   S.cd = W.cd;
-  const col = W.col;
+  const col = W.col, tier = v.tier || 0;
   switch (key) {
-    case 'mg': { S.alt ^= 1; const [x, y] = vMuzzle(v, a, S.alt ? 1 : -1); const ang = a + rand(-.05, .05); mkProj({ kind: 'tracer', x, y, vx: Math.cos(ang) * 780, vy: Math.sin(ang) * 780, ang, r: 4, dmg: W.dmg * dm, pierce: 2, life: W.range / 780, col, size: 1.1, kb: 40 }); vFlash(x, y, a, col, 1.2); v.recoil = 2; break; }
+    case 'mg': { S.alt ^= 1; const nb = tier >= 2 ? 2 : 1; for (let b = 0; b < nb; b++) { const [x, y] = vMuzzle(v, a, (S.alt ? 1 : -1) * (1 + b * 1.6)); const ang = a + rand(-.05, .05) + (b ? (S.alt ? .06 : -.06) : 0); mkProj({ kind: 'tracer', x, y, vx: Math.cos(ang) * 780, vy: Math.sin(ang) * 780, ang, r: 4, dmg: W.dmg * dm / (1 + (nb - 1) * .6), pierce: 2 + (tier >= 3 ? 1 : 0), life: W.range / 780, col, size: 1.1 + tier * .1, kb: 40 }); vFlash(x, y, a, col, 1.2); if (Q.level && Math.random() < .6) addPart(P.x, P.y - 12, rand(-70, 70), rand(-110, -60), '#ffca28', .45, 2, 420); } v.recoil = 2; break; }
     case 'minigun': { S.spin = Math.min(1, S.spin + 0.06); S.cd = W.cd / (0.3 + 0.7 * S.spin); const [x, y] = vMuzzle(v, a); const ang = a + rand(-.09, .09); mkProj({ kind: 'tracer', x, y, vx: Math.cos(ang) * 820, vy: Math.sin(ang) * 820, ang, r: 4, dmg: W.dmg * dm, pierce: 1, life: W.range / 820, col, size: 1, kb: 25 }); vFlash(x, y, a, col, 1); v.recoil = 1.5; if (Q.level && Math.random() < .5) addPart(P.x, P.y - 10, rand(-60, 60), rand(-100, -50), '#ffca28', .4, 2, 420); break; }
-    case 'rocket': { S.alt ^= 1; const [x, y] = vMuzzle(v, a, S.alt ? 1 : -1); mkProj({ kind: 'rocket', x, y, vx: Math.cos(a) * 200, vy: Math.sin(a) * 200, ang: a, acc: 560, r: 6, dmg: W.dmg * dm, pierce: 1, life: 1.3, col, boom: W.boom, explodeEnd: 1, size: 1.1 }); vFlash(x, y, a, '#ffab40', 1.6); v.recoil = 4; break; }
-    case 'homing': { for (let k = 0; k < W.k; k++) later(k * 0.09, () => { if (G.state !== 'play' || !G.veh) return; const t = (tgt && !tgt.dead) ? tgt : nearest(P.x, P.y, W.range); if (!t) return; const aa = a + (k - 1.5) * 0.45; const [x, y] = vMuzzle(v, aa); mkProj({ kind: 'missile', x, y, vx: Math.cos(aa) * 160, vy: Math.sin(aa) * 160, ang: aa, acc: 520, r: 5, dmg: W.dmg * dm, pierce: 1, life: 2.2, col, boom: W.boom, homing: 5, target: t, explodeEnd: 1, size: 1 }); AU.sfx('missile', 1.1); }); v.recoil = 2; break; }
-    case 'grenade': { const [x, y] = vMuzzle(v, a); const d = Math.min(W.range, Math.hypot(tgt.x - x, tgt.y - y)); mkProj({ kind: 'grenade', lob: 1, x0: x, y0: y, tx: x + Math.cos(a) * d, ty: y + Math.sin(a) * d, x, y, vx: 0, vy: 0, ang: 0, T: 0.5, tt: 0, r: 0, dmg: W.dmg * dm, life: 9, col, boom: W.boom, size: 1.1, nohit: 1 }); vFlash(x, y, a, '#c5e1a5', 1.4); v.recoil = 3; break; }
-    case 'shell': { const [x, y] = vMuzzle(v, a); mkProj({ kind: 'cball', x, y, vx: Math.cos(a) * 520, vy: Math.sin(a) * 520, ang: a, r: 9, dmg: W.dmg * dm, pierce: 3, life: W.range / 520, col, boom: W.boom, explodeEnd: 1, size: 16, kb: 140 }); vFlash(x, y, a, '#ffab40', 3.2); for (let k = 0; k < 8; k++) addPart(x, y, Math.cos(a + rand(-.8, .8)) * rand(60, 160), Math.sin(a + rand(-.8, .8)) * rand(60, 160), 'rgba(200,200,200,.6)', .6, 5); v.recoil = 9; G.shake = Math.max(G.shake, 4); break; }
-    case 'mortar': { for (let k = 0; k < W.k; k++) later(k * 0.2, () => { if (G.state !== 'play' || !G.veh) return; const tx = tgt.x + rand(-60, 60), ty = tgt.y + rand(-60, 60); const [x, y] = vMuzzle(v, -Math.PI / 2); mkProj({ kind: 'shell', lob: 1, x0: x, y0: y, tx, ty, x, y, vx: 0, vy: 0, ang: 0, T: 0.9, tt: 0, r: 0, dmg: W.dmg * dm, life: 9, col, boom: W.boom, size: 1.2, nohit: 1 }); effects.push({ type: 'target', x: tx, y: ty, r: W.boom * .7, t: 0, dur: .9, col: '#ffcc80' }); vFlash(x, y, -Math.PI / 2, '#ffe0b2', 1.8); AU.sfx('mortar', 1); }); v.recoil = 4; break; }
-    case 'laser': { S.alt ^= 1; const [x, y] = vMuzzle(v, a, S.alt ? 1.6 : -1.6); mkProj({ kind: 'lbolt', x, y, vx: Math.cos(a) * 900, vy: Math.sin(a) * 900, ang: a, r: 5, dmg: W.dmg * dm, pierce: 2, life: W.range / 900, col, len: 26, kb: 25 }); vFlash(x, y, a, col, 1); break; }
-    case 'plasma': { const [x, y] = vMuzzle(v, a); const d = Math.min(W.range, Math.hypot(tgt.x - x, tgt.y - y) + 40); mkProj({ kind: 'plasma', x, y, vx: Math.cos(a) * 380, vy: Math.sin(a) * 380, ang: a, r: 10, dmg: W.dmg * dm, pierce: 999, life: d / 380, col, boom: W.boom, explodeEnd: 1, size: 10 }); vFlash(x, y, a, col, 2); v.recoil = 4; break; }
-    case 'rail': { const [x1, y1] = vMuzzle(v, a); effects.push({ type: 'charge', t: 0, dur: 0.25, col }); later(0.25, () => { if (G.state !== 'play' || !G.veh) return; const [xa, ya] = vMuzzle(v, a), x2 = xa + Math.cos(a) * W.range, y2 = ya + Math.sin(a) * W.range; effects.push({ type: 'rail', x1: xa, y1: ya, x2, y2, w: 12, col, t: 0, dur: 0.3 }); for (const e of query((xa + x2) / 2, (ya + y2) / 2, W.range / 2 + 10).slice()) if (segDist2(e.x, e.y, xa, ya, x2, y2) < (8 + e.r) ** 2) hitEnemy(e, W.dmg * dm, { ap: 0.6, kb: 90, ang: a, silent: true }); AU.sfx('rail', 1); v.recoil = 8; G.shake = Math.max(G.shake, 4); }); void x1; break; }
-    case 'tesla': { const [x, y] = vMuzzle(v, a); const ts = nearestK(P.x, P.y, W.range, W.k); for (const t of ts) { const pts = [[x, y], [t.x, t.y]]; hitEnemy(t, W.dmg * dm, { silent: true, stun: 0.15 }); let cur = t; const hit = new Set([t.id]); for (let c = 0; c < 2; c++) { let best = null, bd = 130 * 130; for (const e of query(cur.x, cur.y, 130)) { if (hit.has(e.id)) continue; const dd = (e.x - cur.x) ** 2 + (e.y - cur.y) ** 2; if (dd < bd) { bd = dd; best = e; } } if (!best) break; hit.add(best.id); pts.push([best.x, best.y]); hitEnemy(best, W.dmg * dm * 0.7, { silent: true }); cur = best; } effects.push({ type: 'bolt', pts, t: 0, dur: 0.2, seed: Math.random() * 100, col }); } break; }
-    case 'mlrs': { const list = enemies.filter(e => !e.dead && onScreen(e, -10)); for (let k = 0; k < W.k; k++) later(k * 0.07, () => { if (G.state !== 'play' || !G.veh || !list.length) return; const t = pick(list); if (t.dead) return; const aa = -Math.PI / 2 + rand(-.6, .6); const [x, y] = vMuzzle(v, aa); mkProj({ kind: 'missile', x, y, vx: Math.cos(aa) * 220, vy: Math.sin(aa) * 220, ang: aa, acc: 480, r: 5, dmg: W.dmg * dm, pierce: 1, life: 2.4, col, boom: W.boom, homing: 4.5, target: t, explodeEnd: 1, size: .9 }); vFlash(x, y, aa, '#ffd180', 1); }); AU.sfx('missile', .8); v.recoil = 3; break; }
+    case 'rocket': { const nr = 1 + tier; for (let r2 = 0; r2 < nr; r2++) { S.alt ^= 1; const aa = a + (r2 - (nr - 1) / 2) * 0.16; const [x, y] = vMuzzle(v, aa, S.alt ? 1 : -1); mkProj({ kind: 'rocket', x, y, vx: Math.cos(aa) * 200, vy: Math.sin(aa) * 200, ang: aa, acc: 560, r: 6, dmg: W.dmg * dm * (1 + .25 * tier) / nr, pierce: 1, life: 1.3, col, boom: W.boom * (1 + .1 * tier), homing: tier >= 2 ? 2.5 : 0, target: tgt, explodeEnd: 1, size: 1.1 }); vFlash(x, y, aa, '#ffab40', 1.6); } v.recoil = 4; break; }
+    case 'homing': { const K2 = W.k + 2 * tier; for (let k = 0; k < K2; k++) later(k * 0.09, () => { if (G.state !== 'play' || !G.veh) return; const t = (tgt && !tgt.dead) ? tgt : nearest(P.x, P.y, W.range); if (!t) return; const aa = a + (k - 1.5) * 0.45; const [x, y] = vMuzzle(v, aa); mkProj({ kind: 'missile', x, y, vx: Math.cos(aa) * 160, vy: Math.sin(aa) * 160, ang: aa, acc: 520, r: 5, dmg: W.dmg * dm * W.k * (1 + .2 * tier) / K2, pierce: 1, life: 2.2, col, boom: W.boom, homing: 5, target: t, explodeEnd: 1, size: 1 }); AU.sfx('missile', 1.1); }); v.recoil = 2; break; }
+    case 'grenade': { const [x, y] = vMuzzle(v, a); const d = Math.min(W.range, Math.hypot(tgt.x - x, tgt.y - y)); mkProj({ kind: 'grenade', lob: 1, x0: x, y0: y, tx: x + Math.cos(a) * d, ty: y + Math.sin(a) * d, x, y, vx: 0, vy: 0, ang: 0, T: 0.5, tt: 0, r: 0, dmg: W.dmg * dm * (tier ? .75 : 1), life: 9, col, boom: W.boom, cluster: tier ? 2 + tier : 0, size: 1.1 + tier * .1, nohit: 1 }); vFlash(x, y, a, '#c5e1a5', 1.4); v.recoil = 3; break; }
+    case 'shell': { const [x, y] = vMuzzle(v, a); mkProj({ kind: 'cball', x, y, vx: Math.cos(a) * 520, vy: Math.sin(a) * 520, ang: a, r: 9 + tier, dmg: W.dmg * dm * (tier >= 2 ? .8 : 1), pierce: 3, life: W.range / 520, col, boom: W.boom * (1 + .12 * tier), shards: tier >= 2 ? 6 + tier * 2 : 0, shardDmg: W.dmg * dm * .12, explodeEnd: 1, size: 16 + tier * 2, kb: 140 }); vFlash(x, y, a, '#ffab40', 3.2); for (let k = 0; k < 8; k++) addPart(x, y, Math.cos(a + rand(-.8, .8)) * rand(60, 160), Math.sin(a + rand(-.8, .8)) * rand(60, 160), 'rgba(200,200,200,.6)', .6, 5); v.recoil = 9; G.shake = Math.max(G.shake, 4); break; }
+    case 'mortar': { const K3 = W.k + tier; for (let k = 0; k < K3; k++) later(k * 0.2, () => { if (G.state !== 'play' || !G.veh) return; const tx = tgt.x + rand(-60, 60), ty = tgt.y + rand(-60, 60); const [x, y] = vMuzzle(v, -Math.PI / 2); mkProj({ kind: 'shell', lob: 1, x0: x, y0: y, tx, ty, x, y, vx: 0, vy: 0, ang: 0, T: 0.9, tt: 0, r: 0, dmg: W.dmg * dm * W.k * (1 + .2 * tier) / K3, life: 9, col, boom: W.boom, size: 1.2, nohit: 1 }); effects.push({ type: 'target', x: tx, y: ty, r: W.boom * .7, t: 0, dur: .9, col: '#ffcc80' }); vFlash(x, y, -Math.PI / 2, '#ffe0b2', 1.8); AU.sfx('mortar', 1); }); v.recoil = 4; break; }
+    case 'laser': { S.alt ^= 1; const [x, y] = vMuzzle(v, a, S.alt ? 1.6 : -1.6); const nl = tier >= 2 ? 3 : 1; for (let l = 0; l < nl; l++) { const aa = a + (l - (nl - 1) / 2) * .1; const q = mkProj({ kind: 'lbolt', x, y, vx: Math.cos(aa) * 900, vy: Math.sin(aa) * 900, ang: aa, r: 5, dmg: W.dmg * dm * (nl > 1 ? .5 : 1), pierce: 2 + (tier >= 1 ? 2 : 0), life: W.range / 900, col, len: 26 + tier * 6, kb: 25 }); if (tier >= 1 && !l) q.storm = 1; } vFlash(x, y, a, col, 1 + tier * .2); break; }
+    case 'plasma': { const [x, y] = vMuzzle(v, a); const d = Math.min(W.range, Math.hypot(tgt.x - x, tgt.y - y) + 40); mkProj({ kind: 'plasma', x, y, vx: Math.cos(a) * 380, vy: Math.sin(a) * 380, ang: a, r: 10 + tier * 2, dmg: W.dmg * dm, pierce: 999, life: d / 380, col, boom: W.boom * (1 + .15 * tier), shards: tier >= 2 ? 5 + tier : 0, shardDmg: W.dmg * dm * .2, explodeEnd: 1, size: 10 + tier * 2 }); vFlash(x, y, a, col, 2); v.recoil = 4; break; }
+    case 'rail': { const nRail = tier >= 2 ? 3 : 1; const [x1, y1] = vMuzzle(v, a); effects.push({ type: 'charge', t: 0, dur: 0.25, col }); later(0.25, () => { if (G.state !== 'play' || !G.veh) return; for (let rl = 0; rl < nRail; rl++) { const ra = a + (rl - (nRail - 1) / 2) * .12; const [xa, ya] = vMuzzle(v, ra), x2 = xa + Math.cos(ra) * W.range, y2 = ya + Math.sin(ra) * W.range; effects.push({ type: 'rail', x1: xa, y1: ya, x2, y2, w: 12 + tier * 2, col, t: 0, dur: 0.3 }); for (const e of query((xa + x2) / 2, (ya + y2) / 2, W.range / 2 + 10).slice()) if (segDist2(e.x, e.y, xa, ya, x2, y2) < (8 + e.r) ** 2) hitEnemy(e, W.dmg * dm * (nRail > 1 ? .6 : 1), { ap: 0.6, kb: 90, ang: ra, silent: true }); } AU.sfx('rail', 1); v.recoil = 8; G.shake = Math.max(G.shake, 4); }); void x1; break; }
+    case 'tesla': { const [x, y] = vMuzzle(v, a); const ts = nearestK(P.x, P.y, W.range, W.k + tier); for (const t of ts) { const pts = [[x, y], [t.x, t.y]]; hitEnemy(t, W.dmg * dm, { silent: true, stun: 0.15 }); let cur = t; const hit = new Set([t.id]); for (let c = 0; c < 2; c++) { let best = null, bd = 130 * 130; for (const e of query(cur.x, cur.y, 130)) { if (hit.has(e.id)) continue; const dd = (e.x - cur.x) ** 2 + (e.y - cur.y) ** 2; if (dd < bd) { bd = dd; best = e; } } if (!best) break; hit.add(best.id); pts.push([best.x, best.y]); hitEnemy(best, W.dmg * dm * 0.7, { silent: true }); cur = best; } effects.push({ type: 'bolt', pts, t: 0, dur: 0.2, seed: Math.random() * 100, col }); } break; }
+    case 'mlrs': { const list = enemies.filter(e => !e.dead && onScreen(e, -10)); const K4 = W.k + 3 * tier; for (let k = 0; k < K4; k++) later(k * 0.07, () => { if (G.state !== 'play' || !G.veh || !list.length) return; const t = pick(list); if (t.dead) return; const aa = -Math.PI / 2 + rand(-.6, .6); const [x, y] = vMuzzle(v, aa); mkProj({ kind: 'missile', x, y, vx: Math.cos(aa) * 220, vy: Math.sin(aa) * 220, ang: aa, acc: 480, r: 5, dmg: W.dmg * dm * W.k * (1 + .2 * tier) / K4, pierce: 1, life: 2.4, col, boom: W.boom, homing: 4.5, target: t, explodeEnd: 1, size: .9 }); vFlash(x, y, aa, '#ffd180', 1); }); AU.sfx('missile', .8); v.recoil = 3; break; }
     case 'beam': { S.beamT = W.dur; S.tick = 0; AU.sfx('beam', 1); break; }
   }
   if (key !== 'homing' && key !== 'mortar' && key !== 'mlrs' && key !== 'beam' && key !== 'rail') AU.sfx(W.s[0], W.s[1]);
 }
 function updateVehicle(dt) {
   const v = G.veh;
+  v.time -= dt;
+  if (v.time <= 5 && Math.floor(v.time * 2) !== Math.floor((v.time + dt) * 2)) AU.sfx('alarm');
+  if (v.time <= 0) { exitVehicle('time'); return; }
+  if (v.ultT > 0) updateUlt(v, dt);
   v.x = P.x; v.y = P.y; if (P.moving) { v.walkT += dt; if (Math.abs(P.lastMx) > 0.2) v.face = P.lastMx > 0 ? 1 : -1; }
   if (v.recoil > 0) v.recoil = Math.max(0, v.recoil - dt * 30); if (v.flash > 0) v.flash -= dt;
   if (v.skCd > 0) v.skCd -= dt; if (v.ovT > 0) v.ovT -= dt; if (v.nitroT > 0) v.nitroT -= dt; if (v.ramT > 0) v.ramT -= dt;
@@ -3308,7 +3404,14 @@ function addAlly(spec, x, y) {
   return a;
 }
 // 동료 1명 화력 ≈ 주인공 화력의 15% (스테이지 초반 하한 포함)
-function allyBase() { const fl = 5 * enemyH() / Math.sqrt(DF().hp); return clamp(0.14 * playerPow(), fl, fl * 4) / 27; }
+// 동료 성장: 주인공 공격력 증가분의 약 50%만 반영 (주인공 +100% → 동료 +50%)
+function allyGrowth() {
+  let lvs = 0; for (const w of G.weapons) lvs += w.lv + (w.evo ? 2 : 0); const avg = G.weapons.length ? lvs / G.weapons.length : 1;
+  const idx = P.dmgMul / (1 + 0.05 * save.up.atk) * (1 + 0.04 * (G.lv - 1)) * (1 + 0.08 * (avg - 1)) * (1 + 0.05 * save.up.atk);
+  return 1 + 0.5 * Math.max(0, idx - 1);
+}
+function aRank() { return Math.min(5, 1 + Math.floor((G.lv - 1) / 6)); }
+function allyBase() { return 5 * enemyH() / Math.sqrt(DF().hp) * allyGrowth() * (G.allyBoost || 1) / 27; }
 function aDmg(a) { return allyBase() * (a.spec.perk === 'vet' ? 1.25 : 1) * (a.spec.special ? 1.4 : 1); }
 function linkAllies(v, quiet) {
   const L = v.ch.link; let seats = L === 'A' ? 2 : (L === 'A1' && (v.def.idx % 2 === 0)) ? 1 : 0;
@@ -3341,19 +3444,21 @@ function allyHit(a, e, base, o = {}) {
   if (p === 'shock' && Math.random() < .3 && !e.dead) { const t2 = nearest(e.x, e.y, 120, new Set([e.id])); if (t2) zap(e.x, e.y, t2, base * .5, { col: '#ffee58' }); }
   if (p === 'heavy' && Math.random() < .35) explode(e.x, e.y, 30, base * .4, true, '#ff9100');
 }
-function allyShoot(a, t, dm) {
+function allyShoot(a, t, dm, rk = 1) {
   const c = a.c, ang = Math.atan2(t.y - a.y, t.x - a.x), x = a.x + Math.cos(ang) * 12, y = a.y - 6 + Math.sin(ang) * 12, p = a.spec.perk;
   a.aim = ang; a.atkT = .2; if (Math.abs(Math.cos(ang)) > .2) a.face = Math.cos(ang) > 0 ? 1 : -1;
-  const pr = (o) => { const q = mkProj(o); q.ally = a; return q; };
+  const sz = 1 + .08 * (rk - 1); const pr = (o) => { if (o.size) o.size *= sz; if (o.r) o.r *= sz; const q = mkProj(o); q.ally = a; return q; };
   switch (a.cls) {
-    case 'rifle': for (let k = 0; k < 3; k++) later(k * 0.08, () => { if (G.state !== 'play' || a.down > 0 || a.seated) return; const aa = Math.atan2(t.y - a.y, t.x - a.x) + rand(-.06, .06); pr({ kind: 'tracer', x: a.x + Math.cos(aa) * 12, y: a.y - 6 + Math.sin(aa) * 12, vx: Math.cos(aa) * 720, vy: Math.sin(aa) * 720, ang: aa, r: 4, dmg: 8 * dm, pierce: p === 'pierce' ? 3 : 1, life: c.range / 720, col: '#ffe082', size: .9, kb: 25 }); AU.sfx('rifle', 1.25); }); break;
-    case 'sniper': pr({ kind: 'slug', x, y, vx: Math.cos(ang) * 1200, vy: Math.sin(ang) * 1200, ang, r: 4, dmg: 62 * dm, pierce: 5, life: c.range / 1200, col: '#fff176', size: 1.3, kb: 100, ap: .4 }); effects.push({ type: 'rail', x1: x, y1: y, x2: x + Math.cos(ang) * 120, y2: y + Math.sin(ang) * 120, w: 2, col: '#fff59d', t: 0, dur: .12 }); AU.sfx('rifle', .6); break;
-    case 'rocket': pr({ kind: 'rocket', x, y, vx: Math.cos(ang) * 180, vy: Math.sin(ang) * 180, ang, acc: 480, r: 6, dmg: 34 * dm, pierce: 1, life: 1.4, col: '#ff7043', boom: 55, explodeEnd: 1, size: 1 }); effects.push({ type: 'flash', x, y, ang, col: '#ffab40', t: 0, dur: .07, size: 1.4 }); AU.sfx('rocket', 1.2); break;
+    case 'rifle': for (let k = 0; k < (rk >= 4 ? 4 : 3); k++) later(k * 0.08, () => { if (G.state !== 'play' || a.down > 0 || a.seated) return; const aa = Math.atan2(t.y - a.y, t.x - a.x) + rand(-.06, .06); pr({ kind: 'tracer', x: a.x + Math.cos(aa) * 12, y: a.y - 6 + Math.sin(aa) * 12, vx: Math.cos(aa) * 720, vy: Math.sin(aa) * 720, ang: aa, r: 4, dmg: 8 * dm, pierce: (p === 'pierce' ? 3 : 1) + (rk >= 3 ? 1 : 0), life: c.range / 720, col: rk >= 3 ? '#80deea' : '#ffe082', size: .9, kb: 25 }); AU.sfx('rifle', 1.25); }); break;
+    case 'sniper': pr({ kind: 'slug', x, y, vx: Math.cos(ang) * 1200, vy: Math.sin(ang) * 1200, ang, r: 4, dmg: 62 * dm, pierce: 5 + rk, boom: rk >= 4 ? 34 : 0, life: c.range / 1200, col: '#fff176', size: 1.3, kb: 100, ap: .4 }); effects.push({ type: 'rail', x1: x, y1: y, x2: x + Math.cos(ang) * 120, y2: y + Math.sin(ang) * 120, w: 2, col: '#fff59d', t: 0, dur: .12 }); AU.sfx('rifle', .6); break;
+    case 'rocket': for (let k = 0; k < (rk >= 4 ? 2 : 1); k++) { const aa = ang + (k ? .2 : 0); pr({ kind: 'rocket', x, y, vx: Math.cos(aa) * 180, vy: Math.sin(aa) * 180, ang: aa, acc: 480, r: 6, dmg: 34 * dm * (rk >= 4 ? .6 : 1), pierce: 1, life: 1.4, col: '#ff7043', boom: 55 * (1 + .12 * (rk - 1)), homing: k ? 3 : 0, target: t, explodeEnd: 1, size: 1 }); } effects.push({ type: 'flash', x, y, ang, col: '#ffab40', t: 0, dur: .07, size: 1.4 }); AU.sfx('rocket', 1.2); break;
     case 'medic': pr({ kind: 'bullet', x, y, vx: Math.cos(ang) * 650, vy: Math.sin(ang) * 650, ang, r: 4, dmg: 7 * dm, pierce: 1, life: c.range / 650, col: '#e0f7fa', size: .9, kb: 15 }); AU.sfx('smg', 1.5); break;
-    case 'drone': pr({ kind: 'lbolt', x: a.x, y: a.y - 26, vx: Math.cos(ang) * 850, vy: Math.sin(ang) * 850, ang, r: 4, dmg: 7 * dm, pierce: p === 'pierce' ? 3 : 1, life: c.range / 850, col: '#18ffff', len: 14, kb: 10 }); AU.sfx('drone', 1.2); break;
+    case 'drone': a.shots = (a.shots || 0) + 1; if (rk >= 2 && a.shots % (rk >= 4 ? 2 : 3) === 0) { pr({ kind: 'missile', x: a.x, y: a.y - 26, vx: 0, vy: -180, ang: -Math.PI / 2, acc: 460, r: 5, dmg: 18 * dm, pierce: 1, life: 2, col: '#ff8a65', boom: 32, homing: 5, target: t, explodeEnd: 1, size: .8 }); AU.sfx('missile', 1.4); }
+      pr({ kind: 'lbolt', x: a.x, y: a.y - 26, vx: Math.cos(ang) * 850, vy: Math.sin(ang) * 850, ang, r: 4, dmg: 7 * dm, pierce: p === 'pierce' ? 3 : 1, life: c.range / 850, col: '#18ffff', len: 14, kb: 10 }); AU.sfx('drone', 1.2); break;
     case 'guard': pr({ kind: 'bullet', x, y, vx: Math.cos(ang) * 620, vy: Math.sin(ang) * 620, ang, r: 4, dmg: 12 * dm, pierce: 1, life: c.range / 620, col: '#80d8ff', size: 1.1, kb: 50 }); AU.sfx('turret', .9); break;
     case 'mecha': a.alt = (a.alt || 0) ^ 1;
       if (a.alt) { pr({ kind: 'cball', x, y: y - 6, vx: Math.cos(ang) * 480, vy: Math.sin(ang) * 480, ang, r: 7, dmg: 40 * dm, pierce: 2, life: c.range / 480, col: '#ffab40', boom: 52, explodeEnd: 1, size: 12, kb: 100 }); effects.push({ type: 'flash', x, y: y - 6, ang, col: '#ffab40', t: 0, dur: .08, size: 2.4 }); AU.sfx('cannon', 1.3); }
+      else if (rk >= 3) { for (const sd of [-5, 5]) pr({ kind: 'lbolt', x: a.x, y: a.y - 14 + sd, vx: Math.cos(ang) * 900, vy: Math.sin(ang) * 900, ang, r: 5, dmg: 16 * dm, pierce: 3, life: .4, col: '#ff1744', len: 24, kb: 20 }); AU.sfx('laser', 1.2); }
       else for (let k = 0; k < 4; k++) later(k * .07, () => { if (G.state !== 'play' || a.down > 0 || a.seated) return; const aa = Math.atan2(t.y - a.y, t.x - a.x) + rand(-.08, .08); pr({ kind: 'tracer', x: a.x, y: a.y - 10, vx: Math.cos(aa) * 760, vy: Math.sin(aa) * 760, ang: aa, r: 4, dmg: 9 * dm, pierce: 1, life: .45, col: '#ffe082', size: 1, kb: 25 }); AU.sfx('hmg', 1.4); });
       break;
   }
@@ -3363,6 +3468,7 @@ function updateAllies(dt) {
   for (const a of allies) if (a.cls === 'guard' && a.down <= 0 && !a.seated) G.hasGuard = true;
   const mv = Math.hypot(P.lastMx, P.lastMy) || 1, bx = P.moving ? -P.lastMx / mv : 0, by = P.moving ? -P.lastMy / mv : 1;
   const air = G.veh && G.veh.ch.cat === 'air';
+  const rk = aRank(); if (rk > (G.allyRank || 1)) { G.allyRank = rk; toast(`⭐ 동료 전원 진급! 계급 ${rk}<br><span style="font-size:14px">${['', '', '연사·특수탄 강화', '소총병 관통탄 · 메카 쌍열 레이저 해금', '저격 폭발탄 · 로켓 2연발 · 드론 미사일 증가', '최대 계급: 모든 능력 강화'][rk]}</span>`, 1.8, '#ffd54f'); }
   let i = 0;
   for (const a of allies) {
     if (a.seated) { a.x = P.x; a.y = P.y; i++; continue; }
@@ -3399,24 +3505,24 @@ function updateAllies(dt) {
     // 접촉 피해 (적에게 둘러싸이면 맞음)
     if (!fly) for (const e of query(a.x, a.y, 10)) { if (e.static || e.dmg <= 0 || e.atkCd > 0) continue; e.atkCd = 0.8; a.hp -= e.dmg * DF().dmg * 0.7; a.flash = .1; if (a.hp <= 0) { a.hp = 0; a.down = 15; a.tgt = null; texts.push({ x: a.x, y: a.y - 20, t: 0, v: '부상!', col: '#ff8a80', pl: 1 }); AU.sfx('hurt'); } break; }
     // 의무병: 회복
-    if (a.cls === 'medic') { a.healT -= dt; if (a.healT <= 0) { a.healT = 9; if (P.hp < P.maxHp) heal(Math.round(P.maxHp * .06)); for (const o of allies) o.hp = Math.min(o.maxHp, o.hp + o.maxHp * .2); if (G.veh) G.veh.hp = Math.min(G.veh.maxHp, G.veh.hp + G.veh.maxHp * .04); effects.push({ type: 'healfx', x: a.x, y: a.y, r: 90, t: 0, dur: .6 }); } }
+    if (a.cls === 'medic') { a.healT -= dt; if (a.healT <= 0) { a.healT = 9; if (P.hp < P.maxHp) heal(Math.round(P.maxHp * (.05 + .01 * rk))); for (const o of allies) o.hp = Math.min(o.maxHp, o.hp + o.maxHp * .2); if (G.veh) G.veh.hp = Math.min(G.veh.maxHp, G.veh.hp + G.veh.maxHp * .04); effects.push({ type: 'healfx', x: a.x, y: a.y, r: 90, t: 0, dur: .6 }); } }
     // 방어 로봇: 적 탄환 차단
-    if (a.cls === 'guard') for (const b of eprojs) { if (!b.dead && (b.x - a.x) ** 2 + (b.y - a.y) ** 2 < 46 * 46) { b.dead = true; effects.push({ type: 'shock', x: b.x, y: b.y, r: 12, t: 0, dur: .2, col: '#80d8ff' }); } }
+    if (a.cls === 'guard') for (const b of eprojs) { if (!b.dead && (b.x - a.x) ** 2 + (b.y - a.y) ** 2 < (40 + 6 * rk) ** 2) { b.dead = true; effects.push({ type: 'shock', x: b.x, y: b.y, r: 12, t: 0, dur: .2, col: '#80d8ff' }); } }
     // 공격
     const dm = aDmg(a);
     if (a.cls === 'flame') {
-      const t = nearest(a.x, a.y, c.range); a.fireOn = !!t; if (!t) continue;
+      const FRa = c.range * (1 + .06 * (rk - 1)); a.fireR = FRa; const t = nearest(a.x, a.y, FRa); a.fireOn = !!t; if (!t) continue;
       const ta = Math.atan2(t.y - a.y, t.x - a.x); a.fireAng += angDiff(ta, a.fireAng) * Math.min(1, dt * 8); a.aim = a.fireAng; a.atkT = .2; a.face = Math.cos(ta) > 0 ? 1 : -1;
       if (Q.level && Math.random() < .8) { const aa = a.fireAng + rand(-.35, .35), sp = rand(150, 240); addPart(a.x + Math.cos(a.fireAng) * 12, a.y - 6 + Math.sin(a.fireAng) * 12, Math.cos(aa) * sp, Math.sin(aa) * sp, pick(['#ff9800', '#ffeb3b', '#ff5722']), .35, rand(3, 5)); }
-      a.fireTick -= dt; if (a.fireTick <= 0) { a.fireTick = .15; for (const e of query(a.x, a.y, c.range).slice()) { const ea = Math.atan2(e.y - a.y, e.x - a.x); if (Math.abs(angDiff(ea, a.fireAng)) < .45) allyHit(a, e, 7 * dm, { tick: 1, noCrit: true, burn: 12 * dm }); } if (Math.random() < .3) AU.sfx('flame', 1.3); }
+      a.fireTick -= dt; if (a.fireTick <= 0) { a.fireTick = .15; for (const e of query(a.x, a.y, FRa).slice()) { const ea = Math.atan2(e.y - a.y, e.x - a.x); if (Math.abs(angDiff(ea, a.fireAng)) < .45) allyHit(a, e, 7 * dm, { tick: 1, noCrit: true, burn: 12 * dm * (1 + .15 * rk) }); } if (Math.random() < .3) AU.sfx('flame', 1.3); }
       continue;
     }
-    a.cd -= dt * (a.spec.perk === 'rapid' ? 1.35 : 1); if (a.cd > 0) continue;
+    a.cd -= dt * (a.spec.perk === 'rapid' ? 1.35 : 1) * (1 + 0.06 * (rk - 1)); if (a.cd > 0) continue;
     if (c.kind === 'beast') {
       const t = a.tgt && !a.tgt.dead ? a.tgt : null; if (!t) { a.cd = .15; continue; }
       if (Math.hypot(t.x - a.x, t.y - a.y) < t.r + 16) {
         a.cd = c.cd; a.bite = .15;
-        allyHit(a, t, (a.cls === 'wolf' ? 16 : 13) * dm, { kb: 50, ang: Math.atan2(t.y - a.y, t.x - a.x), stun: a.cls === 'dog' ? .35 : 0, poison: a.cls === 'wolf' ? 9 * dm : 0 });
+        allyHit(a, t, (a.cls === 'wolf' ? 16 : 13) * dm * (1 + .1 * (rk - 1)) * (t.boss ? .6 : 1), { kb: 50, ang: Math.atan2(t.y - a.y, t.x - a.x), stun: a.cls === 'dog' ? .35 : 0, poison: a.cls === 'wolf' ? 9 * dm : 0 });
         if (Q.level) for (let k = 0; k < 4; k++) addPart(t.x, t.y, rand(-80, 80), rand(-80, 30), a.cls === 'wolf' ? '#d50000' : '#fff', .25, 2.5);
         AU.sfx('hit');
       } else a.cd = .1;
@@ -3426,7 +3532,7 @@ function updateAllies(dt) {
     if (a.cls === 'sniper') { let best = null, bh = 0; for (const e of enemies) { if (e.dead) continue; const dd = (e.x - a.x) ** 2 + (e.y - a.y) ** 2; if (dd > c.range * c.range) continue; const sc = e.hp * (e.boss ? 3 : e.elite ? 2 : 1); if (sc > bh) { bh = sc; best = e; } } t = best; }
     else t = nearest(a.x, a.y, c.range);
     if (!t) { a.cd = .2; continue; }
-    a.cd = c.cd; allyShoot(a, t, dm);
+    a.cd = c.cd; allyShoot(a, t, dm * (t.boss ? .6 : 1), rk);
   }
   // 합동 공격
   G.comboCd -= dt;
@@ -3476,7 +3582,7 @@ function updateRescues(dt) {
 /* ------------------------- 랜덤 전장 이벤트 (사전 경고 포함) ------------------------- */
 const DIR8 = ['동쪽', '남동쪽', '남쪽', '남서쪽', '서쪽', '북서쪽', '북쪽', '북동쪽'];
 function extEvent() {
-  const opts = [['radio', G.radio || allies.length >= ALLY_MAX ? 0 : 2.2], ['vehicle', 1.4], ['storm', 1], ['artillery', 1.3], ['ambush', 1.4], ['eliteRaid', 1]];
+  const opts = [['radio', G.radio || allies.length >= ALLY_MAX ? 0 : 2.2], ['vehicle', G.vdropDone && !G.veh && !vehs.some(v => !v.dead) ? 0.6 : 0], ['supply2', 1.4], ['lasergrid', G.theme === 'neon' || G.theme === 'plasma' ? 1.4 : 0.3], ['storm', G.theme === 'dust' || G.st.wx === 'dust' ? 1.6 : 0.8], ['artillery', G.theme === 'war' ? 2.4 : 1.1], ['ambush', 1.4], ['eliteRaid', 1]];
   const ev = wpick(opts.filter(o => o[1] > 0));
   if (ev === 'radio') {
     const a = rand(0, TAU), d = rand(520, 700), x = P.x + Math.cos(a) * d, y = P.y + Math.sin(a) * d;
@@ -3485,10 +3591,9 @@ function extEvent() {
     toast(`📻 긴급 구조 요청!<br><span style="font-size:15px">${dir} 지역에 아군이 고립되었습니다</span>`, 3, '#69f0ae'); AU.sfx('alarm');
   } else if (ev === 'vehicle') {
     const pool = VEH_ST[Math.min(40, G.stage + 5)], def = pool[Math.floor(Math.random() * 3)];
-    const a = rand(0, TAU), d = rand(140, 220), x = P.x + Math.cos(a) * d, y = P.y + Math.sin(a) * d;
-    effects.push({ type: 'drop', x, y, t: 0, dur: 1.6 }); toast(`🪂 특수 차량 공수 투하!<br><span style="font-size:14px">${def.name}</span>`, 2, '#80deea'); AU.sfx('alarm');
-    later(1.6, () => { if (G.state !== 'play') return; const v = mkVeh(def, x, y); v.bonus = true; vehs.push(v); G.shake = Math.max(G.shake, 5); AU.sfx('slam'); });
+    vehicleDrop(def, true);
   } else if (ev === 'storm') { G.stormWarn = 2.5; toast('🌪️ 경고: 모래폭풍 접근!<br><span style="font-size:14px">곧 시야가 좁아집니다</span>', 2.4, '#ffcc80'); AU.sfx('alarm'); }
+  else if (ev === 'supply2' || ev === 'lasergrid') extEvent2(ev);
   else if (ev === 'artillery') { G.artWarn = 2.2; toast('🚀 경고: 적의 미사일 포격!<br><span style="font-size:14px">빨간 원을 피하세요</span>', 2.2, '#ff5252'); AU.sfx('alarm'); }
   else if (ev === 'ambush') {
     toast('⚠ 적의 대규모 기습 임박!<br><span style="font-size:14px">양쪽에서 몰려옵니다</span>', 2, '#ff7043'); AU.sfx('alarm');
@@ -3553,7 +3658,7 @@ function updatePotions(dt) {
 }
 
 /* ------------------------- 적 강화 (난이도 / 동료 수) ------------------------- */
-function allySpawnMul() { const n = activeAllies(); return 1 + Math.max(0, n - 1) * 0.1 + (G.veh ? 0.12 : 0); }
+function allySpawnMul() { const n = activeAllies(); return 1 + Math.max(0, n - 1) * 0.1 + (G.veh ? 0.45 : 0); }
 function extDirector(dt) {
   G.extEvT -= dt;
   if (G.extEvT <= 0 && G.bossState === 0 && !G.clearing) { G.extEvT = rand(48, 66); extEvent(); }
@@ -3675,6 +3780,7 @@ function extCollect(p) {
       else if (G.veh) { const g = Math.round(15 * G.stage * P.greed); G.gold += g; toast(`이 차량은 더 수리할 수 없습니다 (+${g}G)`, 1.2, '#b0bec5'); }
       else { G.rkit = 1; AU.sfx('item'); toast('🔧 수리 키트 보관 (탑승 장비가 손상되면 자동 사용)', 1.6, '#80deea'); }
       return true;
+    case 'wsup': collectSup(); return true;
     case 'scrate': { const g = Math.round(12 * G.stage * P.greed); G.gold += g; qAdd('scrate'); AU.sfx('chest'); heal(Math.round(P.maxHp * .1)); texts.push({ x: P.x, y: P.y - 26, t: 0, v: '📦 보급품 확보', col: '#90caf9', pl: 1, big: 1 }); return true; }
   }
   return false;
@@ -3700,7 +3806,7 @@ function extUpdate(dt) {
   updateSquadHud();
 }
 function extArrows(list) {
-  for (const v of vehs) if (!v.dead && v !== G.veh && !v.seen) list.push([v.x, v.y, '#4dd0e1']);
+  for (const v of vehs) if (!v.dead && v !== G.veh) list.unshift([v.x, v.y, '#4dd0e1', true]);
   for (const r of rescues) if (!r.done) list.push([r.x, r.y, '#69f0ae']);
   if (G.radio) list.unshift([G.radio.x, G.radio.y, '#ffd54f', true]);
   if (G.hold && !G.hold.q.done) list.push([G.hold.x, G.hold.y, '#ffab40']);
@@ -3731,12 +3837,301 @@ function updateSquadHud() {
 }
 
 /* =====================================================================
+   데스 서바이버 확장팩: 타격감·대량 처치·콤보·연쇄 폭발, 스테이지별 정예 40종,
+   정예 보상 선택, 전투 보급, 차량 낙하산 투하·사용시간·필살기, 스테이지 테마 연출
+   ===================================================================== */
+const FXCAP = 240;
+const fxOk = () => effects.length < FXCAP;
+
+/* ------------------------- 스테이지 테마 (폭발·처치 연출·효과음) ------------------------- */
+const THEME_OF = { city: 'war', military: 'war', factory: 'tox', lab: 'tox', subway: 'dust', forest: 'bio', hive: 'bio', ice: 'ice', volcano: 'lava', alien: 'plasma', space: 'plasma', epic: 'plasma', techno: 'neon', cyber: 'neon', waste: 'rad', rift: 'void', doom: 'void', final: 'void' };
+const THEMES = {
+  war: { n: '포격전', cols: ['#ffb74d', '#ff7043', '#9e9e9e', '#ffe082'], debris: '#4e342e', ring: '#ffcc80', smoke: 1 },
+  tox: { n: '오염', cols: ['#c6ff00', '#76ff03', '#ffee58'], debris: '#556b2f', ring: '#c6ff00', snd: 'acid' },
+  dust: { n: '흙먼지', cols: ['#bcaaa4', '#8d6e63', '#ffcc80'], debris: '#5d4037', ring: '#d7ccc8', smoke: 1 },
+  bio: { n: '생체', cols: ['#b2ff59', '#69f0ae', '#ce93d8'], debris: '#33691e', ring: '#b9f6ca', snd: 'acid' },
+  ice: { n: '빙결', cols: ['#e1f5fe', '#80d8ff', '#ffffff'], debris: '#b3e5fc', ring: '#e1f5fe', snd: 'freeze' },
+  lava: { n: '용암', cols: ['#ff6d00', '#ffab00', '#ff3d00', '#ffd180'], debris: '#3e2723', ring: '#ff9100', snd: 'flame' },
+  plasma: { n: '플라즈마', cols: ['#e040fb', '#7c4dff', '#18ffff'], debris: '#4a148c', ring: '#ea80fc', snd: 'plasma' },
+  neon: { n: '전자기', cols: ['#00e5ff', '#ff4081', '#76ff03', '#ffffff'], debris: '#263238', ring: '#18ffff', snd: 'zap' },
+  rad: { n: '방사능', cols: ['#c6ff00', '#eeff41', '#76ff03'], debris: '#33691e', ring: '#eeff41', snd: 'acid' },
+  void: { n: '차원', cols: ['#b388ff', '#ff1744', '#e040fb'], debris: '#1a0b2e', ring: '#b388ff', snd: 'hole' }
+};
+const TH = () => THEMES[G.theme] || THEMES.war;
+// 폭발: 충격파 고리 + 파편 + 테마 입자 (실제 피해 범위 r 과 같은 크기)
+function explodeFx(x, y, r, col) {
+  if (!onScreen({ x, y }, r + 40)) return;
+  const th = TH();
+  if (fxOk()) effects.push({ type: 'xring', x, y, r: r * 1.15, t: 0, dur: 0.32, col: th.ring });
+  const nd = Q.level ? Math.min(10, 3 + r / 14) : 2;
+  for (let i = 0; i < nd; i++) { const a = rand(0, TAU), s = rand(80, 220) * r / 55; addPart(x, y, Math.cos(a) * s, Math.sin(a) * s - 80, th.debris, rand(.5, .9), rand(2.5, 4.5), 420); }
+  if (Q.level) for (let i = 0; i < 4; i++) { const a = rand(0, TAU), s = rand(40, 140); addPart(x, y, Math.cos(a) * s, Math.sin(a) * s, pick(th.cols), .45, rand(2, 4)); }
+  if (th.smoke && Q.level >= 2 && r > 40) for (let i = 0; i < 3; i++) parts.length < QC.particles && parts.push(newPart(x + rand(-r, r) * .3, y + rand(-r, r) * .3, rand(-20, 20), rand(-40, -15), 'rgba(90,90,90,.45)', 1.1, 7, 0, 2));
+  if (r >= 70) G.shake = Math.max(G.shake, 3 + r / 40);
+  if (th.snd && r > 50) AU.sfx(th.snd, 0.7);
+}
+// 무기 계열별 처치 연출
+function killFx(e, W_) {
+  if (!Q.level || !fxOk() || !onScreen(e, 30)) return;
+  const c = W_ ? W_.c : null, col = W_ ? W_.col : pick(TH().cols);
+  if (c === 'energy' || c === 'future') effects.push({ type: 'ering', x: e.x, y: e.y, r: e.r * 2, t: 0, dur: .3, col });
+  else if (c === 'blast') for (let i = 0; i < 5; i++) addPart(e.x, e.y, rand(-150, 150), rand(-200, -40), pick(['#ff9800', '#ffeb3b', '#ff5722']), .5, 3.5, 380);
+  else if (c === 'special') effects.push({ type: 'xring', x: e.x, y: e.y, r: e.r * 1.6, t: 0, dur: .25, col });
+}
+// 명중 연출 (무기 계열별): 소총=불꽃, 에너지=고리, 특수=튀김
+function hitFx(e, W_, o) {
+  if (!Q.level || effects.length > 170 || (e.hfxT || 0) > G.time || !onScreen(e, 10)) return;
+  e.hfxT = G.time + 0.09;
+  const fast = W_ && W_.cd && W_.cd < 0.12;
+  if (fast && Math.random() < 0.6) return;
+  effects.push({ type: 'hitx', x: e.x + rand(-4, 4), y: e.y - e.r * .3, r: e.r, ang: o.ang !== undefined ? o.ang : Math.atan2(e.y - P.y, e.x - P.x), t: 0, dur: .14, col: (W_ && W_.col) || '#fff59d', cls: W_ ? W_.c : 'rifle' });
+}
+
+/* ------------------------- 콤보 · 연쇄 폭발 ------------------------- */
+const COMBO_MS = [10, 30, 50, 100];
+function onKill(e) {
+  G.combo++; G.comboT = 2.4; if (G.combo > G.comboMax) G.comboMax = G.combo;
+  if (COMBO_MS.includes(G.combo) || (G.combo > 100 && G.combo % 50 === 0)) comboMilestone(G.combo);
+  // 짧은 시간에 여러 마리를 쓰러뜨리면 연쇄 폭발 (실제 범위 피해)
+  G.kwin.push(G.time); while (G.kwin.length && G.kwin[0] < G.time - 0.3) G.kwin.shift();
+  if (G.kwin.length >= 6 && G.chainCd <= 0 && onScreen(e, 0)) {
+    G.chainCd = 0.14; const r = 44 + Math.min(30, G.kwin.length * 2), x = e.x, y = e.y, dmg = Math.max(e.lastDmg || 0, e.maxHp * 0.5) * 0.5;
+    later(0.06, () => { if (G.state === 'play') explode(x, y, r, dmg, true, pick(TH().cols), { noTrait: 1 }); });
+    if (Math.random() < .25 && texts.length < 70) texts.push({ x, y: y - 16, t: 0, v: '연쇄 폭발!', col: '#ffab40', big: 1 });
+  }
+}
+function comboMilestone(c) {
+  const lv = c >= 100 ? 3 : c >= 50 ? 2 : c >= 30 ? 1 : 0;
+  effects.push({ type: 'combo', c, lv, t: 0, dur: 1.3 });
+  const g = Math.round((2 + lv * 4) * (1 + G.stage * 0.15) * diffRewardMul());
+  if (G.comboGold < 150 + G.stage * 15) { G.comboGold += g; G.gold += g; }
+  if (lv >= 1) for (let i = 0; i < 2 + lv * 2; i++) dropGem(P.x + rand(-50, 50), P.y + rand(-50, 50), 2 + Math.round(G.stage * 0.25));
+  AU.sfx(['coin', 'quest', 'power', 'legend'][lv]);
+  if (lv >= 2) { G.flash = Math.max(G.flash, .18); G.flashCol = lv === 3 ? '255,215,0' : '255,120,40'; if (fxOk()) effects.push({ type: 'nova', x: P.x, y: P.y, r: 160 + lv * 40, t: 0, dur: .5, col: lv === 3 ? '#ffd54f' : '#ff7043' }); }
+}
+
+/* ------------------------- 스테이지별 정예 몬스터 40종 ------------------------- */
+// [이름, 기술1, 기술2, 특성(aura: 주변 강화 / flank: 포위 이동), 장식]
+const ELX_DEF = [
+  ['중장갑 돌격병', 'charge', 'mgun', '', 'armor'], ['폭주 트럭 좀비', 'rush', 'charge', 'flank', 'spikes'], ['미사일 전투 로봇', 'missile', 'mgun', '', 'pods'],
+  ['독성 처리기', 'poison', 'summon', 'aura', 'tanks'], ['실험체 알파', 'blink', 'nova', 'flank', 'tubes'], ['터널 굴착기', 'charge', 'bombard', '', 'drill'],
+  ['포자 거수', 'poison', 'rush', 'aura', 'spores'], ['거대 전갈형 기계', 'poison', 'missile', 'flank', 'tail'], ['냉각 전투 메카', 'freeze', 'mgun', '', 'ice'],
+  ['서리 거인', 'freeze', 'nova', 'aura', 'ice'], ['용암 장갑 괴수', 'lava', 'charge', '', 'lava'], ['과열 융합로', 'lava', 'shock', 'aura', 'core'],
+  ['탈주 생체병기', 'blink', 'rush', 'flank', 'tubes'], ['무중력 저격기', 'mgun', 'blink', '', 'scope'], ['산란 군주', 'summon', 'poison', 'aura', 'spores'],
+  ['조립 파쇄기', 'charge', 'bombard', '', 'drill'], ['원격 지휘 로봇', 'summon', 'shield', 'aura', 'antenna'], ['전자기 전투 로봇', 'shock', 'mgun', 'flank', 'coil'],
+  ['홀로그램 암살자', 'blink', 'shock', 'flank', 'neon'], ['요새 포격 병기', 'bombard', 'missile', '', 'pods'], ['방사능 돌연변이', 'poison', 'nova', 'aura', 'tanks'],
+  ['벙커 경비대장', 'mgun', 'shield', 'aura', 'armor'], ['둥지 수호 여왕', 'summon', 'rush', 'aura', 'crown'], ['함선 방위 드론', 'missile', 'shock', 'flank', 'coil'],
+  ['균열 추적자', 'blink', 'nova', 'flank', 'void'], ['흑요석 거신', 'charge', 'lava', '', 'armor'], ['신전 수호 기계', 'shield', 'shock', 'aura', 'core'],
+  ['강습 전투정', 'missile', 'bombard', 'flank', 'pods'], ['파멸 사냥꾼', 'rush', 'charge', 'flank', 'spikes'], ['혼돈의 사도', 'mega', 'summon', 'aura', 'void'],
+  ['폭풍 하피', 'rush', 'missile', 'flank', 'wings'], ['심해 포식자', 'freeze', 'poison', 'flank', 'tail'], ['수정 골렘', 'nova', 'shield', 'aura', 'crystal'],
+  ['돌격형 돌연변이', 'rush', 'poison', 'flank', 'spikes'], ['미라 포격대장', 'bombard', 'blink', 'aura', 'crown'], ['냉각 전투 메카 MK-II', 'freeze', 'mgun', 'flank', 'ice'],
+  ['플라즈마 화염귀', 'lava', 'nova', 'aura', 'lava'], ['시간 도둑', 'blink', 'mega', 'flank', 'void'], ['심장 방위 병기', 'mega', 'shock', 'aura', 'core'], ['거대 파괴 병기', 'mega', 'bombard', 'aura', 'armor']
+];
+const SKN_X = { nova: '충격 폭발', charge: '돌진', summon: '소환', missile: '유도탄', blink: '순간이동', shield: '보호막', mgun: '기관총 난사', poison: '독성 포격', freeze: '빙결 파동', lava: '용암 폭발', shock: '전기 충격', mega: '다중 광역 공격', rush: '고속 추적', bombard: '포격 요청' };
+const ELX = [];
+for (let n = 1; n <= 40; n++) {
+  const d = ELX_DEF[n - 1], sig = ET['sig' + n], h = (n * 47 + 180) % 360;
+  PAL['elx' + n] = { a: hsl(h, 40, 40), b: hsl(h + 20, 35, 20), c: hsl(h + 180, 95, 60), e: '#ff1744', s: hsl(h + 60, 95, 62), glow: hsl(h, 100, 62) };
+  const def = Object.assign({}, sig, { n: d[0], pal: 'elx' + n, hp: sig.hp * 1.3, r: Math.min(20, sig.r * 1.08), xp: 6, ai: ['dash', 'blink', 'phase'].includes(sig.ai) ? sig.ai : undefined, sig: 0, id: 'elx' + n, minion: undefined });
+  delete def.shot; delete def.keep; ET['elx' + n] = def;
+  ELX[n] = { n: d[0], sk: [d[1], d[2]], aura: d[3] === 'aura', flank: d[3] === 'flank', deco: d[4] };
+  STAGES[n - 1].elx = 'elx' + n;
+}
+function setupElx(e) {
+  const X = ELX[G.stage]; e.elx = X; e.skill = X.sk[0]; e.skill2 = X.sk[1]; e.skT = 2.2;
+  if (X.flank) e.flankA = rand(0, TAU);
+}
+function eliteSkillX(e, a) {
+  const dm = e.dmg;
+  switch (e.skill) {
+    case 'mgun': e.skT = 4.5; hazards.push({ kind: 'line', x: e.x, y: e.y, ang: a, len: 340, w: 16, t: 0, delay: 0.7, dmg: 0, thin: 1 });
+      for (let i = 0; i < 10; i++) later(0.7 + i * 0.06, () => { if (G.state === 'play' && !e.dead) { eShot(e.x, e.y, a + rand(-.07, .07), 270, dm * .32, 'arrow'); if (i % 3 === 0) AU.sfx('eshot'); } }); break;
+    case 'poison': e.skT = 5; for (let i = 0; i < 3; i++) hazards.push({ kind: 'circle', x: P.x + (i ? rand(-90, 90) : 0), y: P.y + (i ? rand(-90, 90) : 0), r: 52, t: 0, delay: 1.2 + i * .1, dmg: dm * .8 }); for (let i = 0; i < 3; i++) eShot(e.x, e.y, a + (i - 1) * .3, 150, dm * .4, 'acid'); break;
+    case 'freeze': e.skT = 5.5; hazards.push({ kind: 'circle', x: e.x, y: e.y, r: 130, t: 0, delay: 0.95, dmg: dm * .7 }); later(.95, () => { if (G.state !== 'play' || e.dead) return; if (Math.hypot(P.x - e.x, P.y - e.y) < 135) P.slowT = 2.2; for (let i = 0; i < 12; i++) eShot(e.x, e.y, i / 12 * TAU, 150, dm * .35, 'ice'); AU.sfx('freeze'); }); break;
+    case 'lava': e.skT = 5; for (let i = 0; i < 6; i++) { const aa = i / 6 * TAU; hazards.push({ kind: 'circle', x: e.x + Math.cos(aa) * 90, y: e.y + Math.sin(aa) * 90, r: 46, t: 0, delay: 1.0, dmg: dm * .9 }); } hazards.push({ kind: 'circle', x: P.x, y: P.y, r: 48, t: 0, delay: 1.3, dmg: dm * .9 }); later(1, () => { if (G.state === 'play') for (let i = 0; i < 16; i++) addPart(e.x, e.y, rand(-200, 200), rand(-220, 0), pick(['#ff6d00', '#ffab00']), .7, 4, 300); }); break;
+    case 'shock': e.skT = 5; { const b0 = rand(0, TAU); for (let i = 0; i < 4; i++) hazards.push({ kind: 'line', x: e.x, y: e.y, ang: b0 + i * Math.PI / 2, len: 270, w: 18, t: 0, delay: 0.9, dmg: dm * .8, beam: 1 }); } AU.sfx('zap'); break;
+    case 'mega': e.skT = 6.5; for (let i = 0; i < 3; i++) hazards.push({ kind: 'circle', x: P.x + (i ? rand(-110, 110) : 0), y: P.y + (i ? rand(-110, 110) : 0), r: 56, t: 0, delay: 1.1 + i * .15, dmg: dm }); for (let i = 0; i < 2; i++) hazards.push({ kind: 'line', x: e.x, y: e.y, ang: a + (i ? .5 : -.5), len: 380, w: 20, t: 0, delay: 1.2, dmg: dm * .8, beam: 1 }); later(.6, () => { if (G.state === 'play' && !e.dead) for (let i = 0; i < 16; i++) eShot(e.x, e.y, i / 16 * TAU, 140, dm * .35, 'plasma'); }); AU.sfx('alarm'); break;
+    case 'rush': e.skT = 6; e.rushT = 2.6; hazards.push({ kind: 'line', x: e.x, y: e.y, ang: a, len: 200, w: e.r * 1.6, t: 0, delay: .5, dmg: 0, thin: 1 }); texts.push({ x: e.x, y: e.y - e.r - 8, t: 0, v: '고속 추적!', col: '#ff5252', big: 1 }); AU.sfx('dash'); break;
+    case 'bombard': e.skT = 6; for (let i = 0; i < 5; i++) { const x = P.x + rand(-140, 140), y = P.y + rand(-140, 140); hazards.push({ kind: 'circle', x, y, r: 58, t: 0, delay: 1.3 + i * .15, dmg: dm * .9 }); later(1.05 + i * .15, () => { if (G.state === 'play') effects.push({ type: 'skybeam', x, y, r: 7, t: 0, dur: .25, col: '#ff8a80' }); }); } AU.sfx('alarm'); break;
+    default: e.skT = 4;
+  }
+}
+function updateElitesX(dt) {
+  G.auraT = (G.auraT || 0) - dt; const doAura = G.auraT <= 0; if (doAura) G.auraT = 1;
+  for (const e of enemies) {
+    if (e.dead || !e.elx) continue;
+    if (doAura && e.elx.aura) for (const o of query(e.x, e.y, 150)) if (!o.elite && !o.boss && !o.static) o.buffT = 1.6;
+  }
+}
+// 정예의 포위 이동 / 동료 공격 대상
+function extTarget(e) {
+  if (e.flankA !== undefined) {
+    const d = Math.hypot(P.x - e.x, P.y - e.y);
+    if (d > 170) { e.flankA += 0.004; return [P.x + Math.cos(e.flankA) * 140, P.y + Math.sin(e.flankA) * 140]; }
+    return null;
+  }
+  if (allies.length && !e.boss) { const at = allyTarget(e); if (at) return [at.x, at.y]; }
+  return null;
+}
+function eliteDeathFx(e) {
+  const th = TH();
+  explode(e.x, e.y, 95, e.maxHp * 0.04, true, th.ring);
+  if (fxOk()) effects.push({ type: 'nova', x: e.x, y: e.y, r: 150, t: 0, dur: .5, col: e.elx ? PAL[e.pal].glow || th.ring : th.ring });
+  for (let i = 0; i < 24; i++) addPart(e.x, e.y, rand(-260, 260), rand(-300, 60), pick(th.cols.concat(['#ffffff'])), rand(.5, 1), rand(3, 5.5), 350);
+  G.shake = Math.max(G.shake, 7); AU.sfx('bigboom');
+  if (Math.random() < (e.elx ? 0.65 : 0.35)) G.eliteRw = (G.eliteRw || 0) + 1;
+}
+
+/* ------------------------- 정예 처치 보상 선택 ------------------------- */
+const EREW = [
+  { k: 'wup', ic: '⬆️', n: '무기 강화', d: '보유 무기 하나의 레벨 +1', ok: () => G.weapons.some(w => w.lv < WMAX) },
+  { k: 'aspd', ic: '⚡', n: '공격 속도 증가', d: '이번 스테이지 공격 속도 +8% (최대 4회)', ok: () => (G.erAspd || 0) < 4 },
+  { k: 'ally', ic: '🤝', n: '동료 강화', d: '동료 공격력 +15% · 동료 체력 전부 회복', ok: () => allies.length > 0 && (G.allyBoost || 1) < 1.8 },
+  { k: 'heal', ic: '❤️', n: '체력 회복', d: '최대 체력의 45% 회복', ok: () => true },
+  { k: 'pot', ic: '🧪', n: '회복 물약', d: '물약 +1', ok: () => G.potions < 6 },
+  { k: 'crit', ic: '🎯', n: '정밀 사격', d: '이번 스테이지 치명타 확률 +5% (최대 3회)', ok: () => (G.erCrit || 0) < 3 }
+];
+function openEliteReward() {
+  G.eliteRw--; const pool = EREW.filter(r => r.ok()).sort(() => Math.random() - .5).slice(0, 3);
+  if (window.__botPick) { applyEliteReward(pool[0]); return; }
+  G.state = 'levelup'; joy.id = null; joy.mag = 0; AU.sfx('chest');
+  $('lvTitle').textContent = '🎖️ 정예 처치 보상!';
+  const box = $('cards'); box.innerHTML = '';
+  for (const r of pool) {
+    const b = document.createElement('button'); b.className = 'card'; b.style.borderColor = '#ffd54f';
+    b.innerHTML = `<div class="ci">${r.ic}</div><div><div class="cn">${r.n}<em>정예 보상</em></div><div class="cd">${r.d}</div></div>`;
+    b.addEventListener('click', () => { if (G.state !== 'levelup') return; AU.sfx('button'); applyEliteReward(r); showScreen(null); G.state = 'play'; G.lastFrame = performance.now(); }, { once: true });
+    box.appendChild(b);
+  }
+  showScreen('scrLevel');
+}
+function applyEliteReward(r) {
+  switch (r.k) {
+    case 'wup': { const own = G.weapons.filter(w => w.lv < WMAX); const w = pick(own); w.lv++; const c = codexOf(w.id); c.maxLv = Math.max(c.maxLv || 1, w.lv); toast(`⬆ ${WMAP[w.id].nm} Lv${w.lv}`, 1.2, '#ffd54f'); break; }
+    case 'aspd': G.erAspd = (G.erAspd || 0) + 1; G.buff.aspd += 0.08; recalc(); break;
+    case 'ally': G.allyBoost = (G.allyBoost || 1) * 1.15; for (const a of allies) { a.hp = a.maxHp; if (a.down > 0) a.down = .01; } break;
+    case 'heal': heal(Math.round(P.maxHp * .45)); break;
+    case 'pot': G.potions++; updatePotBadge(); break;
+    case 'crit': G.erCrit = (G.erCrit || 0) + 1; G.buff.crit += 0.05; recalc(); break;
+  }
+}
+
+/* ------------------------- 전투 보급 (차량 보급과 별도) ------------------------- */
+const SUPK = { fire: { n: '화력 강화', ic: '🔥', d: '공격력 +35%' }, ammo: { n: '탄약 증강', ic: '🎯', d: '발사체 +1' }, rapid: { n: '속사 모드', ic: '⏩', d: '공격 속도 +30%' } };
+function supApply() {
+  const S = G.sup; if (!S || S.t <= 0 || G.veh) return;
+  if (S.k === 'fire') P.dmgMul *= 1.35; else if (S.k === 'ammo') P.projAdd += 1; else if (S.k === 'rapid') P.cdMul /= 1.3;
+}
+function extEvent2(ev) {
+  if (ev === 'supply2') {
+    const [x, y] = freeSpot(100, 190); effects.push({ type: 'drop', x, y, t: 0, dur: 1.3 });
+    later(1.3, () => { if (G.state !== 'play') return; dropPickup('wsup', x, y, 0, null, true); G.shake = Math.max(G.shake, 3); AU.sfx('slam'); });
+    toast('🎁 무기 보급 상자 투하!', 1.4, '#ffd54f');
+  } else if (ev === 'lasergrid') {
+    toast('⚠ 경고: 레이저 격자 공격!<br><span style="font-size:14px">빨간 줄을 피하세요</span>', 2, '#ff5252'); AU.sfx('alarm');
+    for (let w = 0; w < 3; w++) later(w * 1.6, () => {
+      if (G.state !== 'play') return; const base = rand(0, Math.PI);
+      for (let i = -1; i <= 1; i++) { const a = base + (w % 2 ? Math.PI / 2 : 0), ox = Math.cos(a + Math.PI / 2) * i * 90, oy = Math.sin(a + Math.PI / 2) * i * 90; hazards.push({ kind: 'line', x: P.x + ox - Math.cos(a) * 400, y: P.y + oy - Math.sin(a) * 400, ang: a, len: 800, w: 16, t: 0, delay: 1.25, dmg: 9 + G.stage * .7, beam: 1 }); }
+    });
+  }
+}
+function collectSup() {
+  const k = pick(Object.keys(SUPK)), S = G.sup;
+  if (S && S.t > 0) { S.t = Math.max(S.t, 20); S.k = k; } else G.sup = { k, t: 20 };
+  recalc(); AU.sfx('power');
+  toast(`🎁 ${SUPK[k].ic} ${SUPK[k].n}! (${SUPK[k].d}, 20초)${G.veh ? '<br><span style="font-size:13px">하차 후 적용됩니다</span>' : ''}`, 1.6, '#ffd54f');
+}
+
+/* ------------------------- 차량 낙하산 투하 ------------------------- */
+function pickDropDef(n) { const w = [[.5, .3, .2], [.2, .5, .3], [.3, .2, .5]][n % 3]; return VEH_ST[n][wpick([[0, w[0]], [1, w[1]], [2, w[2]]])]; }
+function vehicleDrop(def, bonus) {
+  const [x, y] = freeSpot(200, 320);
+  const v = mkVeh(def, x, y); v.drop = { t: 0, dur: 4.2, spawnT: .6 }; v.bonus = !!bonus; v.seen = true; vehs.push(v);
+  toast(`🪂 특수 전투 장비 투하!<br><span style="font-size:15px">${def.name} · 착륙하면 탑승!</span>`, 2.6, '#80deea'); AU.sfx('alarm');
+}
+function updateDrops(dt) {
+  if (!G.vdropDone && G.bossState < 3 && !G.clearing && (G.t >= G.vdropT || G.bossState === 1)) { G.vdropDone = true; vehicleDrop(pickDropDef(G.stage)); }
+  for (const v of vehs) {
+    if (!v.drop) continue; const D = v.drop; D.t += dt; D.spawnT -= dt;
+    // 낙하 중에는 주변 적이 몰려옴
+    if (D.spawnT <= 0) { D.spawnT = 1; for (let i = 0; i < 3 + Math.floor(G.stage / 8) && aliveCount() < maxEnemies(); i++) { const a = rand(0, TAU), r = rand(240, 320); spawnEnemy(wpick(G.st.mobs), v.x + Math.cos(a) * r, v.y + Math.sin(a) * r); } }
+    if (D.t >= D.dur) {
+      v.drop = null; G.shake = Math.max(G.shake, 6); AU.sfx('slam');
+      effects.push({ type: 'xring', x: v.x, y: v.y, r: 90, t: 0, dur: .45, col: '#d7ccc8' });
+      for (let i = 0; i < 18; i++) addPart(v.x + rand(-30, 30), v.y + 10, rand(-160, 160), rand(-90, -20), 'rgba(190,170,140,.7)', .8, 5);
+      for (const e of query(v.x, v.y, 60).slice()) hitEnemy(e, 30 * vehDmg(), { kb: 260, ang: Math.atan2(e.y - v.y, e.x - v.x), silent: true });
+      toast('✅ 착륙 완료! 가까이 가서 탑승하세요', 1.6, '#64ffda');
+    }
+  }
+}
+
+/* ------------------------- 차량 필살기 (탑승마다 1회) ------------------------- */
+function useVehUlt() {
+  const v = G.veh; if (!v || v.ultUsed || G.state !== 'play') return;
+  v.ultUsed = true; const k = VULT[v.def.ch], dm = vehDmg(); setUltBtn();
+  G.flash = .35; G.flashCol = '255,230,150'; G.shake = Math.max(G.shake, 8); AU.sfx('power'); AU.sfx('bigboom');
+  toast(`💥 필살기: ${VULT_NAME[k]}!`, 1.4, '#ffd54f');
+  const face = v.face || 1, fa = P.moving ? Math.atan2(P.lastMy, P.lastMx) : (face > 0 ? 0 : Math.PI);
+  if (k === 'bigshell') {
+    for (let i = 0; i < 7; i++) { const t = densest(Math.min(VW, VH) * .6); const x = t ? t.x + rand(-60, 60) : P.x + Math.cos(fa) * (120 + i * 40), y = t ? t.y + rand(-60, 60) : P.y + Math.sin(fa) * (120 + i * 40);
+      later(i * .14, () => effects.push({ type: 'target', x, y, r: 110, t: 0, dur: .7, col: '#ff6d00' }));
+      later(i * .14 + .7, () => { if (G.state !== 'play') return; effects.push({ type: 'skybeam', x, y, r: 16, t: 0, dur: .3, col: '#ffe0b2' }); explode(x, y, 110, 45 * dm, true, '#ff6d00'); AU.sfx('cannon', .7); }); }
+  } else if (k === 'carpet') {
+    for (let i = 0; i < 36; i++) { const x = P.x + ((i % 6) - 2.5) * 70 + rand(-15, 15), y = P.y + (Math.floor(i / 6) - 2.5) * 70 + rand(-15, 15);
+      later(.2 + i * .04, () => { if (G.state !== 'play') return; mkProj({ kind: 'missile', x: P.x + rand(-30, 30), y: P.y - 40, vx: 0, vy: -200, ang: -Math.PI / 2, acc: 600, r: 5, dmg: 20 * dm, pierce: 1, life: 1.2, col: '#ff8a65', boom: 55, explodeEnd: 1, target: { x, y, dead: false }, homing: 9, size: 1 }); }); }
+    AU.sfx('missile');
+  } else if (k === 'strafe') {
+    P.dashT = .7; P.dashVx = Math.cos(fa) * 650; P.dashVy = Math.sin(fa) * 650; P.inv = Math.max(P.inv, .9);
+    for (let i = 0; i < 12; i++) later(.1 + i * .06, () => { if (G.state !== 'play') return; const x = P.x + rand(-60, 60), y = P.y + rand(-60, 60); explode(x, y, 72, 30 * dm, true, '#ff7043'); });
+  } else if (k === 'megalaser') { v.ultK = k; v.ultT = 2.3; v.ultAng = fa; const t = densest(500); if (t) v.ultAng = Math.atan2(t.y - P.y, t.x - P.x); AU.sfx('ion'); }
+  else if (k === 'barrage') { v.ultK = k; v.ultT = 3; v.ultAng = fa; const t = densest(400); if (t) v.ultAng = Math.atan2(t.y - P.y, t.x - P.x); }
+  else if (k === 'emstorm') {
+    for (let w = 0; w < 3; w++) later(w * .4, () => { if (G.state !== 'play') return; effects.push({ type: 'nova', x: P.x, y: P.y, r: Math.max(VW, VH) * .55, t: 0, dur: .4, col: '#82b1ff' }); for (const e of enemies) if (!e.dead && onScreen(e, 10)) { if (fxOk() && Math.random() < .5) effects.push({ type: 'bolt', pts: [[P.x, P.y - 20], [e.x, e.y]], t: 0, dur: .2, seed: Math.random() * 100, col: '#b388ff' }); hitEnemy(e, 18 * dm, { stun: .8, silent: true }); } AU.sfx('zap'); });
+  }
+}
+function updateUlt(v, dt) {
+  v.ultT -= dt; const dm = vehDmg();
+  if (v.ultK === 'megalaser') {
+    const t = nearest(P.x, P.y, 600); if (t) v.ultAng += angDiff(Math.atan2(t.y - P.y, t.x - P.x), v.ultAng) * Math.min(1, dt * 2);
+    const x1 = P.x, y1 = P.y - v.ch.mh * .6, x2 = x1 + Math.cos(v.ultAng) * 650, y2 = y1 + Math.sin(v.ultAng) * 650;
+    v.ultBeam = [x1, y1, x2, y2]; v.ultTick = (v.ultTick || 0) - dt;
+    if (v.ultTick <= 0) { v.ultTick = .1; for (const e of query((x1 + x2) / 2, (y1 + y2) / 2, 335).slice()) if (segDist2(e.x, e.y, x1, y1, x2, y2) < (24 + e.r) ** 2) hitEnemy(e, 6 * dm, { tick: 1, silent: true, kb: 40, ang: v.ultAng }); AU.sfx('beam', .8); G.shake = Math.max(G.shake, 3); }
+    if (Q.level) addPart(x2, y2, rand(-120, 120), rand(-120, 120), '#ff80ab', .3, 4);
+  } else if (v.ultK === 'barrage') {
+    v.ultTick = (v.ultTick || 0) - dt;
+    while (v.ultTick <= 0) { v.ultTick += .02; const a = v.ultAng + rand(-.5, .5), [x, y] = vMuzzle(v, a); mkProj({ kind: 'tracer', x, y, vx: Math.cos(a) * 900, vy: Math.sin(a) * 900, ang: a, r: 4, dmg: 3 * dm, pierce: 3, life: .45, col: '#ffe082', size: 1.2, kb: 30 }); if (Math.random() < .3) vFlash(x, y, a, '#ffe082', 1.4); }
+    if (Math.random() < .5) AU.sfx('mini', 1.1);
+  }
+  if (v.ultT <= 0) { v.ultK = null; v.ultBeam = null; }
+}
+function setUltBtn() {
+  const b = $('bUlt'); if (!b) return; const v = G.veh;
+  if (v && !v.ultUsed) { b.style.display = 'flex'; b.querySelector('.lb').textContent = '필살기'; } else b.style.display = 'none';
+}
+
+/* ------------------------- 확장팩 스테이지 시작 / 업데이트 ------------------------- */
+function xpStageStart() {
+  G.theme = THEME_OF[G.st.mu] || 'war';
+  G.combo = 0; G.comboT = 0; G.comboMax = 0; G.comboGold = 0; G.kwin = []; G.chainCd = 0; G.eliteRw = 0; G.erAspd = 0; G.erCrit = 0; G.sup = null; G.auraT = 0;
+  // 스테이지 전환 시 메모리 정리: 지난 스테이지 배경 타일·스프라이트 캐시 해제
+  groundCache.clear(); if (SPR.size > 700) SPR.clear();
+  setUltBtn();
+}
+function xpUpdate(dt) {
+  if (G.comboT > 0) { G.comboT -= dt; if (G.comboT <= 0) G.combo = 0; }
+  if (G.chainCd > 0) G.chainCd -= dt;
+  if (G.sup && G.sup.t > 0) { G.sup.t -= dt; if (G.sup.t <= 0) { G.sup = null; recalc(); toast('보급 효과 종료', .9, '#b0bec5'); } }
+  updateElitesX(dt); updateDrops(dt);
+  if (effects.length > 280) effects.splice(0, effects.length - 280);
+}
+
+/* =====================================================================
    렌더링
    ===================================================================== */
 function render() {
   const st = G.st;
   if (!st || !['play', 'levelup', 'pause', 'result', 'dying'].includes(G.state)) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#0d0818'; ctx.fillRect(0, 0, cv.width, cv.height); return; }
-  const sh = save.settings.shake ? G.shake : 0;
+  const sh = Math.min(12, G.shake) * (save.settings.shake || 0);
   G.camX = P.x + (sh ? rand(-sh, sh) : 0); G.camY = P.y + (sh ? rand(-sh, sh) : 0);
   const cx = cv.width / 2, cy = cv.height / 2;
   const setW = () => ctx.setTransform(K, 0, 0, K, cx - G.camX * K, cy - G.camY * K);
@@ -3789,7 +4184,8 @@ function render() {
     const z = e.z || 0;
     if (z > 0) { ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(e.x, e.y + e.r, e.r, e.r * .3, 0, 0, TAU); ctx.fill(); }
     if (e.alpha < 1) ctx.globalAlpha = e.alpha;
-    ctx.setTransform((e.static ? 1 : e.face) * K, 0, 0, K, cx + (e.x - G.camX) * K, cy + (e.y - z - G.camY) * K);
+    const sq = e.hitT > 0 ? e.hitT : 0;
+    ctx.setTransform((e.static ? 1 : e.face) * K * (1 + sq * 2), 0, 0, K * (1 - sq * 1.5), cx + (e.x - G.camX) * K, cy + (e.y - z - G.camY) * K);
     ctx.drawImage(s.c, -s.box / 2, -s.box / 2, s.box, s.box);
     setW(); ctx.globalAlpha = 1;
     if (e.elite && !e.boss) {
@@ -3797,6 +4193,8 @@ function render() {
       ctx.fillStyle = '#ffd54f'; ctx.beginPath(); ctx.moveTo(e.x - 10, e.y - e.r * 1.25); ctx.lineTo(e.x - 6, e.y - e.r * 1.25 - 10); ctx.lineTo(e.x, e.y - e.r * 1.25 - 4); ctx.lineTo(e.x + 6, e.y - e.r * 1.25 - 10); ctx.lineTo(e.x + 10, e.y - e.r * 1.25); ctx.closePath(); ctx.fill(); ctx.strokeStyle = OL; ctx.lineWidth = 1.2; ctx.stroke();
       ctx.font = '900 9px "Noto Sans KR",sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffd54f'; ctx.strokeStyle = '#000'; ctx.lineWidth = 2.5; ctx.strokeText('정예 ' + e.d.n, e.x, e.y - e.r * 1.5 - 12); ctx.fillText('정예 ' + e.d.n, e.x, e.y - e.r * 1.5 - 12);
     }
+    if (e.elx) drawElxDeco(e);
+    if (e.buffT > 0 && Q.level && !e.elite) { ctx.strokeStyle = 'rgba(255,82,82,.55)'; ctx.lineWidth = 1.5; circ(ctx, e.x, e.y + e.r * .7, e.r * .8); ctx.stroke(); }
     if (e.shieldT > 0) { ctx.globalAlpha = .35 + .15 * Math.sin(G.time * 12); ctx.fillStyle = '#40c4ff'; circ(ctx, e.x, e.y, e.r * 1.35); ctx.fill(); ctx.globalAlpha = 1; ctx.strokeStyle = '#e1f5fe'; ctx.lineWidth = 2; circ(ctx, e.x, e.y, e.r * 1.35); ctx.stroke(); }
     if (e.burn > 0 && e.burn > 1.6 && Q.level) { ctx.globalAlpha = .7; ctx.fillStyle = '#ff6d00'; ctx.beginPath(); const fx = e.x, fy = e.y - e.r * .2, fl = Math.sin(G.time * 25 + e.seed) * 2; ctx.moveTo(fx - 5, fy); ctx.quadraticCurveTo(fx, fy - 14 - fl, fx + 5, fy); ctx.fill(); ctx.globalAlpha = 1; }
     if (e.frozen > 0) { ctx.fillStyle = 'rgba(179,229,252,.55)'; circ(ctx, e.x, e.y, e.r * 1.05); ctx.fill(); ctx.strokeStyle = '#e1f5fe'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(e.x - e.r * .6, e.y - e.r * .4); ctx.lineTo(e.x + e.r * .4, e.y + e.r * .5); ctx.moveTo(e.x + e.r * .5, e.y - e.r * .5); ctx.lineTo(e.x - e.r * .2, e.y + e.r * .3); ctx.stroke(); }
@@ -3827,7 +4225,7 @@ function render() {
   // 투사체
   for (const p of projs) drawProj(p);
   for (const b of eprojs) drawEProj(b);
-  for (const f of effects) drawEffect(f);
+  for (const f of effects) if (f.x === undefined || (Math.abs(f.x - G.camX) < VW / 2 + 260 && Math.abs(f.y - G.camY) < VH / 2 + 260)) drawEffect(f);
   for (const q of parts) { const a = Math.max(0, q.life / q.max); ctx.globalAlpha = a; ctx.fillStyle = q.col; if (q.grow) { circ(ctx, q.x, q.y, q.size * (1 + (1 - a) * q.grow)); ctx.fill(); } else ctx.fillRect(q.x - q.size / 2, q.y - q.size / 2, q.size, q.size); }
   ctx.globalAlpha = 1;
   // 데미지 숫자
@@ -4084,6 +4482,7 @@ function drawEffect(f) {
       ctx.globalAlpha = a * 0.7; ctx.fillStyle = gr; ctx.fillRect(f.x - 9, f.y - 160, 18, 160); ctx.globalAlpha = 1; break; }
     case 'drop': { const z = (1 - k) * 260; ctx.fillStyle = `rgba(0,0,0,${0.15 + k * .25})`; ctx.beginPath(); ctx.ellipse(f.x, f.y, 10 + k * 8, 4 + k * 3, 0, 0, TAU); ctx.fill();
       ctx.save(); ctx.translate(f.x, f.y - z); ctx.strokeStyle = '#eceff1'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-10, -2); ctx.lineTo(0, -26); ctx.lineTo(10, -2); ctx.stroke(); ctx.beginPath(); ctx.arc(0, -26, 16, Math.PI, 0); fs(ctx, '#eceff1', 1.2); rr(ctx, -10, -4, 20, 16, 2); fs(ctx, '#6d7a3a', 1.2); ctx.restore(); break; }
+    default: drawEffectX(f, k);
   }
 }
 // 화면 밖 목표물 방향 표시
@@ -4142,7 +4541,7 @@ function drawHUD() {
     sx += 33;
   }
   // 보스 체력바
-  let qy = hy + 68;
+  let qy = hy + (G.veh ? 92 : 68);
   const boss = (G.boss && !G.boss.dead && G.bossState === 2) ? G.boss : (G.mini && !G.mini.dead ? G.mini : null);
   if (boss) {
     const bw = Math.min(W - 40 - SAFE.l - SAFE.r, 360), bx = (W - bw) / 2, by = qy;
@@ -4355,8 +4754,9 @@ function drawVehicle(g, v, x, y, mounted) {
   const air = ch.cat === 'air', hov = ch.cat === 'hover';
   let alt = air ? 16 + Math.sin(t * 3) * 2 : hov ? 5 + Math.sin(t * 4) * 1.5 : 0;
   if (v.hoverT > 0) alt += 22 * Math.sin(Math.min(1, (1.4 - v.hoverT) / 0.3) * Math.PI / 2) * Math.min(1, v.hoverT / 0.3);
+  const dk = v.drop ? Math.min(1, v.drop.t / v.drop.dur) : 1; if (v.drop) alt += (1 - dk) * 300;
   g.save(); g.translate(x, y + ch.r * 0.55); g.scale(1.15, 1.15);
-  g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.ellipse(0, 0, ch.r * (air ? .9 : 1.15), ch.r * .3, 0, 0, TAU); g.fill();
+  g.fillStyle = `rgba(0,0,0,${.12 + .18 * dk})`; g.beginPath(); g.ellipse(0, 0, ch.r * (air ? .9 : 1.15) * (.5 + .5 * dk), ch.r * .3 * (.5 + .5 * dk), 0, 0, TAU); g.fill();
   if (mounted) { g.strokeStyle = 'rgba(120,220,255,.6)'; g.lineWidth = 2; g.beginPath(); g.ellipse(0, 0, ch.r * 1.25, ch.r * .38, 0, 0, TAU); g.stroke(); }
   if (mounted && P.inv > 0 && P.dashT <= 0 && Math.floor(G.time * 20) % 2) g.globalAlpha = .55;
   g.translate(0, -alt);
@@ -4375,9 +4775,16 @@ function drawVehicle(g, v, x, y, mounted) {
   const a1 = mounted ? v.aim : (face > 0 ? 0 : Math.PI);
   if (ch.cat === 'mech' && v.def.ch !== 'spider') { drawMount(v.def.wp, a1, ch.r * .55, -ch.mh * .85, big); if (v.def.sub) drawMount(v.def.sub, mounted ? v.aim2 : a1, -ch.r * .55, -ch.mh * .85, big * .8); }
   else { drawMount(v.def.wp, a1, ch.r * .1, -ch.mh - (air ? -10 : 2), big); if (v.def.sub) drawMount(v.def.sub, mounted ? v.aim2 : a1, -ch.r * .45, -ch.mh - (air ? -14 : 6), .8); }
+  if (v.drop) { // 낙하산
+    const sw = Math.sin(G.time * 2.4 + v.bob) * .12; g.save(); g.rotate(sw); const top = -ch.mh - 70;
+    g.strokeStyle = '#eceff1'; g.lineWidth = 1.2; g.beginPath(); for (const sx of [-34, -12, 12, 34]) { g.moveTo(sx, top); g.lineTo(sx * .35, -ch.mh * .8); } g.stroke();
+    g.beginPath(); g.moveTo(-40, top); g.quadraticCurveTo(-36, top - 46, 0, top - 50); g.quadraticCurveTo(36, top - 46, 40, top); g.quadraticCurveTo(20, top - 8, 0, top - 2); g.quadraticCurveTo(-20, top - 8, -40, top); g.closePath(); fs(g, '#ff7043', 1.6);
+    g.fillStyle = '#fff3e0'; g.beginPath(); g.moveTo(-14, top - 5); g.quadraticCurveTo(-10, top - 44, 0, top - 48); g.quadraticCurveTo(10, top - 44, 14, top - 5); g.closePath(); g.fill(); g.restore();
+  }
   g.restore(); g.globalAlpha = 1;
   // 주차된 장비: 탑승 안내
-  if (!mounted) {
+  if (!mounted && v.drop) { g.font = '900 11px "Noto Sans KR",sans-serif'; g.textAlign = 'center'; g.lineWidth = 3; g.strokeStyle = '#000'; const ty = y - ch.mh - 40; g.strokeText('🪂 투하 중 ' + Math.max(0, v.drop.dur - v.drop.t).toFixed(1) + '초', x, ty); g.fillStyle = '#ffccbc'; g.fillText('🪂 투하 중 ' + Math.max(0, v.drop.dur - v.drop.t).toFixed(1) + '초', x, ty); }
+  else if (!mounted) {
     const near = G.rideNear === v, by = y - ch.mh - 30 - Math.abs(Math.sin(G.time * 4)) * 6;
     g.fillStyle = near ? '#64ffda' : '#4dd0e1'; g.beginPath(); g.moveTo(x - 7, by - 10); g.lineTo(x + 7, by - 10); g.lineTo(x, by); g.closePath(); g.fill(); g.strokeStyle = '#000'; g.lineWidth = 1.5; g.stroke();
     g.font = '900 10px "Noto Sans KR",sans-serif'; g.textAlign = 'center'; g.lineWidth = 3; g.strokeStyle = '#000';
@@ -4493,6 +4900,7 @@ function drawWorldExt(layer) {
   } else {
     for (const a of allies) if (!a.seated && a.c.fly && vis(a.x, a.y, 40)) drawAlly(ctx, a, a.x, a.y, false);
     const v = G.veh;
+    if (v && v.ultBeam) { const [x1, y1, x2, y2] = v.ultBeam, w = 46 + Math.sin(G.time * 50) * 6; ctx.lineCap = 'round'; if (QC.glow) { ctx.globalAlpha = .35; ctx.strokeStyle = '#ff4081'; ctx.lineWidth = w * 2.2; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); } ctx.globalAlpha = 1; ctx.strokeStyle = '#ff80ab'; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = w * .35; ctx.stroke(); }
     if (v && v.beam) { const [x1, y1, x2, y2, col] = v.beam; ctx.lineCap = 'round'; if (QC.glow) { ctx.globalAlpha = .35; ctx.strokeStyle = col; ctx.lineWidth = 22; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); } ctx.globalAlpha = 1; ctx.strokeStyle = col; ctx.lineWidth = 9 + Math.sin(G.time * 40) * 2; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.stroke(); }
     if (v) for (const S of v.sl) if (S && S.on && QC.glow && v.def.wp === 'flame') { ctx.globalAlpha = .16; ctx.fillStyle = '#ff6d00'; ctx.beginPath(); ctx.moveTo(P.x, P.y - v.ch.mh * .55); ctx.arc(P.x, P.y - v.ch.mh * .55, VWPN.flame.range, S.ang - .5, S.ang + .5); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1; }
   }
@@ -4517,6 +4925,12 @@ function drawPickupExt(p) {
     ctx.save(); ctx.translate(p.x, p.y - bob); rr(ctx, -12, -9, 24, 17, 3); fs(ctx, '#00838f', 1.6); rr(ctx, -5, -13, 10, 5, 2); fs(ctx, '#006064', 1.2);
     ctx.font = '13px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('🔧', 0, 5); ctx.restore(); return true;
   }
+  if (p.kind === 'wsup') {
+    if (QC.glow) { ctx.globalAlpha = .55 + .2 * Math.sin(G.time * 6); ctx.drawImage(glowSprite('#ffd54f'), p.x - 34, p.y - 38, 68, 68); ctx.globalAlpha = 1; }
+    ctx.globalAlpha = .45; const gr = ctx.createLinearGradient(p.x, p.y - 120, p.x, p.y); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(1, '#ffd54f'); ctx.fillStyle = gr; ctx.fillRect(p.x - 7, p.y - 120, 14, 120); ctx.globalAlpha = 1;
+    ctx.save(); ctx.translate(p.x, p.y - bob); rr(ctx, -15, -12, 30, 23, 3); fs(ctx, '#5d4037', 1.8); rr(ctx, -15, -12, 30, 7, 2); fs(ctx, '#ffb300', 1.4);
+    ctx.font = '13px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('🔫', 0, 8); ctx.restore(); return true;
+  }
   if (p.kind === 'scrate') {
     if (QC.glow) { ctx.globalAlpha = .45 + .2 * Math.sin(G.time * 4); ctx.drawImage(glowSprite('#90caf9'), p.x - 32, p.y - 36, 64, 64); ctx.globalAlpha = 1; }
     ctx.globalAlpha = .45; const gr = ctx.createLinearGradient(p.x, p.y - 110, p.x, p.y); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(1, '#90caf9'); ctx.fillStyle = gr; ctx.fillRect(p.x - 7, p.y - 110, 14, 110); ctx.globalAlpha = 1;
@@ -4536,6 +4950,7 @@ function drawScreenExt(cx, cy) {
   }
 }
 function drawHudExt(L, hy, W) {
+  drawHudX(W);
   ctx.textAlign = 'center';
   // 난이도 표시
   const d = DF(); ctx.font = '900 10px "Noto Sans KR",sans-serif'; ctx.fillStyle = d.col; ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
@@ -4548,7 +4963,11 @@ function drawHudExt(L, hy, W) {
     const bw = pw - 12, k = clamp(v.hp / v.maxHp, 0, 1); ctx.fillStyle = '#000a'; rr(ctx, L + 6, hy + 40, bw, 10, 5); ctx.fill();
     ctx.fillStyle = k < .3 ? '#ff5252' : '#26c6da'; rr(ctx, L + 6, hy + 40, Math.max(10, bw * k), 10, 5); ctx.fill();
     ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.font = '900 9px sans-serif'; ctx.fillText(`내구도 ${Math.ceil(v.hp)} / ${v.maxHp}${v.repairs ? '  🔧' + v.repairs + '/2' : ''}`, L + 6 + bw / 2, hy + 48.5);
-    if (v.ovT > 0) { ctx.fillStyle = '#ffd54f'; ctx.fillText('⏩ 과부하 ' + Math.ceil(v.ovT) + 's', L + pw / 2, hy + 66); }
+    const tk = clamp(v.time / v.maxTime, 0, 1), warn = v.time <= 5;
+    ctx.fillStyle = 'rgba(0,30,40,.7)'; rr(ctx, L, hy + 58, pw, 18, 7); ctx.fill();
+    ctx.fillStyle = warn && Math.floor(G.time * 6) % 2 ? '#ff1744' : '#ffd54f'; rr(ctx, L + 3, hy + 61, Math.max(8, (pw - 6) * tk), 12, 5); ctx.fill();
+    ctx.fillStyle = '#000'; ctx.font = '900 10px "Noto Sans KR",sans-serif'; ctx.fillText(`⏱ 남은 사용시간 ${Math.ceil(v.time)}초`, L + pw / 2, hy + 71);
+    if (v.ovT > 0) { ctx.fillStyle = '#ffd54f'; ctx.fillText('⏩ 과부하 ' + Math.ceil(v.ovT) + 's', L + pw / 2, hy + 88); }
   }
   // 구조 진행 게이지 (화면 하단 중앙)
   let rr0 = null; for (const r of rescues) if (r.active && !r.done) rr0 = r;
@@ -4563,6 +4982,69 @@ function drawHudExt(L, hy, W) {
   }
 }
 function H_() { return H; }
+
+/* ------------------------- 확장팩 연출 ------------------------- */
+function drawEffectX(f, k) {
+  switch (f.type) {
+    case 'xring': ctx.globalAlpha = (1 - k) * .85; ctx.strokeStyle = f.col; ctx.lineWidth = 7 * (1 - k) + 1.5; circ(ctx, f.x, f.y, f.r * (.35 + k * .75)); ctx.stroke(); ctx.globalAlpha = (1 - k) * .18; ctx.fillStyle = f.col; ctx.fill(); ctx.globalAlpha = 1; break;
+    case 'ering': ctx.globalAlpha = 1 - k; ctx.strokeStyle = f.col; ctx.lineWidth = 3; circ(ctx, f.x, f.y, f.r * (.3 + k)); ctx.stroke(); ctx.lineWidth = 2; ctx.beginPath(); const L = f.r * (1.4 - k * .4); ctx.moveTo(f.x - L, f.y); ctx.lineTo(f.x + L, f.y); ctx.moveTo(f.x, f.y - L); ctx.lineTo(f.x, f.y + L); ctx.stroke(); ctx.globalAlpha = 1; break;
+    case 'hitx': {
+      ctx.save(); ctx.translate(f.x, f.y); ctx.globalAlpha = 1 - k;
+      if (f.cls === 'energy' || f.cls === 'future') { ctx.strokeStyle = f.col; ctx.lineWidth = 2.5; circ(ctx, 0, 0, 4 + k * f.r * .9); ctx.stroke(); ctx.fillStyle = '#fff'; circ(ctx, 0, 0, 3 * (1 - k)); ctx.fill(); }
+      else if (f.cls === 'special') { ctx.fillStyle = f.col; for (let i = 0; i < 5; i++) { const a = i * 1.26 + f.x, d = 3 + k * 12; circ(ctx, Math.cos(a) * d, Math.sin(a) * d, 2.2 * (1 - k)); ctx.fill(); } }
+      else { ctx.rotate(f.ang); ctx.strokeStyle = '#fff8e1'; ctx.lineWidth = 2; ctx.beginPath(); for (let i = -2; i <= 2; i++) { const a = Math.PI + i * .45, d = 4 + k * 14; ctx.moveTo(Math.cos(a) * 3, Math.sin(a) * 3); ctx.lineTo(Math.cos(a) * d, Math.sin(a) * d); } ctx.stroke(); ctx.fillStyle = f.col; circ(ctx, 0, 0, 4 * (1 - k)); ctx.fill(); }
+      ctx.restore(); ctx.globalAlpha = 1; break; }
+    case 'combo': {
+      const T = ['연속 처치!', '콤보 폭발!', '학살 모드!', '대량 처치 보너스!'], cols = ['#fff59d', '#ffab40', '#ff5252', '#ffd54f'];
+      const y = P.y - 60 - k * 40, sc = 1 + (k < .15 ? (.15 - k) * 4 : 0) + f.lv * .15;
+      ctx.save(); ctx.translate(P.x, y); ctx.scale(sc, sc); ctx.globalAlpha = k > .7 ? (1 - k) / .3 : 1; ctx.textAlign = 'center';
+      ctx.font = '900 20px "Black Han Sans","Noto Sans KR",sans-serif'; ctx.lineWidth = 5; ctx.strokeStyle = '#000';
+      ctx.strokeText(`${f.c} COMBO`, 0, 0); ctx.fillStyle = cols[f.lv]; ctx.fillText(`${f.c} COMBO`, 0, 0);
+      ctx.font = '900 13px "Noto Sans KR",sans-serif'; ctx.lineWidth = 4; ctx.strokeText(T[f.lv], 0, 18); ctx.fillStyle = '#fff'; ctx.fillText(T[f.lv], 0, 18);
+      ctx.restore(); ctx.globalAlpha = 1; break; }
+  }
+}
+// 정예 고유 장식 (외형 차별화)
+function drawElxDeco(e) {
+  const r = e.r, x = e.x, y = e.y, t = G.time, pal = PAL[e.pal] || {}, d = e.elx.deco;
+  ctx.save(); ctx.translate(x, y); ctx.scale(e.face || 1, 1); ctx.lineJoin = 'round';
+  switch (d) {
+    case 'armor': rr(ctx, -r * .7, -r * .6, r * 1.4, r * .35, 3); fs(ctx, '#78909c', 1.5); ctx.fillStyle = '#ff1744'; ctx.fillRect(-r * .3, -r * .52, r * .6, r * .12); break;
+    case 'spikes': ctx.fillStyle = '#cfd8dc'; for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(i * r * .3 - 4, -r * .8); ctx.lineTo(i * r * .3, -r * 1.25); ctx.lineTo(i * r * .3 + 4, -r * .8); ctx.fill(); } break;
+    case 'pods': for (const s of [-1, 1]) { rr(ctx, s * r * .75 - 6, -r * .9, 12, 14, 2); fs(ctx, '#546e7a', 1.3); ctx.fillStyle = '#ff7043'; circ(ctx, s * r * .75, -r * .82, 2.5); ctx.fill(); } break;
+    case 'tanks': case 'tubes': for (const s of [-1, 1]) { rr(ctx, -r * .95, -r * .4 + s * 8, 8, 14, 3); fs(ctx, d === 'tanks' ? '#9ccc65' : '#4dd0e1', 1.2); } break;
+    case 'drill': ctx.save(); ctx.translate(r * .95, 0); ctx.rotate(Math.sin(t * 20) * .1); ctx.beginPath(); ctx.moveTo(0, -7); ctx.lineTo(16, 0); ctx.lineTo(0, 7); ctx.closePath(); fs(ctx, '#ffca28', 1.4); ctx.restore(); break;
+    case 'spores': ctx.fillStyle = pal.s || '#b2ff59'; for (let i = 0; i < 5; i++) { const a = t * 1.5 + i * 1.26; circ(ctx, Math.cos(a) * r * 1.1, Math.sin(a) * r * .6 - r * .3, 3); ctx.fill(); } break;
+    case 'tail': ctx.strokeStyle = pal.b || '#333'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(-r * .7, 0); ctx.quadraticCurveTo(-r * 1.4, -r * 1.2 + Math.sin(t * 4) * 4, -r * .4, -r * 1.3); ctx.stroke(); ctx.fillStyle = '#ff1744'; circ(ctx, -r * .4, -r * 1.3, 4); ctx.fill(); break;
+    case 'ice': ctx.fillStyle = 'rgba(179,229,252,.9)'; for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(i * r * .4 - 5, -r * .75); ctx.lineTo(i * r * .4, -r * 1.3 - Math.abs(i) * -4); ctx.lineTo(i * r * .4 + 5, -r * .75); ctx.closePath(); ctx.fill(); } break;
+    case 'lava': ctx.strokeStyle = `rgba(255,${120 + Math.sin(t * 8) * 60},0,.9)`; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(-r * .5, -r * .3); ctx.lineTo(-r * .1, r * .1); ctx.lineTo(r * .3, -r * .2); ctx.moveTo(-r * .2, r * .4); ctx.lineTo(r * .4, r * .3); ctx.stroke(); break;
+    case 'core': ctx.fillStyle = pal.glow || '#ff1744'; ctx.globalAlpha = .6 + .4 * Math.sin(t * 6); circ(ctx, 0, -r * .2, r * .28); ctx.fill(); ctx.globalAlpha = 1; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; circ(ctx, 0, -r * .2, r * .28); ctx.stroke(); break;
+    case 'scope': rr(ctx, r * .2, -r * .9, r * .9, 6, 2); fs(ctx, '#263238', 1.2); ctx.fillStyle = '#ff1744'; circ(ctx, r * 1.1, -r * .87, 2.5); ctx.fill(); break;
+    case 'antenna': line(ctx, 0, -r * .8, 0, -r * 1.5, 2, '#90a4ae'); ctx.fillStyle = Math.sin(t * 8) > 0 ? '#ff1744' : '#ffeb3b'; circ(ctx, 0, -r * 1.5, 3.5); ctx.fill(); break;
+    case 'coil': for (let i = 0; i < 3; i++) { circ(ctx, -r * .3 + i * r * .3, -r * .95, 4); fs(ctx, '#b0bec5', 1); } if (Math.random() < .5) { ctx.strokeStyle = '#80d8ff'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-r * .3, -r * .95); ctx.lineTo(rand(-r, r), -r * 1.4); ctx.stroke(); } break;
+    case 'neon': ctx.strokeStyle = pal.c || '#00e5ff'; ctx.lineWidth = 2; ctx.globalAlpha = .7; ctx.beginPath(); ctx.ellipse(0, r * .2, r * 1.2, r * .45, 0, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1; break;
+    case 'crown': ctx.fillStyle = '#ffd54f'; ctx.beginPath(); ctx.moveTo(-9, -r * .9); ctx.lineTo(-9, -r * 1.25); ctx.lineTo(-4, -r * 1.05); ctx.lineTo(0, -r * 1.35); ctx.lineTo(4, -r * 1.05); ctx.lineTo(9, -r * 1.25); ctx.lineTo(9, -r * .9); ctx.closePath(); ctx.fill(); ctx.strokeStyle = OL; ctx.lineWidth = 1.2; ctx.stroke(); break;
+    case 'void': ctx.fillStyle = 'rgba(30,0,50,.55)'; for (let i = 0; i < 4; i++) { const a = -t * 2 + i * 1.57; circ(ctx, Math.cos(a) * r * 1.05, Math.sin(a) * r * .5, 4); ctx.fill(); } break;
+    case 'wings': ctx.fillStyle = pal.b || '#555'; for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(0, -r * .4); ctx.lineTo(s * r * 1.5, -r * .9 + Math.sin(t * 10) * 5); ctx.lineTo(s * r * .8, -r * .1); ctx.closePath(); ctx.fill(); } break;
+    case 'crystal': ctx.fillStyle = 'rgba(234,128,252,.85)'; for (const [cx, h] of [[-r * .5, 14], [0, 20], [r * .5, 12]]) { ctx.beginPath(); ctx.moveTo(cx - 5, -r * .7); ctx.lineTo(cx, -r * .7 - h); ctx.lineTo(cx + 5, -r * .7); ctx.closePath(); ctx.fill(); } break;
+  }
+  ctx.restore();
+  if (e.elx.aura) { ctx.globalAlpha = .25 + .1 * Math.sin(t * 4); ctx.strokeStyle = '#ff5252'; ctx.lineWidth = 2; ctx.setLineDash([4, 6]); circ(ctx, x, y, 150); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; }
+}
+function drawHudX(W) {
+  // 콤보
+  if (G.combo >= 5) {
+    const x = W - SAFE.r - 14, y = (G.veh ? 236 : 150) + SAFE.t; ctx.textAlign = 'right';
+    const big = G.combo >= 100 ? 26 : G.combo >= 50 ? 23 : G.combo >= 30 ? 21 : 19;
+    ctx.font = `900 ${big}px "Black Han Sans","Noto Sans KR",sans-serif`; ctx.lineWidth = 4; ctx.strokeStyle = '#000';
+    const col = G.combo >= 100 ? '#ffd54f' : G.combo >= 50 ? '#ff5252' : G.combo >= 30 ? '#ffab40' : '#fff59d';
+    ctx.strokeText(`🔥${G.combo}`, x, y); ctx.fillStyle = col; ctx.fillText(`🔥${G.combo}`, x, y);
+    ctx.font = '900 9px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText('COMBO', x, y + 11);
+    ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(x - 44, y + 15, 44, 3); ctx.fillStyle = col; ctx.fillRect(x - 44, y + 15, 44 * clamp(G.comboT / 2.4, 0, 1), 3);
+  }
+  // 전투 보급 효과
+  if (G.sup && G.sup.t > 0) { const S = SUPK[G.sup.k]; ctx.textAlign = 'center'; ctx.font = '900 11px "Noto Sans KR",sans-serif'; ctx.lineWidth = 3; ctx.strokeStyle = '#000'; const tx = W / 2, ty = H * .2 + SAFE.t; const s = `${S.ic} ${S.n} ${Math.ceil(G.sup.t)}초${G.veh ? ' (하차 후)' : ''}`; ctx.strokeText(s, tx, ty); ctx.fillStyle = '#ffd54f'; ctx.fillText(s, tx, ty); }
+}
 
 /* =====================================================================
    UI / 메뉴 / 입력 / 메인 루프
@@ -4672,7 +5154,7 @@ function stageWin() {
   finishRun(true); AU.bgm('win');
   $('rTitle').textContent = n === 40 ? '최종 승리!' : 'STAGE CLEAR!'; $('rTitle').className = 'res-t win';
   const qrows = G.quests.map(q => `<div class="stat"><span>${q.done ? '✔' : '✖'} ${q.main ? '' : q.sp ? '[특별] ' : '[보조] '}${qLabel(q)}</span><span style="color:${q.done ? '#69f0ae' : '#ef9a9a'}">${q.done ? '완료' : '미완료'}</span></div>`).join('');
-  $('rStats').innerHTML = statRows([['스테이지', `${n}. ${G.st.name}`], ['난이도', `${DF().ic} ${DF().n} (보상 x${dmul.toFixed(2)})`], ['클리어 시간', fmtTime(G.t)], ['도달 레벨', 'Lv ' + G.lv], ['처치 수', G.kills], ['구출한 동료', G.rescued + '명'], ['탑승한 장비', G.vehUsed + '회']]) + qrows +
+  $('rStats').innerHTML = statRows([['스테이지', `${n}. ${G.st.name}`], ['난이도', `${DF().ic} ${DF().n} (보상 x${dmul.toFixed(2)})`], ['클리어 시간', fmtTime(G.t)], ['도달 레벨', 'Lv ' + G.lv], ['처치 수', G.kills], ['최대 콤보', (G.comboMax || 0) + ' 연속'], ['구출한 동료', G.rescued + '명'], ['탑승한 장비', G.vehUsed + '회']]) + qrows +
     statRows([['클리어 보상', '+' + clearG + 'G'], ...(sideG ? [['보조 목표 보상', '+' + sideG + 'G']] : []), ...(special ? [[n % 10 === 0 ? '🏆 10스테이지 전설 보급' : '🎖️ 5스테이지 특별 보상', '+' + special + 'G']] : []), ['획득 골드 합계', '💰 ' + G.gold], ['보유 골드', '💰 ' + save.gold]]) +
     (G.newFound.length ? `<p class="unl">✨ 새로 발견한 무기: ${G.newFound.map(id => WMAP[id].ic + ' ' + WMAP[id].nm).join(', ')}</p>` : '') +
     (newUnlocks.length ? `<p class="unl">🔓 다음 스테이지 신규 무기: ${newUnlocks.map(id => WMAP[id].ic + ' ' + WMAP[id].nm).join(', ')}</p>` : '') +
@@ -4810,13 +5292,14 @@ let setReturn = 'scrTitle';
 function openSettings(ret) {
   setReturn = ret; const s = save.settings;
   $('vMusic').value = Math.round(s.music * 100); $('vSfx').value = Math.round(s.sfx * 100);
-  segSet('segQ', s.quality); segSet('segShake', String(s.shake)); segSet('segDmg', String(s.dmgNum)); segSet('segFast', String(s.fast));
+  segSet('segQ', s.quality); segSet('segShake', String(s.shake)); segSet('segFps', String(s.fps30 ? 1 : 0)); segSet('segDmg', String(s.dmgNum)); segSet('segFast', String(s.fast));
   showScreen('scrSet');
 }
 function segSet(id, v) { [...$(id).children].forEach(b => b.classList.toggle('on', b.dataset.v === v)); }
 function bindSeg(id, fn) { $(id).addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; AU.sfx('button'); segSet(id, b.dataset.v); fn(b.dataset.v); writeSave(); }); }
 bindSeg('segQ', v => { save.settings.quality = v; applyQualitySetting(); });
 bindSeg('segShake', v => save.settings.shake = +v);
+bindSeg('segFps', v => save.settings.fps30 = +v);
 bindSeg('segDmg', v => save.settings.dmgNum = +v);
 bindSeg('segFast', v => save.settings.fast = +v);
 bindSeg('segDiffP', v => setDiff(+v));
@@ -4845,7 +5328,7 @@ $('pResume').addEventListener('click', () => { AU.sfx('button'); resumeGame(); }
 $('pSet').addEventListener('click', () => { AU.sfx('button'); openSettings('scrPause'); });
 $('pQuit').addEventListener('click', () => { AU.sfx('button'); confirmBox('포기하기', '지금까지 모은 골드는 보관됩니다.<br>스테이지를 포기할까요?', () => { finishRun(false); openStageSelect(); }, () => showScreen('scrPause')); });
 function bindPress(id, fn) { $(id).addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); fn(); }); }
-bindPress('bSk1', useSkill1); bindPress('bSk2', useSkill2); bindPress('bPot', usePotion); bindPress('bRide', () => { AU.sfx('button'); rideToggle(); });
+bindPress('bSk1', useSkill1); bindPress('bSk2', useSkill2); bindPress('bPot', usePotion); bindPress('bRide', () => { AU.sfx('button'); rideToggle(); }); bindPress('bUlt', useVehUlt);
 bindPress('bPause', () => { AU.sfx('button'); pauseGame(); });
 
 /* ------------------------- 터치 조이스틱 ------------------------- */
@@ -4864,7 +5347,7 @@ const joyEnd = e => { if (e.pointerId === joy.id) { joy.id = null; joy.mag = 0; 
 cv.addEventListener('pointerup', joyEnd); cv.addEventListener('pointercancel', joyEnd); cv.addEventListener('lostpointercapture', joyEnd);
 window.addEventListener('keydown', e => {
   const k = e.key.length === 1 ? e.key.toLowerCase() : e.key; keys[k] = true;
-  if (k === 'j') useSkill1(); if (k === 'k') useSkill2(); if (k === 'l' || k === 'q') usePotion(); if (k === 'e' || k === 'f') rideToggle();
+  if (k === 'j') useSkill1(); if (k === 'k') useSkill2(); if (k === 'l' || k === 'q') usePotion(); if (k === 'e' || k === 'f') rideToggle(); if (k === 'r') useVehUlt();
   if (k === 'Escape' || k === 'p') { if (G.state === 'play') pauseGame(); else if (G.state === 'pause') resumeGame(); }
 });
 window.addEventListener('keyup', e => { const k = e.key.length === 1 ? e.key.toLowerCase() : e.key; keys[k] = false; });
@@ -4878,11 +5361,12 @@ window.addEventListener('pagehide', writeSave);
 G.lastFrame = performance.now();
 function frame(now) {
   requestAnimationFrame(frame);
+  if (save.settings.fps30 && now - G.lastFrame < 30) return;
   let dt = (now - G.lastFrame) / 1000; G.lastFrame = now;
   if (!(dt > 0)) dt = 0.016; dt = Math.min(dt, 0.05);
   try {
     if (G.state === 'play') { update(dt); updateButtons(); }
-    else if (G.state === 'dying') { G.deadT -= dt; for (const q of parts) { q.life -= dt; q.x += q.vx * dt; q.y += q.vy * dt; } parts = parts.filter(q => q.life > 0); if (G.deadT <= 0) stageLose(); }
+    else if (G.state === 'dying') { G.deadT -= dt; for (const q of parts) { q.life -= dt; q.x += q.vx * dt; q.y += q.vy * dt; } compactParts(); if (G.deadT <= 0) stageLose(); }
     render();
   } catch (err) { console.error(err); }
   if (Q.auto && G.state === 'play') {
@@ -4968,8 +5452,8 @@ function chooseChest(o) {
 
 /* ------------------------- 카카오톡 / 링크 공유 ------------------------- */
 const SHARE = {
-  title: '데스 서바이버: 전설의 귀환',
-  text: '설치 없이 터치 한 번으로 바로 플레이! 현대 화기 280종 · 40스테이지 생존 슈팅 RPG',
+  title: '데스 서바이버 확장팩',
+  text: '설치 없이 터치 한 번으로 바로 플레이! 무기 360종 · 탑승 장비 120종 · 40스테이지 대량 처치 액션',
   url() {
     const c = (window.GAME_CONFIG && GAME_CONFIG.url) || '';
     if (/^https?:/.test(location.protocol) && !/claude|localhost|127\.0\.0\.1/.test(location.hostname)) return location.origin + location.pathname.replace(/index\.html$/, '');
@@ -4990,7 +5474,7 @@ const SHARE = {
     });
   },
   kakao() {
-    const url = this.url(), img = url.replace(/\/?$/, '/') + 'og.jpg';
+    const url = this.url(), img = url.replace(/\/?$/, '/') + 'og.jpg?v=5';
     return this.loadKakao().then(() => {
       Kakao.Share.sendDefault({
         objectType: 'feed',

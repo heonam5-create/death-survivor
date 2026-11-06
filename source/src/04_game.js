@@ -23,6 +23,7 @@ function recalc() {
   P.magnet = 75 * (1 + 0.35 * (p.magnet || 0));
   P.greed = (1 + 0.2 * (p.greed || 0)) * (1 + 0.05 * u.gain) * DF().gold; P.xpMul = (1 + 0.05 * u.gain) * DF().xp;
   if (G.allyAura) P.cdMul /= 1 + 0.06 * G.allyAura;
+  supApply();
   const b = G.buff || {}; P.dmgMul *= 1 + (b.atk || 0); P.cdMul /= 1 + (b.aspd || 0); P.crit += b.crit || 0; P.spd *= 1 + (b.spd || 0);
 }
 function codexOf(id) { return save.codex[id] || (save.codex[id] = { found: 1, maxLv: 1, kills: 0 }); }
@@ -50,7 +51,7 @@ function startStage(n) {
   enemies = []; projs = []; eprojs = []; pickups = []; parts = []; texts = []; effects = []; hazards = []; fields = []; turrets = []; mines = []; gens = []; laterQ = [];
   joy.id = null; joy.mag = 0;
   initQuests(st);
-  extStageStart();
+  extStageStart(); xpStageStart();
   G.paused = false; G.state = 'play';
   showScreen(null); $('gameUI').classList.add('on'); updatePotBadge();
   AU.bgm(st.mu, st.muVar);
@@ -145,7 +146,7 @@ function spawnEnemy(type, x, y, o = {}) {
   if (o.tgtGen) e.tgtGen = true;
   enemies.push(e); return e;
 }
-function maxEnemies() { return Math.min(Q.level === 0 ? 240 : 640, Math.round((Q.level === 0 ? 130 : 200 + G.stage * 4) * G.st.crowd * DF().cnt)); }
+function maxEnemies() { return Math.min(Q.level === 0 ? 210 : Q.level === 1 ? 420 : 640, Math.round((Q.level === 0 ? 130 : 200 + G.stage * 4) * G.st.crowd * DF().cnt)); }
 function aliveCount() { let n = 0; for (const e of enemies) if (!e.dead) n++; return n; }
 function director(dt) {
   const st = G.st, p = progress();
@@ -197,6 +198,7 @@ function eliteSkill(e, dt, pdist) {
     case 'missile': e.skT = 4; for (let i = -1; i <= 1; i += 2) { eShot(e.x, e.y, a + i * 0.9, 120, e.dmg * 0.5, 'fire'); const b = eprojs[eprojs.length - 1]; b.hom = 1; b.life = 4; } AU.sfx('missile', 1.4); break;
     case 'blink': e.skT = 5; effects.push({ type: 'poof', x: e.x, y: e.y, r: e.r * 1.4, t: 0, dur: .3 }); { const b2 = rand(0, TAU); e.x = P.x + Math.cos(b2) * 110; e.y = P.y + Math.sin(b2) * 110; } e.stunT = 0.4; for (let i = 0; i < 8; i++) eShot(e.x, e.y, i / 8 * TAU, 130, e.dmg * 0.4, 'plasma'); AU.sfx('portal'); break;
     case 'shield': e.skT = 6; e.shieldT = 2.5; AU.sfx('clank'); break;
+    default: eliteSkillX(e, a); break;
   }
   if (e.skill2) { const t = e.skill; e.skill = e.skill2; e.skill2 = t; e.skT *= 0.8; }
 }
@@ -238,10 +240,10 @@ function ringWave() {
 }
 function spawnElite() {
   const pool = G.st.mobs.filter(m => ET[m[0]].ai !== 'bomb' && ET[m[0]].ai !== 'summon');
-  const type = Math.random() < 0.6 && ET[G.st.sig].ai !== 'bomb' ? G.st.sig : wpick(pool.length ? pool : G.st.mobs);
-  const [x, y] = edgePos(); const e = spawnEnemy(type, x, y, { elite: true });
-  const SKN = { nova: '충격 폭발', charge: '돌진', summon: '소환', missile: '유도탄', blink: '순간이동', shield: '보호막' };
-  toast(`⚠ 정예 출현: ${e.d.n}<br><span style="font-size:16px">기술: ${SKN[e.skill] || ''}</span>`, 1.6, '#ff9800');
+  const isX = G.st.elx && Math.random() < 0.7;
+  const type = isX ? G.st.elx : Math.random() < 0.6 && ET[G.st.sig].ai !== 'bomb' ? G.st.sig : wpick(pool.length ? pool : G.st.mobs);
+  const [x, y] = edgePos(); const e = spawnEnemy(type, x, y, { elite: true }); if (isX) setupElx(e);
+  toast(`⚠ 정예 출현: ${e.d.n}<br><span style="font-size:16px">기술: ${SKN_X[e.skill] || ''}${e.skill2 ? ' · ' + SKN_X[e.skill2] : ''}${e.elx && e.elx.aura ? ' · 주변 강화' : e.elx && e.elx.flank ? ' · 포위' : ''}</span>`, 1.6, '#ff9800');
   AU.sfx('alarm'); G.flash = Math.max(G.flash, 0.18); G.flashCol = '255,120,0';
 }
 function startBossWarning() {
@@ -348,8 +350,10 @@ function hitEnemy(e, base, o = {}) {
   if (!o.tick && Q.level) {
     const hc = (W_ && W_.col) || '#fff59d';
     if (crit) { if (effects.length < 160) effects.push({ type: 'crit', x: e.x, y: e.y - e.r * .3, r: e.r, t: 0, dur: 0.22, col: hc }); AU.sfx('crit'); }
-    else if (parts.length < QC.particles * 0.7) for (let i = 0; i < 2; i++) addPart(e.x + rand(-4, 4), e.y - e.r * .3, rand(-110, 110), rand(-110, 60), hc, 0.18, 2.5);
+    else { if (parts.length < QC.particles * 0.7) for (let i = 0; i < 2; i++) addPart(e.x + rand(-4, 4), e.y - e.r * .3, rand(-110, 110), rand(-110, 60), hc, 0.18, 2.5); hitFx(e, W_, o); }
+    if ((crit || dmg > e.maxHp * .35) && !e.boss && W_ && (W_.dmg || 0) > 25) G.shake = Math.max(G.shake, 1.5);
   }
+  if (!o.tick && !e.boss && !e.static) e.hitT = Math.max(e.hitT || 0, crit || dmg > e.maxHp * .3 ? .14 : .08);
   if (!o.silent && !crit) AU.sfx(arm > 0.25 ? 'clank' : W_ && W_.c === 'energy' ? 'hitE' : W_ && (W_.c === 'blast' || (W_.dmg || 0) > 30) ? 'hitH' : 'hit');
   if (e.hp <= 0) killEnemy(e);
 }
@@ -362,6 +366,7 @@ function killEnemy(e) {
   for (let i = 0; i < n; i++) addPart(e.x, e.y, rand(-120, 120) * (e.boss ? 2 : big ? 1.4 : 1), rand(-140, 80) * (e.boss ? 2 : 1), col || '#fff', rand(0.3, 0.6), rand(2, 4.5), 200);
   if (big && !e.boss && effects.length < 150) { effects.push({ type: 'shock', x: e.x, y: e.y, r: e.r * 2.2, t: 0, dur: 0.3, col: W_ ? W_.col : '#ffccbc' }); if (e.elite || (e.lastDmg || 0) > 80) G.shake = Math.max(G.shake, 2.5); }
   else effects.push({ type: 'poof', x: e.x, y: e.y, r: e.r, t: 0, dur: 0.3 });
+  killFx(e, W_);
   AU.sfx('die');
   if (e.lastW) { G.wkills[e.lastW] = (G.wkills[e.lastW] || 0) + 1; }
   if (e.boss) { bossDefeated(e); return; }
@@ -371,7 +376,7 @@ function killEnemy(e) {
     if (e.type === 'device') { qAdd('device'); explode(e.x, e.y, 70, 0, false, '#ffd600'); toast('⚙️ 장치 파괴!', 1, '#ffd600'); }
     dropGem(e.x, e.y, e.d.xp); return;
   }
-  G.kills++;
+  G.kills++; onKill(e);
   qAdd('kill');
   const tag = e.d.tag; G.tagKills[tag] = (G.tagKills[tag] || 0) + 1;
   qAdd('killTag', 1, q => q.tag === tag);
@@ -380,7 +385,7 @@ function killEnemy(e) {
   if (G.buff && G.buff.vamp && Math.random() < 0.25) P.hp = Math.min(P.maxHp, P.hp + 1 + G.stage * 0.05);
   if (tr && tr.includes('nova') && Math.random() < 0.35) explode(e.x, e.y, 50, (e.lastDmg || 10) * 0.7, true, '#ffab40', { wid: e.lastW, noTrait: 1 });
   if (e.elite) {
-    G.elitesKilled++; qAdd('elite');
+    G.elitesKilled++; qAdd('elite'); eliteDeathFx(e);
     if (e.cmd) { qAdd('commander'); G.cmdKilled = true; dropPickup('chest', e.x - 16, e.y); }
     if (Math.random() < 0.15) dropPickup('hpot', e.x - 12, e.y + 6);
     if (G.veh && G.veh.repairs < 2 && Math.random() < 0.08) dropPickup('rkit', e.x + 12, e.y + 6);
@@ -431,6 +436,7 @@ function acquireWeapon(id, src) {
 }
 function explode(x, y, r, dmg, friendly, col = '#ff9800', o = {}) {
   effects.push({ type: 'boom', x, y, r, t: 0, dur: 0.35, col });
+  explodeFx(x, y, r, col);
   const np = Q.level ? Math.min(22, 8 + r / 6) : 6;
   for (let i = 0; i < np; i++) { const a = rand(0, TAU), s = rand(40, 180) * r / 50; addPart(x, y, Math.cos(a) * s, Math.sin(a) * s, pick(['#ffeb3b', '#ff9800', '#ff5722', col]), rand(0.25, 0.55), rand(2.5, 5)); }
   AU.sfx(r > 85 ? 'bigboom' : 'boom');
@@ -464,7 +470,11 @@ function collect(p) {
   }
 }
 function heal(v) { const before = P.hp; P.hp = Math.min(P.maxHp, P.hp + v); AU.sfx('heal'); texts.push({ x: P.x, y: P.y - 22, t: 0, v: '+' + Math.round(P.hp - before), col: '#69f0ae', pl: 1 }); for (let i = 0; i < 10; i++) addPart(P.x + rand(-12, 12), P.y + rand(-5, 10), 0, rand(-60, -30), '#69f0ae', 0.6, 3); }
-function addPart(x, y, vx, vy, col, life, size, grav = 0) { if (parts.length >= QC.particles) return; parts.push({ x, y, vx, vy, col, life, max: life, size, grav }); }
+// 입자 오브젝트 풀 (가장 많이 생성되는 객체를 재사용)
+const PPOOL = [];
+function newPart(x, y, vx, vy, col, life, size, grav, grow) { const q = PPOOL.pop() || {}; q.x = x; q.y = y; q.vx = vx; q.vy = vy; q.col = col; q.life = life; q.max = life; q.size = size; q.grav = grav || 0; q.grow = grow || 0; return q; }
+function addPart(x, y, vx, vy, col, life, size, grav = 0) { if (parts.length >= QC.particles) return; parts.push(newPart(x, y, vx, vy, col, life, size, grav)); }
+function compactParts() { let j = 0; for (let i = 0; i < parts.length; i++) { const q = parts[i]; if (q.life > 0) parts[j++] = q; else if (PPOOL.length < 900) PPOOL.push(q); } parts.length = j; }
 
 /* =====================================================================
    무기 50종 — 발사 방식 엔진
@@ -794,7 +804,7 @@ function updateProjs(dt) {
     if (p.homT) { const t = p.htg && !p.htg.dead ? p.htg : (p.htg = nearest(p.x, p.y, 260, p.hit)); if (t) { const sp = Math.hypot(p.vx, p.vy), ta = Math.atan2(t.y - p.y, t.x - p.x); p.ang += clamp(angDiff(ta, p.ang), -p.homT * dt, p.homT * dt); p.vx = Math.cos(p.ang) * sp; p.vy = Math.sin(p.ang) * sp; } }
     if (p.boomer) { p.tt = (p.tt || 0) + dt; if (!p.back && p.tt >= p.out) { p.back = 1; p.hit.clear(); } if (p.back) { const dx = P.x - p.x, dy = P.y - p.y, d = Math.hypot(dx, dy) || 1, sp = Math.hypot(p.vx, p.vy) * 1.05; p.vx = dx / d * sp; p.vy = dy / d * sp; if (d < 18) { p.dead = true; continue; } } p.ang += dt * 18; }
     if (p.wave) { p.tt += dt; p.bx += p.vx * dt; p.by += p.vy * dt; const nx = -Math.sin(p.ang), ny = Math.cos(p.ang), off = Math.sin(p.tt * p.freq + p.ph) * p.amp; const ox = p.x, oy = p.y; p.x = p.bx + nx * off; p.y = p.by + ny * off; p.life -= dt; projCollide(p); if (Q.level && Math.random() < .4) addPart(ox, oy, 0, 0, p.col, .25, 3); if (p.life <= 0) p.dead = true; continue; }
-    if (p.acc && Q.level && Math.random() < 0.7) parts.length < QC.particles && parts.push({ x: p.x - Math.cos(p.ang) * 10, y: p.y - Math.sin(p.ang) * 10, vx: rand(-10, 10), vy: rand(-10, 10), col: 'rgba(200,200,200,.55)', life: 0.6, max: 0.6, size: 4, grav: 0, grow: 2.2 });
+    if (p.acc && Q.level && Math.random() < 0.7) parts.length < QC.particles && parts.push(newPart(p.x - Math.cos(p.ang) * 10, p.y - Math.sin(p.ang) * 10, rand(-10, 10), rand(-10, 10), 'rgba(200,200,200,.55)', 0.6, 4, 0, 2.2));
     if (p.trCol && Q.level >= 2 && Math.random() < 0.25) addPart(p.x, p.y, rand(-20, 20), rand(-20, 20), p.trCol, 0.25, 2.5);
     const steps = Math.min(5, Math.max(1, Math.ceil(Math.hypot(p.vx, p.vy) * dt / (p.r + 9))));
     p.life -= dt;
@@ -1015,7 +1025,7 @@ function updateEnemies(dt) {
     if (e.slowT > 0) { e.slowT -= dt; if (e.slowT <= 0) e.slowF = 1; }
     let tx = P.x, ty = P.y;
     if (e.tgtGen) { let bd = 1e9; for (const g of gens) { if (g.dead) continue; const d = (g.x - e.x) ** 2 + (g.y - e.y) ** 2; if (d < bd) { bd = d; tx = g.x; ty = g.y; } } if (bd === 1e9) e.tgtGen = false; }
-    if (!e.tgtGen && !e.boss && !e.static && allies.length) { const at = allyTarget(e); if (at) { tx = at.x; ty = at.y; } }
+    if (!e.tgtGen && !e.boss && !e.static && (allies.length || e.flankA !== undefined)) { const at = extTarget(e); if (at) { tx = at[0]; ty = at[1]; } }
     const dx = tx - e.x, dy = ty - e.y; const dist = Math.hypot(dx, dy) || 1; const nx = dx / dist, ny = dy / dist;
     const pdist = Math.hypot(P.x - e.x, P.y - e.y);
     if (e.boss) { if (e.stunT > 0) e.stunT = 0; bossUpdate(e, dt); }
@@ -1061,6 +1071,9 @@ function updateEnemies(dt) {
           break;
         case 'flee': { vx = -nx * e.spd; vy = -ny * e.spd; e.life -= dt; if (Math.random() < .3) addPart(e.x, e.y, rand(-20, 20), rand(-30, 0), '#ffd54f', .5, 3); if (e.life <= 0) { e.dead = true; effects.push({ type: 'poof', x: e.x, y: e.y, r: e.r * 2, t: 0, dur: .4 }); } break; }
       }
+      if (e.hitT > 0) { e.hitT -= dt; vx *= .3; vy *= .3; }
+      if (e.buffT > 0) { e.buffT -= dt; vx *= 1.25; vy *= 1.25; }
+      if (e.rushT > 0) { e.rushT -= dt; vx *= 2.2; vy *= 2.2; if (Q.level && Math.random() < .5) addPart(e.x, e.y + e.r * .5, rand(-30, 30), rand(-30, 0), '#ff5252', .3, 3); }
       if (e.slowT > 0) { vx *= e.slowF; vy *= e.slowF; }
       e.x += (vx + e.kx) * dt; e.y += (vy + e.ky) * dt;
       const kd = Math.pow(0.002, dt); e.kx *= kd; e.ky *= kd;
@@ -1139,7 +1152,7 @@ function update(dt) {
   director(dt);
   buildGrid();
   if (!G.veh) updateWeapons(dt); updateProjs(dt); updateFields(dt); updateTurrets(dt); updateMines(dt);
-  extUpdate(dt);
+  extUpdate(dt); xpUpdate(dt);
   buildGrid();
   updateEnemies(dt); updateEProjs(dt); updateHazards(dt); updateGens(dt);
   if (G.state !== 'play') return;
@@ -1149,7 +1162,7 @@ function update(dt) {
     if (p.dead) continue; p.t += dt;
     if (p.kind !== 'gem' && p.z !== undefined && p.t < 0.5) { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 300 * dt; }
     const dx = P.x - p.x, dy = P.y - p.y, d2 = dx * dx + dy * dy;
-    const big = p.kind === 'hpot' || p.kind === 'rkit' || p.kind === 'scrate' || p.kind === 'chest' || p.kind === 'meat' || p.kind === 'magnet' || p.kind === 'crate' || p.kind === 'secret' || p.kind === 'power' || p.kind === 'wdrop' || p.kind === 'legend';
+    const big = p.kind === 'hpot' || p.kind === 'rkit' || p.kind === 'wsup' || p.kind === 'scrate' || p.kind === 'chest' || p.kind === 'meat' || p.kind === 'magnet' || p.kind === 'crate' || p.kind === 'secret' || p.kind === 'power' || p.kind === 'wdrop' || p.kind === 'legend';
     const rng = big ? 24 * 24 : p.kind === 'qitem' ? Math.max(mg2, 55 * 55) : mg2;
     if (p.t > 0.4 && d2 < rng) p.mag = true;
     if (p.mag) { const d = Math.sqrt(d2) || 1, sp = 260 + p.t * 60; p.x += dx / d * sp * dt; p.y += dy / d * sp * dt; if (d < P.r + 6) { p.dead = true; collect(p); } }
@@ -1161,9 +1174,10 @@ function update(dt) {
   if (G.shake > 0) G.shake = Math.max(0, G.shake - dt * 30);
   if (G.flash > 0) G.flash -= dt;
   if (G.time % 0.25 < dt) { enemies = enemies.filter(e => !e.dead); eprojs = eprojs.filter(b => !b.dead); pickups = pickups.filter(p => !p.dead); hazards = hazards.filter(h => !h.dead); }
-  parts = parts.filter(q => q.life > 0); texts = texts.filter(t => t.t < (t.big ? 1.4 : t.crit ? 0.9 : 0.7)); effects = effects.filter(f => f.t < f.dur);
+  compactParts(); texts = texts.filter(t => t.t < (t.big ? 1.4 : t.crit ? 0.9 : 0.7)); effects = effects.filter(f => f.t < f.dur);
   projs = projs.filter(p => !p.dead);
   if (G.swapQ && G.swapQ.length && G.state === 'play' && P.hp > 0) openSwap(G.swapQ.shift());
   else if (G.pendingLv > 0 && G.state === 'play' && P.hp > 0 && G.clearing === 0) openLevelUp();
+  else if (G.eliteRw > 0 && G.state === 'play' && P.hp > 0 && G.clearing === 0) openEliteReward();
   if (G.bossState === 3) { G.winT -= dt; if (G.winT <= 0 && G.state === 'play') stageWin(); }
 }

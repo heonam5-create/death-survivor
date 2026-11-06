@@ -6,10 +6,10 @@
 
 /* ------------------------- 난이도 ------------------------- */
 const DIFFS = [
-  { k: 'easy', n: '쉬움', ic: '🌱', col: '#69f0ae', hp: .75, dmg: .70, cnt: .80, spd: .93, elite: .7, potT: 26, gold: .8, xp: 1, boss: .8, rescue: .85, pat: 0 },
-  { k: 'normal', n: '보통', ic: '⚔️', col: '#90caf9', hp: 1, dmg: 1, cnt: 1, spd: 1, elite: 1, potT: 36, gold: 1, xp: 1, boss: 1, rescue: 1, pat: 0 },
-  { k: 'hard', n: '어려움', ic: '🔥', col: '#ffb74d', hp: 1.45, dmg: 1.35, cnt: 1.25, spd: 1.07, elite: 1.35, potT: 46, gold: 1.35, xp: 1.1, boss: 1.3, rescue: 1.12, pat: 1 },
-  { k: 'hell', n: '지옥', ic: '👹', col: '#ff5252', hp: 2.0, dmg: 1.75, cnt: 1.5, spd: 1.14, elite: 1.8, potT: 58, gold: 1.8, xp: 1.2, boss: 1.7, rescue: 1.25, pat: 2 }
+  { k: 'easy', n: '쉬움', ic: '🌱', col: '#69f0ae', hp: .8, dmg: .72, cnt: .95, spd: .95, elite: .8, potT: 26, gold: .8, xp: 1, boss: .85, rescue: .85, pat: 0 },
+  { k: 'normal', n: '보통', ic: '⚔️', col: '#90caf9', hp: 1.05, dmg: 1.15, cnt: 1.3, spd: 1.03, elite: 1.3, potT: 34, gold: 1.1, xp: 1.05, boss: 1.15, rescue: 1, pat: 1 },
+  { k: 'hard', n: '어려움', ic: '🔥', col: '#ffb74d', hp: 1.45, dmg: 1.4, cnt: 1.55, spd: 1.08, elite: 1.65, potT: 44, gold: 1.4, xp: 1.12, boss: 1.4, rescue: 1.12, pat: 2 },
+  { k: 'hell', n: '지옥', ic: '👹', col: '#ff5252', hp: 1.95, dmg: 1.8, cnt: 1.8, spd: 1.15, elite: 2.1, potT: 54, gold: 1.9, xp: 1.25, boss: 1.8, rescue: 1.25, pat: 3 }
 ];
 function diffIdx() { const d = save.settings.diff; return d >= 0 && d <= 3 ? d : 1; }
 function DF() { return DIFFS[diffIdx()]; }
@@ -39,23 +39,23 @@ function diffRewardMul() {
 // cat: ground 지상 / hover 부양 / mech 보행 로봇 / air 비행
 // link: 동료 연동 — A 동승 전투(2석), A1 1석(50% 확률), B 호위 전투, C 공중+지상 지원
 const VCH = {
-  bike: { n: '전투 오토바이', cat: 'ground', spd: 210, hp: 150, ar: .10, r: 16, crush: 10, link: 'B', open: 1, mh: 10 },
-  buggy: { n: '전투 버기', cat: 'ground', spd: 190, hp: 190, ar: .14, r: 18, crush: 14, link: 'A1', open: 1, mh: 12 },
-  jeep: { n: '경장갑 차량', cat: 'ground', spd: 170, hp: 235, ar: .18, r: 20, crush: 16, link: 'A1', open: 1, mh: 16 },
-  rover: { n: '6륜 장갑 로버', cat: 'ground', spd: 145, hp: 300, ar: .24, r: 22, crush: 20, link: 'A', mh: 20 },
-  apc: { n: '장갑차', cat: 'ground', spd: 130, hp: 340, ar: .28, r: 24, crush: 22, link: 'A', mh: 20 },
-  tank: { n: '중형 전차', cat: 'ground', spd: 108, hp: 400, ar: .32, r: 25, crush: 30, link: 'B', mh: 18 },
-  hbike: { n: '호버 바이크', cat: 'hover', spd: 232, hp: 150, ar: .08, r: 16, crush: 8, link: 'B', open: 1, mh: 14 },
-  htank: { n: '호버 전차', cat: 'hover', spd: 145, hp: 370, ar: .30, r: 25, crush: 24, link: 'B', mh: 22 },
-  minibot: { n: '소형 전투 로봇', cat: 'mech', spd: 155, hp: 220, ar: .18, r: 18, crush: 12, link: 'B', mh: 22 },
-  mech: { n: '중형 전투 로봇', cat: 'mech', spd: 135, hp: 310, ar: .25, r: 22, crush: 18, link: 'B', mh: 28 },
-  spider: { n: '다족 보행 메카', cat: 'mech', spd: 150, hp: 290, ar: .24, r: 23, crush: 16, link: 'B', mh: 22 },
-  titan: { n: '거대 메카', cat: 'mech', spd: 102, hp: 480, ar: .32, r: 31, crush: 34, link: 'B', mh: 40 },
-  heli: { n: '전투 헬리콥터', cat: 'air', spd: 175, hp: 210, ar: .14, r: 23, crush: 0, link: 'C', mh: 30 },
-  jet: { n: '고속 전투기', cat: 'air', spd: 252, hp: 170, ar: .10, r: 21, crush: 0, link: 'C', mh: 30 },
-  dpod: { n: '드론 탑승 장비', cat: 'air', spd: 192, hp: 190, ar: .12, r: 19, crush: 0, link: 'C', mh: 30 },
-  gunship: { n: '중형 건쉽', cat: 'air', spd: 140, hp: 320, ar: .22, r: 27, crush: 0, link: 'A', mh: 32 },
-  saucer: { n: '반중력 비행체', cat: 'air', spd: 196, hp: 270, ar: .20, r: 23, crush: 0, link: 'C', mh: 32 }
+  bike: { n: '전투 오토바이', cat: 'ground', spd: 210, hp: 100, time: 25, ar: .10, r: 16, crush: 10, link: 'B', open: 1, mh: 10 },
+  buggy: { n: '전투 버기', cat: 'ground', spd: 190, hp: 125, time: 25, ar: .14, r: 18, crush: 14, link: 'A1', open: 1, mh: 12 },
+  jeep: { n: '경장갑 차량', cat: 'ground', spd: 170, hp: 150, time: 35, ar: .18, r: 20, crush: 16, link: 'A1', open: 1, mh: 16 },
+  rover: { n: '6륜 장갑 로버', cat: 'ground', spd: 145, hp: 205, time: 35, ar: .24, r: 22, crush: 20, link: 'A', mh: 20 },
+  apc: { n: '장갑차', cat: 'ground', spd: 130, hp: 255, time: 35, ar: .28, r: 24, crush: 22, link: 'A', mh: 20 },
+  tank: { n: '중형 전차', cat: 'ground', spd: 108, hp: 285, time: 40, ar: .32, r: 25, crush: 30, link: 'B', mh: 18 },
+  hbike: { n: '호버 바이크', cat: 'hover', spd: 232, hp: 100, time: 25, ar: .08, r: 16, crush: 8, link: 'B', open: 1, mh: 14 },
+  htank: { n: '호버 전차', cat: 'hover', spd: 145, hp: 250, time: 40, ar: .30, r: 25, crush: 24, link: 'B', mh: 22 },
+  minibot: { n: '소형 전투 로봇', cat: 'mech', spd: 155, hp: 150, time: 25, ar: .18, r: 18, crush: 12, link: 'B', mh: 22 },
+  mech: { n: '중형 전투 로봇', cat: 'mech', spd: 135, hp: 205, time: 35, ar: .25, r: 22, crush: 18, link: 'B', mh: 28 },
+  spider: { n: '다족 보행 메카', cat: 'mech', spd: 150, hp: 190, time: 35, ar: .24, r: 23, crush: 16, link: 'B', mh: 22 },
+  titan: { n: '거대 메카', cat: 'mech', spd: 102, hp: 310, time: 40, ar: .32, r: 31, crush: 34, link: 'B', mh: 40 },
+  heli: { n: '전투 헬리콥터', cat: 'air', spd: 175, hp: 165, time: 30, ar: .14, r: 23, crush: 0, link: 'C', mh: 30 },
+  jet: { n: '고속 전투기', cat: 'air', spd: 252, hp: 105, time: 24, ar: .10, r: 21, crush: 0, link: 'C', mh: 30 },
+  dpod: { n: '드론 탑승 장비', cat: 'air', spd: 192, hp: 120, time: 25, ar: .12, r: 19, crush: 0, link: 'C', mh: 30 },
+  gunship: { n: '중형 건쉽', cat: 'air', spd: 140, hp: 215, time: 30, ar: .22, r: 27, crush: 0, link: 'A', mh: 32 },
+  saucer: { n: '반중력 비행체', cat: 'air', spd: 196, hp: 175, time: 30, ar: .20, r: 23, crush: 0, link: 'C', mh: 32 }
 };
 const VCAT_NAME = { ground: '지상', hover: '부양', mech: '보행', air: '비행' };
 // 차량 무기 14종: 발사체 크기·속도·방향·폭발 범위·이펙트가 모두 다름
@@ -101,7 +101,13 @@ const VCOMP = {
   dpod: ['homing', 'laser', 'tesla', 'plasma', 'mg', 'beam'], gunship: ['minigun', 'mlrs', 'shell', 'homing', 'beam', 'rocket'],
   saucer: ['beam', 'plasma', 'tesla', 'laser', 'rail', 'homing']
 };
-const VSUBS = { rover: 1, apc: 1, tank: 1, htank: 1, titan: 1, gunship: 1, mech: 1 };
+const VSIG = { bike: 'mg', buggy: 'rocket', jeep: 'grenade', rover: 'mortar', apc: 'minigun', tank: 'shell', hbike: 'tesla', htank: 'rail', minibot: 'laser', mech: 'laser',
+  spider: 'flame', titan: 'plasma', heli: 'mlrs', jet: 'homing', dpod: 'tesla', gunship: 'shell', saucer: 'beam' };
+const VSUBTIER = [[], ['mg', 'grenade', 'rocket'], ['homing', 'tesla', 'minigun'], ['rail', 'mlrs', 'plasma']];
+// 차량 필살기 (탑승마다 1회)
+const VULT = { tank: 'bigshell', htank: 'bigshell', gunship: 'bigshell', heli: 'carpet', jet: 'strafe', mech: 'megalaser', minibot: 'megalaser', titan: 'megalaser', spider: 'megalaser',
+  apc: 'barrage', rover: 'barrage', jeep: 'barrage', buggy: 'barrage', bike: 'barrage', hbike: 'emstorm', saucer: 'emstorm', dpod: 'emstorm' };
+const VULT_NAME = { bigshell: '초대형 포격', carpet: '미사일 융단폭격', strafe: '전방 대규모 폭격', megalaser: '초대형 레이저', barrage: '전방 집중 기관포 난사', emstorm: '전자기 폭풍' };
 const VSPPOOL = { ground: ['nitro', 'smoke', 'ram', 'shield', 'repair', 'overdrive', 'airstrike'], hover: ['hover', 'nitro', 'shield', 'emp', 'overdrive', 'flare'],
   mech: ['stomp', 'shield', 'overdrive', 'emp', 'salvo', 'repair'], air: ['salvo', 'flare', 'airstrike', 'emp', 'overdrive', 'shield'] };
 const VMODEL = {
@@ -136,12 +142,12 @@ const VEH = [], VEH_ST = [];
     prev = chs.slice().sort().join();
     const list = [], stW = new Set();
     chs.forEach((c, k) => {
-      const comp = VCOMP[c].slice().sort(() => rnd() - .5);
-      let wp = comp.find(w => !stW.has(w) && !usedCW.has(c + w)) || comp.find(w => !stW.has(w)) || comp[0];
-      stW.add(wp); usedCW.add(c + wp);
+      // 차체마다 고정된 전용 무기 (오토바이=쌍열 기관총, 전차=초대형 포탄, 헬기=다연장 미사일 …)
+      let wp = VSIG[c]; stW.add(wp); usedCW.add(c + wp);
       const cat = VCH[c].cat, spp = VSPPOOL[cat].slice().sort(() => rnd() - .5);
       let sp = spp.find(s => !used.has(c + wp + s)) || spp[0];
-      let sub = null; if (VSUBS[c]) { const subs = ['mg', 'homing', 'minigun', 'grenade', 'tesla', 'rocket'].filter(x => x !== wp); sub = subs[Math.floor(rnd() * subs.length)]; }
+      // 스테이지가 높아질수록 새로운 보조 무기 해금 (같은 차체라도 공격 방식이 달라짐)
+      let sub = null; if (g >= 1) { const subs = VSUBTIER[g].filter(x => x !== wp); sub = subs[(n + k) % subs.length]; }
       used.add(c + wp + sp);
       const kp = VKITS.filter(x => (x !== 'wings' || cat === 'air' || cat === 'hover') && (x !== 'spikes' || cat === 'ground' || cat === 'mech')).sort(() => rnd() - .5);
       const mi = mcount[c] = (mcount[c] || 0) + 1, ml = VMODEL[c];
@@ -151,7 +157,7 @@ const VEH = [], VEH_ST = [];
         : g === 1 ? { a: hsl(190 + (n * 17 + k * 40) % 80, 18, 46), b: hsl(200 + (n * 17) % 60, 20, 28), c: hsl(h, 90, 55), gl: '#80deea' }
           : g === 2 ? { a: hsl(h, 50, 40), b: hsl(h + 20, 45, 22), c: hsl(h + 170, 95, 60), gl: '#e1bee7' }
             : { a: hsl(h, 12, 86), b: hsl(h, 14, 55), c: hsl(h + 180, 95, 58), gl: '#ffecb3' };
-      const def = { id: `v${n}_${k}`, st: n, k, ch: c, wp, sub, sp, kit: kp.slice(0, 2), col, name: model + ' ' + VCH[c].n, idx: VEH.length };
+      const def = { id: `v${n}_${k}`, st: n, k, tier: g, ch: c, wp, sub, sp, kit: kp.slice(0, 2), col, name: model + ' ' + VCH[c].n, idx: VEH.length };
       VEH.push(def); list.push(def);
     });
     VEH_ST[n] = list;
@@ -225,12 +231,12 @@ function extStageStart() {
   const n = G.stage;
   G.diffAcc = [0, 0, 0, 0]; G.veh = null; G.rkit = 0; G.comboCd = 8; G.comboT = {}; G.cmdSpawned = false; G.cmdKilled = false;
   G.hpotT = DF().potT * 0.6; G.lastHpot = 0; G.rkitT = 40; G.radio = null; G.stormT = 0; G.stormWarn = 0; G.artT = 0; G.artTick = 0; G.surroundT = 30;
-  G.extEvT = rand(55, 70); G.pdps = 40; G.pAcc = 0; G.pdT = 0; G.allyEliteT = 40; G.hold = null; G.rescued = 0; G.vehUsed = 0; G.lungeN = 0; G.spDone = 0;
+  G.extEvT = rand(55, 70); G.allyRank = 1; G.allyBoost = 1; G.pdps = 40; G.pAcc = 0; G.pdT = 0; G.allyEliteT = 40; G.hold = null; G.rescued = 0; G.vehUsed = 0; G.lungeN = 0; G.spDone = 0;
   allies = []; vehs = []; rescues = [];
   P.baseR = P.r;
-  // 탑승 장비 3종 배치
-  const defs = VEH_ST[n], a0 = rand(0, TAU), dists = [250, 520, 800];
-  defs.forEach((d, i) => { const a = a0 + i * TAU / 3 + rand(-.3, .3); vehs.push(mkVeh(d, Math.cos(a) * dists[i], Math.sin(a) * dists[i])); });
+  // 탑승 장비: 스테이지 진행률 45~75% 구간에 낙하산으로 투하 (3종 중 스테이지별 확률로 1종)
+  const a0 = rand(0, TAU);
+  G.vdropT = G.st.D * rand(0.45, 0.75); G.vdropDone = false;
   // 구조 대상 2명
   const al = ALLY_ST[n], b0 = a0 + Math.PI / 3;
   for (let i = 0; i < 2; i++) { const a = b0 + i * Math.PI + rand(-.4, .4), d = rand(380, 640); rescues.push(mkRescue(al[i], Math.cos(a) * d, Math.sin(a) * d, ['cage', 'capsule', 'chains'][(n + i) % 3])); }
@@ -245,8 +251,8 @@ function extStageStart() {
 
 /* ------------------------- 탑승 장비 ------------------------- */
 function mkVeh(def, x, y) {
-  const ch = VCH[def.ch], hp = Math.round(ch.hp * (1 + (G.stage - 1) * 0.075) * (1 + 0.03 * save.up.hp));
-  return { def, ch, x, y, hp, maxHp: hp, repairs: 0, aim: 0, aim2: 0, face: 1, walkT: 0, recoil: 0, skCd: 2, ovT: 0, nitroT: 0, hoverT: 0, ramT: 0, sl: [], seats: [], dead: false, flash: 0, bob: rand(0, 6), seen: false };
+  const ch = VCH[def.ch], hp = Math.round(ch.hp * (1 + (G.stage - 1) * 0.075) * (1 + 0.03 * save.up.hp) / Math.sqrt(DF().dmg));
+  return { def, ch, x, y, hp, maxHp: hp, time: ch.time, maxTime: ch.time, tier: def.tier || 0, ultUsed: false, ultT: 0, repairs: 0, aim: 0, aim2: 0, face: 1, walkT: 0, recoil: 0, skCd: 2, ovT: 0, nitroT: 0, hoverT: 0, ramT: 0, sl: [], seats: [], dead: false, flash: 0, bob: rand(0, 6), seen: false };
 }
 // 실측(군중 상대) 피해량 기준 무기별 보정 — 단일 대상 무기는 덜 깎아 보스전 가치를 유지
 const VW_MEAS = { mg: 300, minigun: 304, rocket: 801, homing: 829, grenade: 845, shell: 1336, mortar: 1603, laser: 329, plasma: 1044, flame: 1458, rail: 1355, tesla: 568, mlrs: 667, beam: 688 };
@@ -264,14 +270,14 @@ function playerPow() { return Math.max((G.pdps || 40) / P.dmgMul * (G.veh ? 0.85
 // 탑승 장비 화력: 주인공 화력의 약 1.35배, 단 스테이지 초반에도 의미 있도록 적 체력 기반 하한
 function vehDmg(key, slot) {
   if (window.__VDM) return window.__VDM;
-  const fl = 36 * enemyH() / Math.sqrt(DF().hp), target = clamp(1.35 * playerPow(), fl, fl * 5); // 하한 + 상한(눈덩이 방지)
+  const fl = 60 * enemyH() / Math.sqrt(DF().hp), target = clamp(2.6 * playerPow(), fl, fl * 8); // 시간제한형 고화력 (하한 + 상한)
   const share = G.veh && G.veh.def.sub ? (slot ? 0.38 : 0.72) : 1;
   return target / 300 * (key ? VW_F[key] : 1) * share;
 }
 function vehSpd() { const v = G.veh; return v.ch.spd * (1 + 0.02 * save.up.spd) * (v.nitroT > 0 ? 2.1 : 1) * (P.slowT > 0 ? 0.7 : 1); }
 function nearVeh() {
   if (G.veh) return null; let best = null, bd = 64 * 64;
-  for (const v of vehs) { if (v.dead) continue; const d = (v.x - P.x) ** 2 + (v.y - P.y) ** 2; if (d < bd) { bd = d; best = v; } }
+  for (const v of vehs) { if (v.dead || v.drop) continue; const d = (v.x - P.x) ** 2 + (v.y - P.y) ** 2; if (d < bd) { bd = d; best = v; } }
   return best;
 }
 function rideToggle() {
@@ -280,21 +286,26 @@ function rideToggle() {
   const v = nearVeh(); if (v) boardVehicle(v);
 }
 function boardVehicle(v) {
-  G.veh = v; G.lvAtMount = G.lv; P.x = v.x; P.y = v.y; P.r = v.ch.r * 0.8; P.inv = Math.max(P.inv, 0.6);
+  G.veh = v; G.lvAtMount = G.lv; recalc(); P.x = v.x; P.y = v.y; P.r = v.ch.r * 0.8; P.inv = Math.max(P.inv, 0.6);
   if (!save.vfound[v.def.id]) { save.vfound[v.def.id] = 1; G.newVeh = (G.newVeh || 0) + 1; }
   G.vehUsed++; qAdd('ride');
   AU.sfx('power'); G.shake = Math.max(G.shake, 4);
   effects.push({ type: 'shock', x: P.x, y: P.y, r: v.ch.r * 2.2, t: 0, dur: .4, col: v.def.col.c });
   const L = linkAllies(v);
-  toast(`🚘 탑승: ${v.def.name}<br><span style="font-size:14px">${VWPN[v.def.wp].n}${v.def.sub ? ' + ' + VWPN[v.def.sub].n : ''} · 특수: ${VSP[v.def.sp].n}${L ? '<br>' + L : ''}</span>`, 2.2, v.def.col.c);
-  setRideBtn(); setSkillBtn();
+  toast(`🚘 탑승: ${v.def.name} (${Math.ceil(v.time)}초)<br><span style="font-size:14px">${VWPN[v.def.wp].n}${v.def.sub ? ' + ' + VWPN[v.def.sub].n : ''} · 특수: ${VSP[v.def.sp].n} · 필살기: ${VULT_NAME[VULT[v.def.ch]]}${L ? '<br>' + L : ''}</span>`, 2.4, v.def.col.c);
+  setRideBtn(); setSkillBtn(); setUltBtn();
 }
 function exitVehicle(destroyed) {
   const v = G.veh; if (!v) return;
-  G.veh = null; P.r = P.baseR || 12;
+  G.veh = null; P.r = P.baseR || 12; recalc();
   for (const a of allies) if (a.seated === v) { a.seated = null; const ang = rand(0, TAU); a.x = P.x + Math.cos(ang) * 34; a.y = P.y + Math.sin(ang) * 34; }
   v.seats = [];
-  if (destroyed) {
+  if (destroyed === 'time') {
+    v.dead = true; P.inv = Math.max(P.inv, 1.2); AU.sfx('clank'); G.shake = Math.max(G.shake, 4);
+    for (let i = 0; i < 18; i++) addPart(P.x + rand(-20, 20), P.y - 10, rand(-60, 60), rand(-120, -40), 'rgba(90,90,90,.7)', 1.2, 6);
+    effects.push({ type: 'shock', x: P.x, y: P.y, r: 70, t: 0, dur: .4, col: '#b0bec5' });
+    toast('⏱️ 사용 시간 종료 — 장비 전투 불능<br><span style="font-size:14px">안전하게 하차했습니다</span>', 1.8, '#b0bec5');
+  } else if (destroyed) {
     v.dead = true; P.inv = Math.max(P.inv, 1.6);
     explode(P.x, P.y, 90, 120 * vehDmg(), true, '#ff6d00'); G.shake = 14; G.flash = 0.35; G.flashCol = '255,120,0';
     for (let i = 0; i < 26; i++) addPart(P.x, P.y, rand(-260, 260), rand(-260, 120), pick(['#455a64', '#263238', '#ff9800', v.def.col.a]), rand(.5, 1), rand(3, 6), 300);
@@ -302,7 +313,7 @@ function exitVehicle(destroyed) {
   } else {
     v.x = P.x; v.y = P.y; P.x += 30; AU.sfx('clank'); toast('하차', 0.8, '#b0bec5');
   }
-  setRideBtn(); setSkillBtn();
+  setRideBtn(); setSkillBtn(); setUltBtn();
 }
 function vehHit(dmg, src) {
   const v = G.veh;
@@ -331,12 +342,12 @@ function vFlash(x, y, a, col, size) { if (effects.length < 170) effects.push({ t
 function vWeapon(v, key, i, dt) {
   const W = VWPN[key], S = vSlot(v, i), dm = vehDmg(key, i), rate = (v.ovT > 0 ? 2 : 1) * (1 / P.cdMul);
   if (key === 'flame') {
-    const t = nearest(P.x, P.y, W.range + 20); S.on = !!t; if (!t) return;
+    const FR = W.range * (1 + .15 * (v.tier || 0)); const t = nearest(P.x, P.y, FR + 20); S.on = !!t; if (!t) return;
     const ta = Math.atan2(t.y - P.y, t.x - P.x); S.ang += angDiff(ta, S.ang) * Math.min(1, dt * 8); if (!i) v.aim = S.ang; else v.aim2 = S.ang;
     S.tick -= dt * rate;
     const [mx, my] = vMuzzle(v, S.ang);
     if (Q.level && Math.random() < 0.9) for (let k = 0; k < Q.level; k++) { const aa = S.ang + rand(-.4, .4), sp = rand(200, 320); addPart(mx, my, Math.cos(aa) * sp, Math.sin(aa) * sp, pick(['#ff9800', '#ffeb3b', '#ff5722', '#fff3e0']), .38, rand(3, 6)); }
-    if (S.tick <= 0) { S.tick = 0.1; for (const e of query(P.x, P.y, W.range).slice()) { const ea = Math.atan2(e.y - P.y, e.x - P.x); if (Math.abs(angDiff(ea, S.ang)) < 0.5) hitEnemy(e, W.dps * 0.1 * dm, { tick: 1, silent: true, noCrit: true, burn: W.dps * 0.25 * dm, kb: 10, ang: S.ang }); } AU.sfx('flame', 1.1); }
+    if (S.tick <= 0) { S.tick = 0.1; for (const e of query(P.x, P.y, FR).slice()) { const ea = Math.atan2(e.y - P.y, e.x - P.x); if (Math.abs(angDiff(ea, S.ang)) < 0.5) hitEnemy(e, W.dps * 0.1 * dm, { tick: 1, silent: true, noCrit: true, burn: W.dps * 0.25 * dm, kb: 10, ang: S.ang }); } AU.sfx('flame', 1.1); }
     return;
   }
   if (S.beamT > 0) {
@@ -345,7 +356,7 @@ function vWeapon(v, key, i, dt) {
     if (!i) v.aim = S.ang; else v.aim2 = S.ang;
     S.tick -= dt; const [x1, y1] = vMuzzle(v, S.ang), x2 = x1 + Math.cos(S.ang) * W.range, y2 = y1 + Math.sin(S.ang) * W.range;
     v.beam = [x1, y1, x2, y2, W.col];
-    if (S.tick <= 0) { S.tick = 0.1; for (const e of query((x1 + x2) / 2, (y1 + y2) / 2, W.range / 2 + 10).slice()) if (segDist2(e.x, e.y, x1, y1, x2, y2) < (8 + e.r) ** 2) hitEnemy(e, W.dps * 0.1 * dm, { tick: 1, silent: true }); AU.sfx('beam', 1.2); }
+    if (S.tick <= 0) { S.tick = 0.1; for (const e of query((x1 + x2) / 2, (y1 + y2) / 2, W.range / 2 + 10).slice()) if (segDist2(e.x, e.y, x1, y1, x2, y2) < (8 + 4 * (v.tier || 0) + e.r) ** 2) hitEnemy(e, W.dps * 0.1 * dm, { tick: 1, silent: true }); AU.sfx('beam', 1.2); }
     if (Math.random() < .6) addPart(x2, y2, rand(-90, 90), rand(-90, 90), W.col, .25, 3);
     if (S.beamT <= 0) v.beam = null;
     return;
@@ -356,26 +367,30 @@ function vWeapon(v, key, i, dt) {
   const a = Math.atan2(tgt.y - P.y, tgt.x - P.x); S.ang = a; if (!i) v.aim = a; else v.aim2 = a;
   if (Math.abs(Math.cos(a)) > 0.25 && !i) v.face = Math.cos(a) > 0 ? 1 : -1;
   S.cd = W.cd;
-  const col = W.col;
+  const col = W.col, tier = v.tier || 0;
   switch (key) {
-    case 'mg': { S.alt ^= 1; const [x, y] = vMuzzle(v, a, S.alt ? 1 : -1); const ang = a + rand(-.05, .05); mkProj({ kind: 'tracer', x, y, vx: Math.cos(ang) * 780, vy: Math.sin(ang) * 780, ang, r: 4, dmg: W.dmg * dm, pierce: 2, life: W.range / 780, col, size: 1.1, kb: 40 }); vFlash(x, y, a, col, 1.2); v.recoil = 2; break; }
+    case 'mg': { S.alt ^= 1; const nb = tier >= 2 ? 2 : 1; for (let b = 0; b < nb; b++) { const [x, y] = vMuzzle(v, a, (S.alt ? 1 : -1) * (1 + b * 1.6)); const ang = a + rand(-.05, .05) + (b ? (S.alt ? .06 : -.06) : 0); mkProj({ kind: 'tracer', x, y, vx: Math.cos(ang) * 780, vy: Math.sin(ang) * 780, ang, r: 4, dmg: W.dmg * dm / (1 + (nb - 1) * .6), pierce: 2 + (tier >= 3 ? 1 : 0), life: W.range / 780, col, size: 1.1 + tier * .1, kb: 40 }); vFlash(x, y, a, col, 1.2); if (Q.level && Math.random() < .6) addPart(P.x, P.y - 12, rand(-70, 70), rand(-110, -60), '#ffca28', .45, 2, 420); } v.recoil = 2; break; }
     case 'minigun': { S.spin = Math.min(1, S.spin + 0.06); S.cd = W.cd / (0.3 + 0.7 * S.spin); const [x, y] = vMuzzle(v, a); const ang = a + rand(-.09, .09); mkProj({ kind: 'tracer', x, y, vx: Math.cos(ang) * 820, vy: Math.sin(ang) * 820, ang, r: 4, dmg: W.dmg * dm, pierce: 1, life: W.range / 820, col, size: 1, kb: 25 }); vFlash(x, y, a, col, 1); v.recoil = 1.5; if (Q.level && Math.random() < .5) addPart(P.x, P.y - 10, rand(-60, 60), rand(-100, -50), '#ffca28', .4, 2, 420); break; }
-    case 'rocket': { S.alt ^= 1; const [x, y] = vMuzzle(v, a, S.alt ? 1 : -1); mkProj({ kind: 'rocket', x, y, vx: Math.cos(a) * 200, vy: Math.sin(a) * 200, ang: a, acc: 560, r: 6, dmg: W.dmg * dm, pierce: 1, life: 1.3, col, boom: W.boom, explodeEnd: 1, size: 1.1 }); vFlash(x, y, a, '#ffab40', 1.6); v.recoil = 4; break; }
-    case 'homing': { for (let k = 0; k < W.k; k++) later(k * 0.09, () => { if (G.state !== 'play' || !G.veh) return; const t = (tgt && !tgt.dead) ? tgt : nearest(P.x, P.y, W.range); if (!t) return; const aa = a + (k - 1.5) * 0.45; const [x, y] = vMuzzle(v, aa); mkProj({ kind: 'missile', x, y, vx: Math.cos(aa) * 160, vy: Math.sin(aa) * 160, ang: aa, acc: 520, r: 5, dmg: W.dmg * dm, pierce: 1, life: 2.2, col, boom: W.boom, homing: 5, target: t, explodeEnd: 1, size: 1 }); AU.sfx('missile', 1.1); }); v.recoil = 2; break; }
-    case 'grenade': { const [x, y] = vMuzzle(v, a); const d = Math.min(W.range, Math.hypot(tgt.x - x, tgt.y - y)); mkProj({ kind: 'grenade', lob: 1, x0: x, y0: y, tx: x + Math.cos(a) * d, ty: y + Math.sin(a) * d, x, y, vx: 0, vy: 0, ang: 0, T: 0.5, tt: 0, r: 0, dmg: W.dmg * dm, life: 9, col, boom: W.boom, size: 1.1, nohit: 1 }); vFlash(x, y, a, '#c5e1a5', 1.4); v.recoil = 3; break; }
-    case 'shell': { const [x, y] = vMuzzle(v, a); mkProj({ kind: 'cball', x, y, vx: Math.cos(a) * 520, vy: Math.sin(a) * 520, ang: a, r: 9, dmg: W.dmg * dm, pierce: 3, life: W.range / 520, col, boom: W.boom, explodeEnd: 1, size: 16, kb: 140 }); vFlash(x, y, a, '#ffab40', 3.2); for (let k = 0; k < 8; k++) addPart(x, y, Math.cos(a + rand(-.8, .8)) * rand(60, 160), Math.sin(a + rand(-.8, .8)) * rand(60, 160), 'rgba(200,200,200,.6)', .6, 5); v.recoil = 9; G.shake = Math.max(G.shake, 4); break; }
-    case 'mortar': { for (let k = 0; k < W.k; k++) later(k * 0.2, () => { if (G.state !== 'play' || !G.veh) return; const tx = tgt.x + rand(-60, 60), ty = tgt.y + rand(-60, 60); const [x, y] = vMuzzle(v, -Math.PI / 2); mkProj({ kind: 'shell', lob: 1, x0: x, y0: y, tx, ty, x, y, vx: 0, vy: 0, ang: 0, T: 0.9, tt: 0, r: 0, dmg: W.dmg * dm, life: 9, col, boom: W.boom, size: 1.2, nohit: 1 }); effects.push({ type: 'target', x: tx, y: ty, r: W.boom * .7, t: 0, dur: .9, col: '#ffcc80' }); vFlash(x, y, -Math.PI / 2, '#ffe0b2', 1.8); AU.sfx('mortar', 1); }); v.recoil = 4; break; }
-    case 'laser': { S.alt ^= 1; const [x, y] = vMuzzle(v, a, S.alt ? 1.6 : -1.6); mkProj({ kind: 'lbolt', x, y, vx: Math.cos(a) * 900, vy: Math.sin(a) * 900, ang: a, r: 5, dmg: W.dmg * dm, pierce: 2, life: W.range / 900, col, len: 26, kb: 25 }); vFlash(x, y, a, col, 1); break; }
-    case 'plasma': { const [x, y] = vMuzzle(v, a); const d = Math.min(W.range, Math.hypot(tgt.x - x, tgt.y - y) + 40); mkProj({ kind: 'plasma', x, y, vx: Math.cos(a) * 380, vy: Math.sin(a) * 380, ang: a, r: 10, dmg: W.dmg * dm, pierce: 999, life: d / 380, col, boom: W.boom, explodeEnd: 1, size: 10 }); vFlash(x, y, a, col, 2); v.recoil = 4; break; }
-    case 'rail': { const [x1, y1] = vMuzzle(v, a); effects.push({ type: 'charge', t: 0, dur: 0.25, col }); later(0.25, () => { if (G.state !== 'play' || !G.veh) return; const [xa, ya] = vMuzzle(v, a), x2 = xa + Math.cos(a) * W.range, y2 = ya + Math.sin(a) * W.range; effects.push({ type: 'rail', x1: xa, y1: ya, x2, y2, w: 12, col, t: 0, dur: 0.3 }); for (const e of query((xa + x2) / 2, (ya + y2) / 2, W.range / 2 + 10).slice()) if (segDist2(e.x, e.y, xa, ya, x2, y2) < (8 + e.r) ** 2) hitEnemy(e, W.dmg * dm, { ap: 0.6, kb: 90, ang: a, silent: true }); AU.sfx('rail', 1); v.recoil = 8; G.shake = Math.max(G.shake, 4); }); void x1; break; }
-    case 'tesla': { const [x, y] = vMuzzle(v, a); const ts = nearestK(P.x, P.y, W.range, W.k); for (const t of ts) { const pts = [[x, y], [t.x, t.y]]; hitEnemy(t, W.dmg * dm, { silent: true, stun: 0.15 }); let cur = t; const hit = new Set([t.id]); for (let c = 0; c < 2; c++) { let best = null, bd = 130 * 130; for (const e of query(cur.x, cur.y, 130)) { if (hit.has(e.id)) continue; const dd = (e.x - cur.x) ** 2 + (e.y - cur.y) ** 2; if (dd < bd) { bd = dd; best = e; } } if (!best) break; hit.add(best.id); pts.push([best.x, best.y]); hitEnemy(best, W.dmg * dm * 0.7, { silent: true }); cur = best; } effects.push({ type: 'bolt', pts, t: 0, dur: 0.2, seed: Math.random() * 100, col }); } break; }
-    case 'mlrs': { const list = enemies.filter(e => !e.dead && onScreen(e, -10)); for (let k = 0; k < W.k; k++) later(k * 0.07, () => { if (G.state !== 'play' || !G.veh || !list.length) return; const t = pick(list); if (t.dead) return; const aa = -Math.PI / 2 + rand(-.6, .6); const [x, y] = vMuzzle(v, aa); mkProj({ kind: 'missile', x, y, vx: Math.cos(aa) * 220, vy: Math.sin(aa) * 220, ang: aa, acc: 480, r: 5, dmg: W.dmg * dm, pierce: 1, life: 2.4, col, boom: W.boom, homing: 4.5, target: t, explodeEnd: 1, size: .9 }); vFlash(x, y, aa, '#ffd180', 1); }); AU.sfx('missile', .8); v.recoil = 3; break; }
+    case 'rocket': { const nr = 1 + tier; for (let r2 = 0; r2 < nr; r2++) { S.alt ^= 1; const aa = a + (r2 - (nr - 1) / 2) * 0.16; const [x, y] = vMuzzle(v, aa, S.alt ? 1 : -1); mkProj({ kind: 'rocket', x, y, vx: Math.cos(aa) * 200, vy: Math.sin(aa) * 200, ang: aa, acc: 560, r: 6, dmg: W.dmg * dm * (1 + .25 * tier) / nr, pierce: 1, life: 1.3, col, boom: W.boom * (1 + .1 * tier), homing: tier >= 2 ? 2.5 : 0, target: tgt, explodeEnd: 1, size: 1.1 }); vFlash(x, y, aa, '#ffab40', 1.6); } v.recoil = 4; break; }
+    case 'homing': { const K2 = W.k + 2 * tier; for (let k = 0; k < K2; k++) later(k * 0.09, () => { if (G.state !== 'play' || !G.veh) return; const t = (tgt && !tgt.dead) ? tgt : nearest(P.x, P.y, W.range); if (!t) return; const aa = a + (k - 1.5) * 0.45; const [x, y] = vMuzzle(v, aa); mkProj({ kind: 'missile', x, y, vx: Math.cos(aa) * 160, vy: Math.sin(aa) * 160, ang: aa, acc: 520, r: 5, dmg: W.dmg * dm * W.k * (1 + .2 * tier) / K2, pierce: 1, life: 2.2, col, boom: W.boom, homing: 5, target: t, explodeEnd: 1, size: 1 }); AU.sfx('missile', 1.1); }); v.recoil = 2; break; }
+    case 'grenade': { const [x, y] = vMuzzle(v, a); const d = Math.min(W.range, Math.hypot(tgt.x - x, tgt.y - y)); mkProj({ kind: 'grenade', lob: 1, x0: x, y0: y, tx: x + Math.cos(a) * d, ty: y + Math.sin(a) * d, x, y, vx: 0, vy: 0, ang: 0, T: 0.5, tt: 0, r: 0, dmg: W.dmg * dm * (tier ? .75 : 1), life: 9, col, boom: W.boom, cluster: tier ? 2 + tier : 0, size: 1.1 + tier * .1, nohit: 1 }); vFlash(x, y, a, '#c5e1a5', 1.4); v.recoil = 3; break; }
+    case 'shell': { const [x, y] = vMuzzle(v, a); mkProj({ kind: 'cball', x, y, vx: Math.cos(a) * 520, vy: Math.sin(a) * 520, ang: a, r: 9 + tier, dmg: W.dmg * dm * (tier >= 2 ? .8 : 1), pierce: 3, life: W.range / 520, col, boom: W.boom * (1 + .12 * tier), shards: tier >= 2 ? 6 + tier * 2 : 0, shardDmg: W.dmg * dm * .12, explodeEnd: 1, size: 16 + tier * 2, kb: 140 }); vFlash(x, y, a, '#ffab40', 3.2); for (let k = 0; k < 8; k++) addPart(x, y, Math.cos(a + rand(-.8, .8)) * rand(60, 160), Math.sin(a + rand(-.8, .8)) * rand(60, 160), 'rgba(200,200,200,.6)', .6, 5); v.recoil = 9; G.shake = Math.max(G.shake, 4); break; }
+    case 'mortar': { const K3 = W.k + tier; for (let k = 0; k < K3; k++) later(k * 0.2, () => { if (G.state !== 'play' || !G.veh) return; const tx = tgt.x + rand(-60, 60), ty = tgt.y + rand(-60, 60); const [x, y] = vMuzzle(v, -Math.PI / 2); mkProj({ kind: 'shell', lob: 1, x0: x, y0: y, tx, ty, x, y, vx: 0, vy: 0, ang: 0, T: 0.9, tt: 0, r: 0, dmg: W.dmg * dm * W.k * (1 + .2 * tier) / K3, life: 9, col, boom: W.boom, size: 1.2, nohit: 1 }); effects.push({ type: 'target', x: tx, y: ty, r: W.boom * .7, t: 0, dur: .9, col: '#ffcc80' }); vFlash(x, y, -Math.PI / 2, '#ffe0b2', 1.8); AU.sfx('mortar', 1); }); v.recoil = 4; break; }
+    case 'laser': { S.alt ^= 1; const [x, y] = vMuzzle(v, a, S.alt ? 1.6 : -1.6); const nl = tier >= 2 ? 3 : 1; for (let l = 0; l < nl; l++) { const aa = a + (l - (nl - 1) / 2) * .1; const q = mkProj({ kind: 'lbolt', x, y, vx: Math.cos(aa) * 900, vy: Math.sin(aa) * 900, ang: aa, r: 5, dmg: W.dmg * dm * (nl > 1 ? .5 : 1), pierce: 2 + (tier >= 1 ? 2 : 0), life: W.range / 900, col, len: 26 + tier * 6, kb: 25 }); if (tier >= 1 && !l) q.storm = 1; } vFlash(x, y, a, col, 1 + tier * .2); break; }
+    case 'plasma': { const [x, y] = vMuzzle(v, a); const d = Math.min(W.range, Math.hypot(tgt.x - x, tgt.y - y) + 40); mkProj({ kind: 'plasma', x, y, vx: Math.cos(a) * 380, vy: Math.sin(a) * 380, ang: a, r: 10 + tier * 2, dmg: W.dmg * dm, pierce: 999, life: d / 380, col, boom: W.boom * (1 + .15 * tier), shards: tier >= 2 ? 5 + tier : 0, shardDmg: W.dmg * dm * .2, explodeEnd: 1, size: 10 + tier * 2 }); vFlash(x, y, a, col, 2); v.recoil = 4; break; }
+    case 'rail': { const nRail = tier >= 2 ? 3 : 1; const [x1, y1] = vMuzzle(v, a); effects.push({ type: 'charge', t: 0, dur: 0.25, col }); later(0.25, () => { if (G.state !== 'play' || !G.veh) return; for (let rl = 0; rl < nRail; rl++) { const ra = a + (rl - (nRail - 1) / 2) * .12; const [xa, ya] = vMuzzle(v, ra), x2 = xa + Math.cos(ra) * W.range, y2 = ya + Math.sin(ra) * W.range; effects.push({ type: 'rail', x1: xa, y1: ya, x2, y2, w: 12 + tier * 2, col, t: 0, dur: 0.3 }); for (const e of query((xa + x2) / 2, (ya + y2) / 2, W.range / 2 + 10).slice()) if (segDist2(e.x, e.y, xa, ya, x2, y2) < (8 + e.r) ** 2) hitEnemy(e, W.dmg * dm * (nRail > 1 ? .6 : 1), { ap: 0.6, kb: 90, ang: ra, silent: true }); } AU.sfx('rail', 1); v.recoil = 8; G.shake = Math.max(G.shake, 4); }); void x1; break; }
+    case 'tesla': { const [x, y] = vMuzzle(v, a); const ts = nearestK(P.x, P.y, W.range, W.k + tier); for (const t of ts) { const pts = [[x, y], [t.x, t.y]]; hitEnemy(t, W.dmg * dm, { silent: true, stun: 0.15 }); let cur = t; const hit = new Set([t.id]); for (let c = 0; c < 2; c++) { let best = null, bd = 130 * 130; for (const e of query(cur.x, cur.y, 130)) { if (hit.has(e.id)) continue; const dd = (e.x - cur.x) ** 2 + (e.y - cur.y) ** 2; if (dd < bd) { bd = dd; best = e; } } if (!best) break; hit.add(best.id); pts.push([best.x, best.y]); hitEnemy(best, W.dmg * dm * 0.7, { silent: true }); cur = best; } effects.push({ type: 'bolt', pts, t: 0, dur: 0.2, seed: Math.random() * 100, col }); } break; }
+    case 'mlrs': { const list = enemies.filter(e => !e.dead && onScreen(e, -10)); const K4 = W.k + 3 * tier; for (let k = 0; k < K4; k++) later(k * 0.07, () => { if (G.state !== 'play' || !G.veh || !list.length) return; const t = pick(list); if (t.dead) return; const aa = -Math.PI / 2 + rand(-.6, .6); const [x, y] = vMuzzle(v, aa); mkProj({ kind: 'missile', x, y, vx: Math.cos(aa) * 220, vy: Math.sin(aa) * 220, ang: aa, acc: 480, r: 5, dmg: W.dmg * dm * W.k * (1 + .2 * tier) / K4, pierce: 1, life: 2.4, col, boom: W.boom, homing: 4.5, target: t, explodeEnd: 1, size: .9 }); vFlash(x, y, aa, '#ffd180', 1); }); AU.sfx('missile', .8); v.recoil = 3; break; }
     case 'beam': { S.beamT = W.dur; S.tick = 0; AU.sfx('beam', 1); break; }
   }
   if (key !== 'homing' && key !== 'mortar' && key !== 'mlrs' && key !== 'beam' && key !== 'rail') AU.sfx(W.s[0], W.s[1]);
 }
 function updateVehicle(dt) {
   const v = G.veh;
+  v.time -= dt;
+  if (v.time <= 5 && Math.floor(v.time * 2) !== Math.floor((v.time + dt) * 2)) AU.sfx('alarm');
+  if (v.time <= 0) { exitVehicle('time'); return; }
+  if (v.ultT > 0) updateUlt(v, dt);
   v.x = P.x; v.y = P.y; if (P.moving) { v.walkT += dt; if (Math.abs(P.lastMx) > 0.2) v.face = P.lastMx > 0 ? 1 : -1; }
   if (v.recoil > 0) v.recoil = Math.max(0, v.recoil - dt * 30); if (v.flash > 0) v.flash -= dt;
   if (v.skCd > 0) v.skCd -= dt; if (v.ovT > 0) v.ovT -= dt; if (v.nitroT > 0) v.nitroT -= dt; if (v.ramT > 0) v.ramT -= dt;
@@ -439,7 +454,14 @@ function addAlly(spec, x, y) {
   return a;
 }
 // 동료 1명 화력 ≈ 주인공 화력의 15% (스테이지 초반 하한 포함)
-function allyBase() { const fl = 5 * enemyH() / Math.sqrt(DF().hp); return clamp(0.14 * playerPow(), fl, fl * 4) / 27; }
+// 동료 성장: 주인공 공격력 증가분의 약 50%만 반영 (주인공 +100% → 동료 +50%)
+function allyGrowth() {
+  let lvs = 0; for (const w of G.weapons) lvs += w.lv + (w.evo ? 2 : 0); const avg = G.weapons.length ? lvs / G.weapons.length : 1;
+  const idx = P.dmgMul / (1 + 0.05 * save.up.atk) * (1 + 0.04 * (G.lv - 1)) * (1 + 0.08 * (avg - 1)) * (1 + 0.05 * save.up.atk);
+  return 1 + 0.5 * Math.max(0, idx - 1);
+}
+function aRank() { return Math.min(5, 1 + Math.floor((G.lv - 1) / 6)); }
+function allyBase() { return 5 * enemyH() / Math.sqrt(DF().hp) * allyGrowth() * (G.allyBoost || 1) / 27; }
 function aDmg(a) { return allyBase() * (a.spec.perk === 'vet' ? 1.25 : 1) * (a.spec.special ? 1.4 : 1); }
 function linkAllies(v, quiet) {
   const L = v.ch.link; let seats = L === 'A' ? 2 : (L === 'A1' && (v.def.idx % 2 === 0)) ? 1 : 0;
@@ -472,19 +494,21 @@ function allyHit(a, e, base, o = {}) {
   if (p === 'shock' && Math.random() < .3 && !e.dead) { const t2 = nearest(e.x, e.y, 120, new Set([e.id])); if (t2) zap(e.x, e.y, t2, base * .5, { col: '#ffee58' }); }
   if (p === 'heavy' && Math.random() < .35) explode(e.x, e.y, 30, base * .4, true, '#ff9100');
 }
-function allyShoot(a, t, dm) {
+function allyShoot(a, t, dm, rk = 1) {
   const c = a.c, ang = Math.atan2(t.y - a.y, t.x - a.x), x = a.x + Math.cos(ang) * 12, y = a.y - 6 + Math.sin(ang) * 12, p = a.spec.perk;
   a.aim = ang; a.atkT = .2; if (Math.abs(Math.cos(ang)) > .2) a.face = Math.cos(ang) > 0 ? 1 : -1;
-  const pr = (o) => { const q = mkProj(o); q.ally = a; return q; };
+  const sz = 1 + .08 * (rk - 1); const pr = (o) => { if (o.size) o.size *= sz; if (o.r) o.r *= sz; const q = mkProj(o); q.ally = a; return q; };
   switch (a.cls) {
-    case 'rifle': for (let k = 0; k < 3; k++) later(k * 0.08, () => { if (G.state !== 'play' || a.down > 0 || a.seated) return; const aa = Math.atan2(t.y - a.y, t.x - a.x) + rand(-.06, .06); pr({ kind: 'tracer', x: a.x + Math.cos(aa) * 12, y: a.y - 6 + Math.sin(aa) * 12, vx: Math.cos(aa) * 720, vy: Math.sin(aa) * 720, ang: aa, r: 4, dmg: 8 * dm, pierce: p === 'pierce' ? 3 : 1, life: c.range / 720, col: '#ffe082', size: .9, kb: 25 }); AU.sfx('rifle', 1.25); }); break;
-    case 'sniper': pr({ kind: 'slug', x, y, vx: Math.cos(ang) * 1200, vy: Math.sin(ang) * 1200, ang, r: 4, dmg: 62 * dm, pierce: 5, life: c.range / 1200, col: '#fff176', size: 1.3, kb: 100, ap: .4 }); effects.push({ type: 'rail', x1: x, y1: y, x2: x + Math.cos(ang) * 120, y2: y + Math.sin(ang) * 120, w: 2, col: '#fff59d', t: 0, dur: .12 }); AU.sfx('rifle', .6); break;
-    case 'rocket': pr({ kind: 'rocket', x, y, vx: Math.cos(ang) * 180, vy: Math.sin(ang) * 180, ang, acc: 480, r: 6, dmg: 34 * dm, pierce: 1, life: 1.4, col: '#ff7043', boom: 55, explodeEnd: 1, size: 1 }); effects.push({ type: 'flash', x, y, ang, col: '#ffab40', t: 0, dur: .07, size: 1.4 }); AU.sfx('rocket', 1.2); break;
+    case 'rifle': for (let k = 0; k < (rk >= 4 ? 4 : 3); k++) later(k * 0.08, () => { if (G.state !== 'play' || a.down > 0 || a.seated) return; const aa = Math.atan2(t.y - a.y, t.x - a.x) + rand(-.06, .06); pr({ kind: 'tracer', x: a.x + Math.cos(aa) * 12, y: a.y - 6 + Math.sin(aa) * 12, vx: Math.cos(aa) * 720, vy: Math.sin(aa) * 720, ang: aa, r: 4, dmg: 8 * dm, pierce: (p === 'pierce' ? 3 : 1) + (rk >= 3 ? 1 : 0), life: c.range / 720, col: rk >= 3 ? '#80deea' : '#ffe082', size: .9, kb: 25 }); AU.sfx('rifle', 1.25); }); break;
+    case 'sniper': pr({ kind: 'slug', x, y, vx: Math.cos(ang) * 1200, vy: Math.sin(ang) * 1200, ang, r: 4, dmg: 62 * dm, pierce: 5 + rk, boom: rk >= 4 ? 34 : 0, life: c.range / 1200, col: '#fff176', size: 1.3, kb: 100, ap: .4 }); effects.push({ type: 'rail', x1: x, y1: y, x2: x + Math.cos(ang) * 120, y2: y + Math.sin(ang) * 120, w: 2, col: '#fff59d', t: 0, dur: .12 }); AU.sfx('rifle', .6); break;
+    case 'rocket': for (let k = 0; k < (rk >= 4 ? 2 : 1); k++) { const aa = ang + (k ? .2 : 0); pr({ kind: 'rocket', x, y, vx: Math.cos(aa) * 180, vy: Math.sin(aa) * 180, ang: aa, acc: 480, r: 6, dmg: 34 * dm * (rk >= 4 ? .6 : 1), pierce: 1, life: 1.4, col: '#ff7043', boom: 55 * (1 + .12 * (rk - 1)), homing: k ? 3 : 0, target: t, explodeEnd: 1, size: 1 }); } effects.push({ type: 'flash', x, y, ang, col: '#ffab40', t: 0, dur: .07, size: 1.4 }); AU.sfx('rocket', 1.2); break;
     case 'medic': pr({ kind: 'bullet', x, y, vx: Math.cos(ang) * 650, vy: Math.sin(ang) * 650, ang, r: 4, dmg: 7 * dm, pierce: 1, life: c.range / 650, col: '#e0f7fa', size: .9, kb: 15 }); AU.sfx('smg', 1.5); break;
-    case 'drone': pr({ kind: 'lbolt', x: a.x, y: a.y - 26, vx: Math.cos(ang) * 850, vy: Math.sin(ang) * 850, ang, r: 4, dmg: 7 * dm, pierce: p === 'pierce' ? 3 : 1, life: c.range / 850, col: '#18ffff', len: 14, kb: 10 }); AU.sfx('drone', 1.2); break;
+    case 'drone': a.shots = (a.shots || 0) + 1; if (rk >= 2 && a.shots % (rk >= 4 ? 2 : 3) === 0) { pr({ kind: 'missile', x: a.x, y: a.y - 26, vx: 0, vy: -180, ang: -Math.PI / 2, acc: 460, r: 5, dmg: 18 * dm, pierce: 1, life: 2, col: '#ff8a65', boom: 32, homing: 5, target: t, explodeEnd: 1, size: .8 }); AU.sfx('missile', 1.4); }
+      pr({ kind: 'lbolt', x: a.x, y: a.y - 26, vx: Math.cos(ang) * 850, vy: Math.sin(ang) * 850, ang, r: 4, dmg: 7 * dm, pierce: p === 'pierce' ? 3 : 1, life: c.range / 850, col: '#18ffff', len: 14, kb: 10 }); AU.sfx('drone', 1.2); break;
     case 'guard': pr({ kind: 'bullet', x, y, vx: Math.cos(ang) * 620, vy: Math.sin(ang) * 620, ang, r: 4, dmg: 12 * dm, pierce: 1, life: c.range / 620, col: '#80d8ff', size: 1.1, kb: 50 }); AU.sfx('turret', .9); break;
     case 'mecha': a.alt = (a.alt || 0) ^ 1;
       if (a.alt) { pr({ kind: 'cball', x, y: y - 6, vx: Math.cos(ang) * 480, vy: Math.sin(ang) * 480, ang, r: 7, dmg: 40 * dm, pierce: 2, life: c.range / 480, col: '#ffab40', boom: 52, explodeEnd: 1, size: 12, kb: 100 }); effects.push({ type: 'flash', x, y: y - 6, ang, col: '#ffab40', t: 0, dur: .08, size: 2.4 }); AU.sfx('cannon', 1.3); }
+      else if (rk >= 3) { for (const sd of [-5, 5]) pr({ kind: 'lbolt', x: a.x, y: a.y - 14 + sd, vx: Math.cos(ang) * 900, vy: Math.sin(ang) * 900, ang, r: 5, dmg: 16 * dm, pierce: 3, life: .4, col: '#ff1744', len: 24, kb: 20 }); AU.sfx('laser', 1.2); }
       else for (let k = 0; k < 4; k++) later(k * .07, () => { if (G.state !== 'play' || a.down > 0 || a.seated) return; const aa = Math.atan2(t.y - a.y, t.x - a.x) + rand(-.08, .08); pr({ kind: 'tracer', x: a.x, y: a.y - 10, vx: Math.cos(aa) * 760, vy: Math.sin(aa) * 760, ang: aa, r: 4, dmg: 9 * dm, pierce: 1, life: .45, col: '#ffe082', size: 1, kb: 25 }); AU.sfx('hmg', 1.4); });
       break;
   }
@@ -494,6 +518,7 @@ function updateAllies(dt) {
   for (const a of allies) if (a.cls === 'guard' && a.down <= 0 && !a.seated) G.hasGuard = true;
   const mv = Math.hypot(P.lastMx, P.lastMy) || 1, bx = P.moving ? -P.lastMx / mv : 0, by = P.moving ? -P.lastMy / mv : 1;
   const air = G.veh && G.veh.ch.cat === 'air';
+  const rk = aRank(); if (rk > (G.allyRank || 1)) { G.allyRank = rk; toast(`⭐ 동료 전원 진급! 계급 ${rk}<br><span style="font-size:14px">${['', '', '연사·특수탄 강화', '소총병 관통탄 · 메카 쌍열 레이저 해금', '저격 폭발탄 · 로켓 2연발 · 드론 미사일 증가', '최대 계급: 모든 능력 강화'][rk]}</span>`, 1.8, '#ffd54f'); }
   let i = 0;
   for (const a of allies) {
     if (a.seated) { a.x = P.x; a.y = P.y; i++; continue; }
@@ -530,24 +555,24 @@ function updateAllies(dt) {
     // 접촉 피해 (적에게 둘러싸이면 맞음)
     if (!fly) for (const e of query(a.x, a.y, 10)) { if (e.static || e.dmg <= 0 || e.atkCd > 0) continue; e.atkCd = 0.8; a.hp -= e.dmg * DF().dmg * 0.7; a.flash = .1; if (a.hp <= 0) { a.hp = 0; a.down = 15; a.tgt = null; texts.push({ x: a.x, y: a.y - 20, t: 0, v: '부상!', col: '#ff8a80', pl: 1 }); AU.sfx('hurt'); } break; }
     // 의무병: 회복
-    if (a.cls === 'medic') { a.healT -= dt; if (a.healT <= 0) { a.healT = 9; if (P.hp < P.maxHp) heal(Math.round(P.maxHp * .06)); for (const o of allies) o.hp = Math.min(o.maxHp, o.hp + o.maxHp * .2); if (G.veh) G.veh.hp = Math.min(G.veh.maxHp, G.veh.hp + G.veh.maxHp * .04); effects.push({ type: 'healfx', x: a.x, y: a.y, r: 90, t: 0, dur: .6 }); } }
+    if (a.cls === 'medic') { a.healT -= dt; if (a.healT <= 0) { a.healT = 9; if (P.hp < P.maxHp) heal(Math.round(P.maxHp * (.05 + .01 * rk))); for (const o of allies) o.hp = Math.min(o.maxHp, o.hp + o.maxHp * .2); if (G.veh) G.veh.hp = Math.min(G.veh.maxHp, G.veh.hp + G.veh.maxHp * .04); effects.push({ type: 'healfx', x: a.x, y: a.y, r: 90, t: 0, dur: .6 }); } }
     // 방어 로봇: 적 탄환 차단
-    if (a.cls === 'guard') for (const b of eprojs) { if (!b.dead && (b.x - a.x) ** 2 + (b.y - a.y) ** 2 < 46 * 46) { b.dead = true; effects.push({ type: 'shock', x: b.x, y: b.y, r: 12, t: 0, dur: .2, col: '#80d8ff' }); } }
+    if (a.cls === 'guard') for (const b of eprojs) { if (!b.dead && (b.x - a.x) ** 2 + (b.y - a.y) ** 2 < (40 + 6 * rk) ** 2) { b.dead = true; effects.push({ type: 'shock', x: b.x, y: b.y, r: 12, t: 0, dur: .2, col: '#80d8ff' }); } }
     // 공격
     const dm = aDmg(a);
     if (a.cls === 'flame') {
-      const t = nearest(a.x, a.y, c.range); a.fireOn = !!t; if (!t) continue;
+      const FRa = c.range * (1 + .06 * (rk - 1)); a.fireR = FRa; const t = nearest(a.x, a.y, FRa); a.fireOn = !!t; if (!t) continue;
       const ta = Math.atan2(t.y - a.y, t.x - a.x); a.fireAng += angDiff(ta, a.fireAng) * Math.min(1, dt * 8); a.aim = a.fireAng; a.atkT = .2; a.face = Math.cos(ta) > 0 ? 1 : -1;
       if (Q.level && Math.random() < .8) { const aa = a.fireAng + rand(-.35, .35), sp = rand(150, 240); addPart(a.x + Math.cos(a.fireAng) * 12, a.y - 6 + Math.sin(a.fireAng) * 12, Math.cos(aa) * sp, Math.sin(aa) * sp, pick(['#ff9800', '#ffeb3b', '#ff5722']), .35, rand(3, 5)); }
-      a.fireTick -= dt; if (a.fireTick <= 0) { a.fireTick = .15; for (const e of query(a.x, a.y, c.range).slice()) { const ea = Math.atan2(e.y - a.y, e.x - a.x); if (Math.abs(angDiff(ea, a.fireAng)) < .45) allyHit(a, e, 7 * dm, { tick: 1, noCrit: true, burn: 12 * dm }); } if (Math.random() < .3) AU.sfx('flame', 1.3); }
+      a.fireTick -= dt; if (a.fireTick <= 0) { a.fireTick = .15; for (const e of query(a.x, a.y, FRa).slice()) { const ea = Math.atan2(e.y - a.y, e.x - a.x); if (Math.abs(angDiff(ea, a.fireAng)) < .45) allyHit(a, e, 7 * dm, { tick: 1, noCrit: true, burn: 12 * dm * (1 + .15 * rk) }); } if (Math.random() < .3) AU.sfx('flame', 1.3); }
       continue;
     }
-    a.cd -= dt * (a.spec.perk === 'rapid' ? 1.35 : 1); if (a.cd > 0) continue;
+    a.cd -= dt * (a.spec.perk === 'rapid' ? 1.35 : 1) * (1 + 0.06 * (rk - 1)); if (a.cd > 0) continue;
     if (c.kind === 'beast') {
       const t = a.tgt && !a.tgt.dead ? a.tgt : null; if (!t) { a.cd = .15; continue; }
       if (Math.hypot(t.x - a.x, t.y - a.y) < t.r + 16) {
         a.cd = c.cd; a.bite = .15;
-        allyHit(a, t, (a.cls === 'wolf' ? 16 : 13) * dm, { kb: 50, ang: Math.atan2(t.y - a.y, t.x - a.x), stun: a.cls === 'dog' ? .35 : 0, poison: a.cls === 'wolf' ? 9 * dm : 0 });
+        allyHit(a, t, (a.cls === 'wolf' ? 16 : 13) * dm * (1 + .1 * (rk - 1)) * (t.boss ? .6 : 1), { kb: 50, ang: Math.atan2(t.y - a.y, t.x - a.x), stun: a.cls === 'dog' ? .35 : 0, poison: a.cls === 'wolf' ? 9 * dm : 0 });
         if (Q.level) for (let k = 0; k < 4; k++) addPart(t.x, t.y, rand(-80, 80), rand(-80, 30), a.cls === 'wolf' ? '#d50000' : '#fff', .25, 2.5);
         AU.sfx('hit');
       } else a.cd = .1;
@@ -557,7 +582,7 @@ function updateAllies(dt) {
     if (a.cls === 'sniper') { let best = null, bh = 0; for (const e of enemies) { if (e.dead) continue; const dd = (e.x - a.x) ** 2 + (e.y - a.y) ** 2; if (dd > c.range * c.range) continue; const sc = e.hp * (e.boss ? 3 : e.elite ? 2 : 1); if (sc > bh) { bh = sc; best = e; } } t = best; }
     else t = nearest(a.x, a.y, c.range);
     if (!t) { a.cd = .2; continue; }
-    a.cd = c.cd; allyShoot(a, t, dm);
+    a.cd = c.cd; allyShoot(a, t, dm * (t.boss ? .6 : 1), rk);
   }
   // 합동 공격
   G.comboCd -= dt;
@@ -607,7 +632,7 @@ function updateRescues(dt) {
 /* ------------------------- 랜덤 전장 이벤트 (사전 경고 포함) ------------------------- */
 const DIR8 = ['동쪽', '남동쪽', '남쪽', '남서쪽', '서쪽', '북서쪽', '북쪽', '북동쪽'];
 function extEvent() {
-  const opts = [['radio', G.radio || allies.length >= ALLY_MAX ? 0 : 2.2], ['vehicle', 1.4], ['storm', 1], ['artillery', 1.3], ['ambush', 1.4], ['eliteRaid', 1]];
+  const opts = [['radio', G.radio || allies.length >= ALLY_MAX ? 0 : 2.2], ['vehicle', G.vdropDone && !G.veh && !vehs.some(v => !v.dead) ? 0.6 : 0], ['supply2', 1.4], ['lasergrid', G.theme === 'neon' || G.theme === 'plasma' ? 1.4 : 0.3], ['storm', G.theme === 'dust' || G.st.wx === 'dust' ? 1.6 : 0.8], ['artillery', G.theme === 'war' ? 2.4 : 1.1], ['ambush', 1.4], ['eliteRaid', 1]];
   const ev = wpick(opts.filter(o => o[1] > 0));
   if (ev === 'radio') {
     const a = rand(0, TAU), d = rand(520, 700), x = P.x + Math.cos(a) * d, y = P.y + Math.sin(a) * d;
@@ -616,10 +641,9 @@ function extEvent() {
     toast(`📻 긴급 구조 요청!<br><span style="font-size:15px">${dir} 지역에 아군이 고립되었습니다</span>`, 3, '#69f0ae'); AU.sfx('alarm');
   } else if (ev === 'vehicle') {
     const pool = VEH_ST[Math.min(40, G.stage + 5)], def = pool[Math.floor(Math.random() * 3)];
-    const a = rand(0, TAU), d = rand(140, 220), x = P.x + Math.cos(a) * d, y = P.y + Math.sin(a) * d;
-    effects.push({ type: 'drop', x, y, t: 0, dur: 1.6 }); toast(`🪂 특수 차량 공수 투하!<br><span style="font-size:14px">${def.name}</span>`, 2, '#80deea'); AU.sfx('alarm');
-    later(1.6, () => { if (G.state !== 'play') return; const v = mkVeh(def, x, y); v.bonus = true; vehs.push(v); G.shake = Math.max(G.shake, 5); AU.sfx('slam'); });
+    vehicleDrop(def, true);
   } else if (ev === 'storm') { G.stormWarn = 2.5; toast('🌪️ 경고: 모래폭풍 접근!<br><span style="font-size:14px">곧 시야가 좁아집니다</span>', 2.4, '#ffcc80'); AU.sfx('alarm'); }
+  else if (ev === 'supply2' || ev === 'lasergrid') extEvent2(ev);
   else if (ev === 'artillery') { G.artWarn = 2.2; toast('🚀 경고: 적의 미사일 포격!<br><span style="font-size:14px">빨간 원을 피하세요</span>', 2.2, '#ff5252'); AU.sfx('alarm'); }
   else if (ev === 'ambush') {
     toast('⚠ 적의 대규모 기습 임박!<br><span style="font-size:14px">양쪽에서 몰려옵니다</span>', 2, '#ff7043'); AU.sfx('alarm');
@@ -684,7 +708,7 @@ function updatePotions(dt) {
 }
 
 /* ------------------------- 적 강화 (난이도 / 동료 수) ------------------------- */
-function allySpawnMul() { const n = activeAllies(); return 1 + Math.max(0, n - 1) * 0.1 + (G.veh ? 0.12 : 0); }
+function allySpawnMul() { const n = activeAllies(); return 1 + Math.max(0, n - 1) * 0.1 + (G.veh ? 0.45 : 0); }
 function extDirector(dt) {
   G.extEvT -= dt;
   if (G.extEvT <= 0 && G.bossState === 0 && !G.clearing) { G.extEvT = rand(48, 66); extEvent(); }
@@ -806,6 +830,7 @@ function extCollect(p) {
       else if (G.veh) { const g = Math.round(15 * G.stage * P.greed); G.gold += g; toast(`이 차량은 더 수리할 수 없습니다 (+${g}G)`, 1.2, '#b0bec5'); }
       else { G.rkit = 1; AU.sfx('item'); toast('🔧 수리 키트 보관 (탑승 장비가 손상되면 자동 사용)', 1.6, '#80deea'); }
       return true;
+    case 'wsup': collectSup(); return true;
     case 'scrate': { const g = Math.round(12 * G.stage * P.greed); G.gold += g; qAdd('scrate'); AU.sfx('chest'); heal(Math.round(P.maxHp * .1)); texts.push({ x: P.x, y: P.y - 26, t: 0, v: '📦 보급품 확보', col: '#90caf9', pl: 1, big: 1 }); return true; }
   }
   return false;
@@ -831,7 +856,7 @@ function extUpdate(dt) {
   updateSquadHud();
 }
 function extArrows(list) {
-  for (const v of vehs) if (!v.dead && v !== G.veh && !v.seen) list.push([v.x, v.y, '#4dd0e1']);
+  for (const v of vehs) if (!v.dead && v !== G.veh) list.unshift([v.x, v.y, '#4dd0e1', true]);
   for (const r of rescues) if (!r.done) list.push([r.x, r.y, '#69f0ae']);
   if (G.radio) list.unshift([G.radio.x, G.radio.y, '#ffd54f', true]);
   if (G.hold && !G.hold.q.done) list.push([G.hold.x, G.hold.y, '#ffab40']);

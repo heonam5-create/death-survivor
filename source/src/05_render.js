@@ -4,7 +4,7 @@
 function render() {
   const st = G.st;
   if (!st || !['play', 'levelup', 'pause', 'result', 'dying'].includes(G.state)) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#0d0818'; ctx.fillRect(0, 0, cv.width, cv.height); return; }
-  const sh = save.settings.shake ? G.shake : 0;
+  const sh = Math.min(12, G.shake) * (save.settings.shake || 0);
   G.camX = P.x + (sh ? rand(-sh, sh) : 0); G.camY = P.y + (sh ? rand(-sh, sh) : 0);
   const cx = cv.width / 2, cy = cv.height / 2;
   const setW = () => ctx.setTransform(K, 0, 0, K, cx - G.camX * K, cy - G.camY * K);
@@ -57,7 +57,8 @@ function render() {
     const z = e.z || 0;
     if (z > 0) { ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(e.x, e.y + e.r, e.r, e.r * .3, 0, 0, TAU); ctx.fill(); }
     if (e.alpha < 1) ctx.globalAlpha = e.alpha;
-    ctx.setTransform((e.static ? 1 : e.face) * K, 0, 0, K, cx + (e.x - G.camX) * K, cy + (e.y - z - G.camY) * K);
+    const sq = e.hitT > 0 ? e.hitT : 0;
+    ctx.setTransform((e.static ? 1 : e.face) * K * (1 + sq * 2), 0, 0, K * (1 - sq * 1.5), cx + (e.x - G.camX) * K, cy + (e.y - z - G.camY) * K);
     ctx.drawImage(s.c, -s.box / 2, -s.box / 2, s.box, s.box);
     setW(); ctx.globalAlpha = 1;
     if (e.elite && !e.boss) {
@@ -65,6 +66,8 @@ function render() {
       ctx.fillStyle = '#ffd54f'; ctx.beginPath(); ctx.moveTo(e.x - 10, e.y - e.r * 1.25); ctx.lineTo(e.x - 6, e.y - e.r * 1.25 - 10); ctx.lineTo(e.x, e.y - e.r * 1.25 - 4); ctx.lineTo(e.x + 6, e.y - e.r * 1.25 - 10); ctx.lineTo(e.x + 10, e.y - e.r * 1.25); ctx.closePath(); ctx.fill(); ctx.strokeStyle = OL; ctx.lineWidth = 1.2; ctx.stroke();
       ctx.font = '900 9px "Noto Sans KR",sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffd54f'; ctx.strokeStyle = '#000'; ctx.lineWidth = 2.5; ctx.strokeText('정예 ' + e.d.n, e.x, e.y - e.r * 1.5 - 12); ctx.fillText('정예 ' + e.d.n, e.x, e.y - e.r * 1.5 - 12);
     }
+    if (e.elx) drawElxDeco(e);
+    if (e.buffT > 0 && Q.level && !e.elite) { ctx.strokeStyle = 'rgba(255,82,82,.55)'; ctx.lineWidth = 1.5; circ(ctx, e.x, e.y + e.r * .7, e.r * .8); ctx.stroke(); }
     if (e.shieldT > 0) { ctx.globalAlpha = .35 + .15 * Math.sin(G.time * 12); ctx.fillStyle = '#40c4ff'; circ(ctx, e.x, e.y, e.r * 1.35); ctx.fill(); ctx.globalAlpha = 1; ctx.strokeStyle = '#e1f5fe'; ctx.lineWidth = 2; circ(ctx, e.x, e.y, e.r * 1.35); ctx.stroke(); }
     if (e.burn > 0 && e.burn > 1.6 && Q.level) { ctx.globalAlpha = .7; ctx.fillStyle = '#ff6d00'; ctx.beginPath(); const fx = e.x, fy = e.y - e.r * .2, fl = Math.sin(G.time * 25 + e.seed) * 2; ctx.moveTo(fx - 5, fy); ctx.quadraticCurveTo(fx, fy - 14 - fl, fx + 5, fy); ctx.fill(); ctx.globalAlpha = 1; }
     if (e.frozen > 0) { ctx.fillStyle = 'rgba(179,229,252,.55)'; circ(ctx, e.x, e.y, e.r * 1.05); ctx.fill(); ctx.strokeStyle = '#e1f5fe'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(e.x - e.r * .6, e.y - e.r * .4); ctx.lineTo(e.x + e.r * .4, e.y + e.r * .5); ctx.moveTo(e.x + e.r * .5, e.y - e.r * .5); ctx.lineTo(e.x - e.r * .2, e.y + e.r * .3); ctx.stroke(); }
@@ -95,7 +98,7 @@ function render() {
   // 투사체
   for (const p of projs) drawProj(p);
   for (const b of eprojs) drawEProj(b);
-  for (const f of effects) drawEffect(f);
+  for (const f of effects) if (f.x === undefined || (Math.abs(f.x - G.camX) < VW / 2 + 260 && Math.abs(f.y - G.camY) < VH / 2 + 260)) drawEffect(f);
   for (const q of parts) { const a = Math.max(0, q.life / q.max); ctx.globalAlpha = a; ctx.fillStyle = q.col; if (q.grow) { circ(ctx, q.x, q.y, q.size * (1 + (1 - a) * q.grow)); ctx.fill(); } else ctx.fillRect(q.x - q.size / 2, q.y - q.size / 2, q.size, q.size); }
   ctx.globalAlpha = 1;
   // 데미지 숫자
@@ -352,6 +355,7 @@ function drawEffect(f) {
       ctx.globalAlpha = a * 0.7; ctx.fillStyle = gr; ctx.fillRect(f.x - 9, f.y - 160, 18, 160); ctx.globalAlpha = 1; break; }
     case 'drop': { const z = (1 - k) * 260; ctx.fillStyle = `rgba(0,0,0,${0.15 + k * .25})`; ctx.beginPath(); ctx.ellipse(f.x, f.y, 10 + k * 8, 4 + k * 3, 0, 0, TAU); ctx.fill();
       ctx.save(); ctx.translate(f.x, f.y - z); ctx.strokeStyle = '#eceff1'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-10, -2); ctx.lineTo(0, -26); ctx.lineTo(10, -2); ctx.stroke(); ctx.beginPath(); ctx.arc(0, -26, 16, Math.PI, 0); fs(ctx, '#eceff1', 1.2); rr(ctx, -10, -4, 20, 16, 2); fs(ctx, '#6d7a3a', 1.2); ctx.restore(); break; }
+    default: drawEffectX(f, k);
   }
 }
 // 화면 밖 목표물 방향 표시
@@ -410,7 +414,7 @@ function drawHUD() {
     sx += 33;
   }
   // 보스 체력바
-  let qy = hy + 68;
+  let qy = hy + (G.veh ? 92 : 68);
   const boss = (G.boss && !G.boss.dead && G.bossState === 2) ? G.boss : (G.mini && !G.mini.dead ? G.mini : null);
   if (boss) {
     const bw = Math.min(W - 40 - SAFE.l - SAFE.r, 360), bx = (W - bw) / 2, by = qy;
