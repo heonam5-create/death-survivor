@@ -160,7 +160,7 @@ function spawnEnemy(type, x, y, o = {}) {
 // v9: 몬스터 밀도 — 초반 약 72%, 후반 약 82%까지 점진 증가. 정예·보스가 있으면 일반 몬스터를 더 줄임
 function densF() { return 0.72 + 0.10 * Math.min(1, ((G.stage || 1) - 1) / 30); }
 function crowdBusy() { let el = 0; for (const e of enemies) if (!e.dead && e.elite && !e.boss) el++; return (G.bossState === 2 ? 0.7 : 1) / (1 + Math.min(4, el) * 0.06); }
-const MOB_X = 1.3;   // 밸런스 수정: 일반 몬스터 출현량 +30%
+const MOB_X = 1.3, MON_DMG_X = 1.2;   // 밸런스 수정: 일반 몬스터 출현량 +30%
 function maxEnemies() { return Math.min(Math.round((Q.level === 0 ? 180 : Q.level === 1 ? 330 : 470) * MOB_X), Math.round(MOB_X * (Q.level === 0 ? 130 : 200 + G.stage * 4) * G.st.crowd * CNT() * densF() * crowdBusy())); }
 const DENS_COMP = () => 1 / densF();   // 수가 줄어든 만큼 개체당 보상·체력 일부 보정 (템포 유지)
 function aliveCount() { let n = 0; for (const e of enemies) if (!e.dead) n++; return n; }
@@ -442,7 +442,7 @@ function killEnemy(e) {
 function damagePlayer(dmg, src) {
   if (P.inv > 0 || G.state !== 'play' || P.hp <= 0 || G.clearing > 0) return;
   if (G.buff && G.buff.barrier > 0) { G.buff.barrier--; P.inv = 0.5; effects.push({ type: 'shock', x: P.x, y: P.y, r: 40, t: 0, dur: 0.35, col: '#80d8ff' }); AU.sfx('clank'); texts.push({ x: P.x, y: P.y - 24, t: 0, v: '보호막!', col: '#80d8ff', pl: 1 }); return; }
-  dmg *= DF().dmg * (1 + adaptNow() * 0.7);
+  dmg *= DF().dmg * (1 + adaptNow() * 0.7) * MON_DMG_X;   // 밸런스: 모든 몬스터 공격 피해 ×1.2 (여기서 한 번만)
   if (G.veh) { vehHit(dmg, src); return; }
   dmg = Math.max(1, Math.round(dmg * (1 - P.armor)));
   if (G.dmgLog) G.dmgLog[src || '?'] = (G.dmgLog[src || '?'] || 0) + dmg;

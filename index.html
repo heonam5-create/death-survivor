@@ -1973,7 +1973,7 @@ function spawnEnemy(type, x, y, o = {}) {
 // v9: 몬스터 밀도 — 초반 약 72%, 후반 약 82%까지 점진 증가. 정예·보스가 있으면 일반 몬스터를 더 줄임
 function densF() { return 0.72 + 0.10 * Math.min(1, ((G.stage || 1) - 1) / 30); }
 function crowdBusy() { let el = 0; for (const e of enemies) if (!e.dead && e.elite && !e.boss) el++; return (G.bossState === 2 ? 0.7 : 1) / (1 + Math.min(4, el) * 0.06); }
-const MOB_X = 1.3;   // 밸런스 수정: 일반 몬스터 출현량 +30%
+const MOB_X = 1.3, MON_DMG_X = 1.2;   // 밸런스 수정: 일반 몬스터 출현량 +30%
 function maxEnemies() { return Math.min(Math.round((Q.level === 0 ? 180 : Q.level === 1 ? 330 : 470) * MOB_X), Math.round(MOB_X * (Q.level === 0 ? 130 : 200 + G.stage * 4) * G.st.crowd * CNT() * densF() * crowdBusy())); }
 const DENS_COMP = () => 1 / densF();   // 수가 줄어든 만큼 개체당 보상·체력 일부 보정 (템포 유지)
 function aliveCount() { let n = 0; for (const e of enemies) if (!e.dead) n++; return n; }
@@ -2255,7 +2255,7 @@ function killEnemy(e) {
 function damagePlayer(dmg, src) {
   if (P.inv > 0 || G.state !== 'play' || P.hp <= 0 || G.clearing > 0) return;
   if (G.buff && G.buff.barrier > 0) { G.buff.barrier--; P.inv = 0.5; effects.push({ type: 'shock', x: P.x, y: P.y, r: 40, t: 0, dur: 0.35, col: '#80d8ff' }); AU.sfx('clank'); texts.push({ x: P.x, y: P.y - 24, t: 0, v: '보호막!', col: '#80d8ff', pl: 1 }); return; }
-  dmg *= DF().dmg * (1 + adaptNow() * 0.7);
+  dmg *= DF().dmg * (1 + adaptNow() * 0.7) * MON_DMG_X;   // 밸런스: 모든 몬스터 공격 피해 ×1.2 (여기서 한 번만)
   if (G.veh) { vehHit(dmg, src); return; }
   dmg = Math.max(1, Math.round(dmg * (1 - P.armor)));
   if (G.dmgLog) G.dmgLog[src || '?'] = (G.dmgLog[src || '?'] || 0) + dmg;
@@ -4729,27 +4729,28 @@ function render() {
   for (const f of fields) drawField(f);
   // 위험 구역
   // v9: 일반·정예 몬스터의 경고 표시는 그리지 않음. 보스·맵 이벤트만 흐릿하고 은은한 반투명 경고
+  let hzOn = false; for (const h of hazards) if (h.src && !h.dead) { hzOn = true; break; }
+  const hc = hzOn ? hzLayerBegin() : ctx;
   for (const h of hazards) {
     if (!h.src || h.dead) continue;
-    const p = Math.min(1, h.t / h.delay), fade = Math.min(1, h.t / 0.25), pulse = .85 + .15 * Math.sin(G.time * 7);
-    const rgb = h.src === 'boss' ? '255,110,120' : '255,170,90';
-    ctx.globalAlpha = fade * pulse;
+    const p = Math.min(1, h.t / h.delay), fade = Math.min(1, h.t / 0.25);
+    const rgb = h.src === 'boss' ? '255,90,90' : '255,160,80';
+    hc.globalAlpha = fade;
     if (h.kind === 'circle') {
-      if (QC.glow) { const g = ctx.createRadialGradient(h.x, h.y, h.r * .15, h.x, h.y, h.r); g.addColorStop(0, `rgba(${rgb},0)`); g.addColorStop(.75, `rgba(${rgb},${.10 + .10 * p})`); g.addColorStop(1, `rgba(${rgb},0)`); ctx.fillStyle = g; }
-      else ctx.fillStyle = `rgba(${rgb},${.07 + .08 * p})`;
-      circ(ctx, h.x, h.y, h.r); ctx.fill();
-      ctx.strokeStyle = `rgba(${rgb},${.18 + .2 * p})`; ctx.lineWidth = 1.2; circ(ctx, h.x, h.y, h.r * (0.4 + 0.6 * p)); ctx.stroke();
+      const g = hc.createRadialGradient(h.x, h.y, h.r * .1, h.x, h.y, h.r); g.addColorStop(0, `rgba(${rgb},.5)`); g.addColorStop(.75, `rgba(${rgb},1)`); g.addColorStop(1, `rgba(${rgb},0)`);
+      hc.fillStyle = g; circ(hc, h.x, h.y, h.r); hc.fill();
+      hc.fillStyle = `rgba(${rgb},1)`; circ(hc, h.x, h.y, h.r * .9 * p); hc.fill();
     } else if (h.kind === 'line') {
-      ctx.save(); ctx.translate(h.x, h.y); ctx.rotate(h.ang);
+      hc.save(); hc.translate(h.x, h.y); hc.rotate(h.ang);
       const w = h.w * (h.thin ? .7 : 1);
-      if (QC.glow) { const g = ctx.createLinearGradient(0, -w / 2, 0, w / 2); g.addColorStop(0, `rgba(${rgb},0)`); g.addColorStop(.5, `rgba(${rgb},${.13 + .12 * p})`); g.addColorStop(1, `rgba(${rgb},0)`); ctx.fillStyle = g; }
-      else ctx.fillStyle = `rgba(${rgb},${.08 + .08 * p})`;
-      ctx.fillRect(0, -w / 2, h.len, w);
-      ctx.fillStyle = `rgba(${rgb},${.10 * p})`; ctx.fillRect(0, -w / 6, h.len * p, w / 3);
-      ctx.restore();
+      const g = hc.createLinearGradient(0, -w / 2, 0, w / 2); g.addColorStop(0, `rgba(${rgb},0)`); g.addColorStop(.3, `rgba(${rgb},1)`); g.addColorStop(.7, `rgba(${rgb},1)`); g.addColorStop(1, `rgba(${rgb},0)`);
+      hc.fillStyle = g; hc.fillRect(0, -w / 2, h.len, w);
+      hc.fillStyle = `rgba(${rgb},1)`; hc.fillRect(0, -w / 8, h.len * p, w / 4);
+      hc.restore();
     }
-    ctx.globalAlpha = 1;
+    hc.globalAlpha = 1;
   }
+  if (hzOn) hzLayerEnd(hc);
   // 지뢰, 발전기
   for (const m of mines) { circ(ctx, m.x, m.y, 6); fs(ctx, '#37474f', 1.5); ctx.fillStyle = m.armed && Math.sin(G.time * 10) > 0 ? '#ff1744' : '#5d0000'; circ(ctx, m.x, m.y, 2.5); ctx.fill(); }
   for (const g of gens) {
@@ -4795,7 +4796,6 @@ function render() {
     }
     if (e.elx) drawElxDeco(e);
     if (e.boss && e.bars) drawBossTag(e);
-    if (e.buffT > 0 && Q.level && !e.elite) { ctx.strokeStyle = 'rgba(255,82,82,.55)'; ctx.lineWidth = 1.5; circ(ctx, e.x, e.y + e.r * .7, e.r * .8); ctx.stroke(); }
     if (e.shieldT > 0) { ctx.globalAlpha = .35 + .15 * Math.sin(G.time * 12); ctx.fillStyle = '#40c4ff'; circ(ctx, e.x, e.y, e.r * 1.35); ctx.fill(); ctx.globalAlpha = 1; ctx.strokeStyle = '#e1f5fe'; ctx.lineWidth = 2; circ(ctx, e.x, e.y, e.r * 1.35); ctx.stroke(); }
     if (e.burn > 0 && e.burn > 1.6 && Q.level) { ctx.globalAlpha = .7; ctx.fillStyle = '#ff6d00'; ctx.beginPath(); const fx = e.x, fy = e.y - e.r * .2, fl = Math.sin(G.time * 25 + e.seed) * 2; ctx.moveTo(fx - 5, fy); ctx.quadraticCurveTo(fx, fy - 14 - fl, fx + 5, fy); ctx.fill(); ctx.globalAlpha = 1; }
     if (e.frozen > 0) { ctx.fillStyle = 'rgba(179,229,252,.55)'; circ(ctx, e.x, e.y, e.r * 1.05); ctx.fill(); ctx.strokeStyle = '#e1f5fe'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(e.x - e.r * .6, e.y - e.r * .4); ctx.lineTo(e.x + e.r * .4, e.y + e.r * .5); ctx.moveTo(e.x + e.r * .5, e.y - e.r * .5); ctx.lineTo(e.x - e.r * .2, e.y + e.r * .3); ctx.stroke(); }
@@ -4805,8 +4805,8 @@ function render() {
     if (e.burn > 0 && Q.level && Math.random() < 0.15) addPart(e.x + rand(-e.r, e.r) * .5, e.y, 0, -50, '#ff7043', .35, 2.5);
     if (e.stunT > 0 && !e.frozen && !e.static) { ctx.fillStyle = '#ffeb3b'; for (let i = 0; i < 3; i++) { const a = G.time * 6 + i * 2.1; circ(ctx, e.x + Math.cos(a) * e.r * .6, e.y - e.r * 1.1 + Math.sin(a) * 3, 2); ctx.fill(); } }
     if ((e.elite || e.static || e.type === 'golden') && !e.boss) { const w = Math.max(28, e.r * 2); ctx.fillStyle = '#000a'; ctx.fillRect(e.x - w / 2, e.y - e.r * 1.5 - 4, w, 4); ctx.fillStyle = e.static ? '#e040fb' : e.type === 'golden' ? '#ffd54f' : '#ff9800'; ctx.fillRect(e.x - w / 2, e.y - e.r * 1.5 - 4, w * Math.max(0, e.hp / e.maxHp), 4); }
-    if (e.d.ai === 'bomb' && e.st === 1) { ctx.strokeStyle = 'rgba(255,50,0,.8)'; ctx.lineWidth = 2; circ(ctx, e.x, e.y, 55); ctx.stroke(); ctx.fillStyle = 'rgba(255,50,0,.25)'; circ(ctx, e.x, e.y, 55 * (1 - e.aiT / 0.9)); ctx.fill(); }
-    if (e.d.ai === 'dash' && e.st === 1) { ctx.strokeStyle = 'rgba(255,0,0,.55)'; ctx.lineWidth = e.r; ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(e.x + Math.cos(e.dang) * 150, e.y + Math.sin(e.dang) * 150); ctx.stroke(); }
+    if (e.boss && e.d.ai === 'bomb' && e.st === 1) { ctx.strokeStyle = 'rgba(255,50,0,.8)'; ctx.lineWidth = 2; circ(ctx, e.x, e.y, 55); ctx.stroke(); ctx.fillStyle = 'rgba(255,50,0,.25)'; circ(ctx, e.x, e.y, 55 * (1 - e.aiT / 0.9)); ctx.fill(); }
+    if (e.boss && e.d.ai === 'dash' && e.st === 1) { ctx.strokeStyle = 'rgba(255,90,90,.25)'; ctx.lineWidth = e.r; ctx.beginPath(); ctx.moveTo(e.x, e.y); ctx.lineTo(e.x + Math.cos(e.dang) * 150, e.y + Math.sin(e.dang) * 150); ctx.stroke(); }
     if (e.type === 'egg') { ctx.fillStyle = '#fff'; ctx.font = '900 9px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(Math.ceil(e.hatch), e.x, e.y + 3); }
   }
   // 플레이어
@@ -5211,6 +5211,16 @@ function drawLegendChest(p, bob) {
   const sp = legendSprite(Math.min(3, DPR * S)); ctx.drawImage(sp.c, p.x - sp.w / 2, y - sp.h + 6, sp.w, sp.h);
   if (Q.level && Math.random() < .18) addPart(p.x + rand(-20, 20), y - rand(10, 40), rand(-8, 8), rand(-40, -20), pick(['#fff59d', '#ffe082']), .8, 2.5);
 }
+
+/* 보스 공격 경고 레이어: 따로 그린 뒤 투명도 25%로 한 번 합성 (겹쳐도 진해지지 않음, 가장자리 부드럽게) */
+let hzCv = null;
+function hzLayerBegin() {
+  if (!hzCv) hzCv = document.createElement('canvas');
+  if (hzCv.width !== cv.width || hzCv.height !== cv.height) { hzCv.width = cv.width; hzCv.height = cv.height; }
+  const g = hzCv.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, hzCv.width, hzCv.height); g.setTransform(ctx.getTransform());
+  return g;
+}
+function hzLayerEnd() { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 0.25; ctx.drawImage(hzCv, 0, 0); ctx.restore(); }
 
 /* =====================================================================
    v4 확장 그리기: 탑승 장비 17개 차체 + 14개 무기 장착부 + 부착물,
