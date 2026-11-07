@@ -190,10 +190,10 @@ function extEvent2(ev) {
     later(1.3, () => { if (G.state !== 'play') return; dropPickup('wsup', x, y, 0, null, true); G.shake = Math.max(G.shake, 3); AU.sfx('slam'); });
     toast('🎁 무기 보급 상자 투하!', 1.4, '#ffd54f');
   } else if (ev === 'lasergrid') {
-    toast('⚠ 경고: 레이저 격자 공격!<br><span style="font-size:14px">빨간 줄을 피하세요</span>', 2, '#ff5252'); AU.sfx('alarm');
+    toast('⚠ 경고: 레이저 격자 공격!<br><span style="font-size:14px">흐릿한 경고 줄을 피하세요</span>', 2, '#ff5252'); AU.sfx('alarm');
     for (let w = 0; w < 3; w++) later(w * 1.6, () => {
       if (G.state !== 'play') return; const base = rand(0, Math.PI);
-      for (let i = -1; i <= 1; i++) { const a = base + (w % 2 ? Math.PI / 2 : 0), ox = Math.cos(a + Math.PI / 2) * i * 90, oy = Math.sin(a + Math.PI / 2) * i * 90; hazards.push({ kind: 'line', x: P.x + ox - Math.cos(a) * 400, y: P.y + oy - Math.sin(a) * 400, ang: a, len: 800, w: 16, t: 0, delay: 1.25, dmg: 9 + G.stage * .7, beam: 1 }); }
+      for (let i = -1; i <= 1; i++) { const a = base + (w % 2 ? Math.PI / 2 : 0), ox = Math.cos(a + Math.PI / 2) * i * 90, oy = Math.sin(a + Math.PI / 2) * i * 90; hazards.push({ src: 'env', kind: 'line', x: P.x + ox - Math.cos(a) * 400, y: P.y + oy - Math.sin(a) * 400, ang: a, len: 800, w: 16, t: 0, delay: 1.25, dmg: 9 + G.stage * .7, beam: 1 }); }
     });
   }
 }
@@ -274,7 +274,7 @@ function setUltBtn() {
 /* ------------------------- 확장팩 스테이지 시작 / 업데이트 ------------------------- */
 function xpStageStart() {
   G.theme = THEME_OF[G.st.mu] || 'war';
-  pools = []; G.adaptLive = 0;
+  pools = []; G.adaptLive = 0; turStageStart();
   G.combo = 0; G.comboT = 0; G.comboMax = 0; G.comboGold = 0; G.kwin = []; G.chainCd = 0; G.eliteRw = 0; G.erAspd = 0; G.erCrit = 0; G.sup = null; G.auraT = 0;
   // 스테이지 전환 시 메모리 정리: 지난 스테이지 배경 타일·스프라이트 캐시 해제
   groundCache.clear(); if (SPR.size > 700) SPR.clear();
@@ -284,6 +284,6 @@ function xpUpdate(dt) {
   if (G.comboT > 0) { G.comboT -= dt; if (G.comboT <= 0) G.combo = 0; }
   if (G.chainCd > 0) G.chainCd -= dt;
   if (G.sup && G.sup.t > 0) { G.sup.t -= dt; if (G.sup.t <= 0) { G.sup = null; recalc(); toast('보급 효과 종료', .9, '#b0bec5'); } }
-  updateElitesX(dt); updateDrops(dt); updatePools(dt); G.adaptT = (G.adaptT || 0) - dt; if (G.adaptT <= 0) { G.adaptT = 1; G.adaptLive = Math.min(0.08, 0.012 * activeAllies() * clamp(allyGrowth(), 1, 2.5)); }
+  updateElitesX(dt); updateDrops(dt); updatePools(dt); turretUpdate(dt); G.adaptT = (G.adaptT || 0) - dt; if (G.adaptT <= 0) { G.adaptT = 1; G.adaptLive = Math.min(0.08, 0.012 * activeAllies() * clamp(allyGrowth(), 1, 2.5)); }
   if (effects.length > 280) effects.splice(0, effects.length - 280);
 }

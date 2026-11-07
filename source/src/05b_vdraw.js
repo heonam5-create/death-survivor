@@ -307,7 +307,7 @@ function drawZone(x, y, r, col, label, k) {
 function vis(x, y, m) { return Math.abs(x - G.camX) < VW / 2 + m && Math.abs(y - G.camY) < VH / 2 + m; }
 function drawWorldExt(layer) {
   if (layer === 'under') {
-    drawPools();
+    drawPools(); drawTurrets();
     if (G.hold && !G.hold.q.done && vis(G.hold.x, G.hold.y, 140)) drawZone(G.hold.x, G.hold.y, G.hold.r, '#ffab40', `🚩 구역 사수 ${Math.max(0, Math.ceil(G.hold.q.sec - G.hold.q.cur))}초`, G.hold.q.cur / G.hold.q.sec);
     const R = G.radio; if (R && vis(R.x, R.y, 160)) {
       drawZone(R.x, R.y, R.r, '#ffd54f', R.phase === 'go' ? '📻 고립된 아군' : `🛡️ 방어 ${Math.floor(R.prog / R.need * 100)}%`, R.prog / R.need);
@@ -449,7 +449,7 @@ function drawElxDeco(e) {
     case 'crystal': ctx.fillStyle = 'rgba(234,128,252,.85)'; for (const [cx, h] of [[-r * .5, 14], [0, 20], [r * .5, 12]]) { ctx.beginPath(); ctx.moveTo(cx - 5, -r * .7); ctx.lineTo(cx, -r * .7 - h); ctx.lineTo(cx + 5, -r * .7); ctx.closePath(); ctx.fill(); } break;
   }
   ctx.restore();
-  if (e.elx.aura) { ctx.globalAlpha = .25 + .1 * Math.sin(t * 4); ctx.strokeStyle = '#ff5252'; ctx.lineWidth = 2; ctx.setLineDash([4, 6]); circ(ctx, x, y, 150); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; }
+  if (e.elx.aura) { ctx.globalAlpha = .10 + .04 * Math.sin(t * 4); ctx.fillStyle = '#ffab91'; circ(ctx, x, y, 150); ctx.fill(); ctx.globalAlpha = 1; }
 }
 function drawHudX(W) {
   // 콤보

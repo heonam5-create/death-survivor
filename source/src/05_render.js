@@ -16,19 +16,27 @@ function render() {
   // 장판 (화염·독·산성·블랙홀)
   for (const f of fields) drawField(f);
   // 위험 구역
+  // v9: 일반·정예 몬스터의 경고 표시는 그리지 않음. 보스·맵 이벤트만 흐릿하고 은은한 반투명 경고
   for (const h of hazards) {
-    const p = Math.min(1, h.t / h.delay);
+    if (!h.src || h.dead) continue;
+    const p = Math.min(1, h.t / h.delay), fade = Math.min(1, h.t / 0.25), pulse = .85 + .15 * Math.sin(G.time * 7);
+    const rgb = h.src === 'boss' ? '255,110,120' : '255,170,90';
+    ctx.globalAlpha = fade * pulse;
     if (h.kind === 'circle') {
-      ctx.fillStyle = 'rgba(255,30,30,0.18)'; circ(ctx, h.x, h.y, h.r); ctx.fill();
-      ctx.fillStyle = 'rgba(255,30,30,0.35)'; circ(ctx, h.x, h.y, h.r * p); ctx.fill();
-      ctx.strokeStyle = 'rgba(255,60,60,0.9)'; ctx.lineWidth = 2; circ(ctx, h.x, h.y, h.r); ctx.stroke();
+      if (QC.glow) { const g = ctx.createRadialGradient(h.x, h.y, h.r * .15, h.x, h.y, h.r); g.addColorStop(0, `rgba(${rgb},0)`); g.addColorStop(.75, `rgba(${rgb},${.10 + .10 * p})`); g.addColorStop(1, `rgba(${rgb},0)`); ctx.fillStyle = g; }
+      else ctx.fillStyle = `rgba(${rgb},${.07 + .08 * p})`;
+      circ(ctx, h.x, h.y, h.r); ctx.fill();
+      ctx.strokeStyle = `rgba(${rgb},${.18 + .2 * p})`; ctx.lineWidth = 1.2; circ(ctx, h.x, h.y, h.r * (0.4 + 0.6 * p)); ctx.stroke();
     } else if (h.kind === 'line') {
       ctx.save(); ctx.translate(h.x, h.y); ctx.rotate(h.ang);
-      ctx.fillStyle = h.thin ? 'rgba(255,30,30,0.15)' : 'rgba(255,30,30,0.2)'; ctx.fillRect(0, -h.w / 2, h.len, h.w);
-      ctx.fillStyle = 'rgba(255,30,30,0.35)'; ctx.fillRect(0, -h.w / 2, h.len * p, h.w);
-      if (!h.thin) { ctx.strokeStyle = 'rgba(255,60,60,0.9)'; ctx.lineWidth = 2; ctx.strokeRect(0, -h.w / 2, h.len, h.w); }
+      const w = h.w * (h.thin ? .7 : 1);
+      if (QC.glow) { const g = ctx.createLinearGradient(0, -w / 2, 0, w / 2); g.addColorStop(0, `rgba(${rgb},0)`); g.addColorStop(.5, `rgba(${rgb},${.13 + .12 * p})`); g.addColorStop(1, `rgba(${rgb},0)`); ctx.fillStyle = g; }
+      else ctx.fillStyle = `rgba(${rgb},${.08 + .08 * p})`;
+      ctx.fillRect(0, -w / 2, h.len, w);
+      ctx.fillStyle = `rgba(${rgb},${.10 * p})`; ctx.fillRect(0, -w / 6, h.len * p, w / 3);
       ctx.restore();
     }
+    ctx.globalAlpha = 1;
   }
   // 지뢰, 발전기
   for (const m of mines) { circ(ctx, m.x, m.y, 6); fs(ctx, '#37474f', 1.5); ctx.fillStyle = m.armed && Math.sin(G.time * 10) > 0 ? '#ff1744' : '#5d0000'; circ(ctx, m.x, m.y, 2.5); ctx.fill(); }
@@ -62,7 +70,7 @@ function render() {
     ctx.drawImage(s.c, -s.box / 2, -s.box / 2, s.box, s.box);
     setW(); ctx.globalAlpha = 1;
     if (e.elite && !e.boss) {
-      ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(G.time * 1.5); ctx.setLineDash([8, 6]); ctx.strokeStyle = e.affix === 'aura' ? '#ff3d00' : '#ffd54f'; ctx.lineWidth = 2.5; circ(ctx, 0, 0, e.r * 1.25); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+      ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(G.time * 1.5); ctx.setLineDash([8, 6]); ctx.globalAlpha = .45; ctx.strokeStyle = e.affix === 'aura' ? '#ffab91' : '#ffd54f'; ctx.lineWidth = 1.5; circ(ctx, 0, 0, e.r * 1.25); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
       ctx.fillStyle = '#ffd54f'; ctx.beginPath(); ctx.moveTo(e.x - 10, e.y - e.r * 1.25); ctx.lineTo(e.x - 6, e.y - e.r * 1.25 - 10); ctx.lineTo(e.x, e.y - e.r * 1.25 - 4); ctx.lineTo(e.x + 6, e.y - e.r * 1.25 - 10); ctx.lineTo(e.x + 10, e.y - e.r * 1.25); ctx.closePath(); ctx.fill(); ctx.strokeStyle = OL; ctx.lineWidth = 1.2; ctx.stroke();
       ctx.font = '900 9px "Noto Sans KR",sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffd54f'; ctx.strokeStyle = '#000'; ctx.lineWidth = 2.5; ctx.strokeText('정예 ' + e.d.n, e.x, e.y - e.r * 1.5 - 12); ctx.fillText('정예 ' + e.d.n, e.x, e.y - e.r * 1.5 - 12);
     }
@@ -272,6 +280,10 @@ function drawPickup(p) {
       ctx.globalAlpha = .5; const gr = ctx.createLinearGradient(p.x, p.y - 70, p.x, p.y); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(1, it.col); ctx.fillStyle = gr; ctx.fillRect(p.x - 5, p.y - 70, 10, 70); ctx.globalAlpha = 1;
       ctx.strokeStyle = it.col; ctx.lineWidth = 2; circ(ctx, p.x, p.y, 8 + ph * 10); ctx.globalAlpha = 1 - ph; ctx.stroke(); ctx.globalAlpha = 1;
       ctx.font = '18px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(it.ic, p.x, p.y + 6 - bob); break; }
+    case 'tdrop': { const T = TURRETS[p.item] || TURRETS.mg; const yy = p.y - bob;
+      if (QC.glow) { ctx.globalAlpha = .45; ctx.drawImage(glowSprite(T.col), p.x - 22, yy - 22, 44, 44); ctx.globalAlpha = 1; }
+      rr(ctx, p.x - 12, yy - 10, 24, 20, 5); fs(ctx, '#263238', 1.6); ctx.strokeStyle = '#64ffda'; ctx.lineWidth = 2; rr(ctx, p.x - 12, yy - 10, 24, 20, 5); ctx.stroke();
+      ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(T.ic, p.x, yy); ctx.textBaseline = 'alphabetic'; break; }
     case 'chest': case 'secret': case 'crate': {
       const col = p.kind === 'secret' ? '#e040fb' : p.kind === 'crate' ? '#90caf9' : '#ffd54f';
       if (QC.glow) { ctx.globalAlpha = .5 + .2 * Math.sin(G.time * 5); ctx.drawImage(glowSprite(col), p.x - 30, p.y - 34, 60, 60); ctx.globalAlpha = 1; }

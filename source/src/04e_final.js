@@ -40,6 +40,7 @@ function addPool(o) { pools.push(Object.assign({ t: 0, tick: 0 }, o)); }
 function updatePools(dt) {
   for (const p of pools) {
     p.t += dt; if (p.t < p.delay) continue;
+    if (p.friendly) { p.tick -= dt; if (p.tick <= 0) { p.tick = 0.5; for (const e of query(p.x, p.y, p.r)) if (!e.dead && !e.obj) hitEnemy(e, p.dps * 0.5, { poison: p.dps * 0.4, ally: 'turret', silent: true, tick: 1 }); } if (Q.level && Math.random() < 0.25) addPart(p.x + rand(-p.r, p.r) * .7, p.y + rand(-p.r, p.r) * .5, 0, -20, '#c5e1a5', .6, 4); continue; }
     const d = Math.hypot(P.x - p.x, P.y - p.y), inside = d < p.r;
     if (p.k === 'well') { if (d > 8 && d < p.r * 2.2) { const pw = p.pull * dt; P.x += (p.x - P.x) / d * Math.min(d, pw); P.y += (p.y - P.y) / d * Math.min(d, pw); } }
     else if (inside) { p.tick -= dt; if (p.tick <= 0) { p.tick = 0.5; damagePlayer(p.dps * 0.5, p.k); if (p.k === 'frost') P.slowT = Math.max(P.slowT, 0.6); } }
@@ -50,11 +51,12 @@ function updatePools(dt) {
 function drawPools() {
   for (const p of pools) {
     if (Math.abs(p.x - G.camX) > VW / 2 + p.r || Math.abs(p.y - G.camY) > VH / 2 + p.r) continue;
-    const warm = p.t < p.delay, k = warm ? p.t / p.delay : 1, col = p.k === 'fire' ? '255,90,0' : p.k === 'frost' ? '128,216,255' : '124,77,255';
+    const warm = p.t < p.delay, k = warm ? p.t / p.delay : 1, col = p.k === 'fire' ? '255,90,0' : p.k === 'frost' ? '128,216,255' : p.k === 'gas' ? '174,213,129' : '124,77,255';
     ctx.save(); ctx.translate(p.x, p.y); ctx.scale(1, .6);
-    if (warm) { ctx.strokeStyle = `rgba(${col},.9)`; ctx.lineWidth = 2; circ(ctx, 0, 0, p.r); ctx.stroke(); ctx.fillStyle = `rgba(${col},.25)`; circ(ctx, 0, 0, p.r * k); ctx.fill(); }
+    if (p.friendly) { ctx.fillStyle = `rgba(${col},${.16 + .05 * Math.sin(G.time * 5 + p.x)})`; circ(ctx, 0, 0, p.r); ctx.fill(); }
+    else if (warm) { ctx.strokeStyle = `rgba(${col},.3)`; ctx.lineWidth = 1.2; circ(ctx, 0, 0, p.r); ctx.stroke(); ctx.fillStyle = `rgba(${col},.12)`; circ(ctx, 0, 0, p.r * k); ctx.fill(); }
     else if (p.k === 'well') { ctx.rotate(G.time * 3); for (let i = 0; i < 3; i++) { ctx.strokeStyle = `rgba(${col},${.7 - i * .2})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, 0, p.r * (.3 + i * .3), 0, 4.2); ctx.stroke(); } ctx.fillStyle = '#000'; circ(ctx, 0, 0, 14); ctx.fill(); }
-    else { const a = .35 + .1 * Math.sin(G.time * 8 + p.x); ctx.fillStyle = `rgba(${col},${a})`; circ(ctx, 0, 0, p.r); ctx.fill(); ctx.strokeStyle = `rgba(${col},.9)`; ctx.lineWidth = 2; circ(ctx, 0, 0, p.r); ctx.stroke(); }
+    else { const a = .35 + .1 * Math.sin(G.time * 8 + p.x); ctx.fillStyle = `rgba(${col},${a * .8})`; circ(ctx, 0, 0, p.r); ctx.fill(); ctx.strokeStyle = `rgba(${col},.45)`; ctx.lineWidth = 1.5; circ(ctx, 0, 0, p.r); ctx.stroke(); }
     ctx.restore();
   }
 }
@@ -66,20 +68,20 @@ function bossArchStart(e, pat) {
   const d = e.dmg, ph = e.bar || 0;
   switch (pat) {
     case 'dashx': e.dn = ph >= 2 ? 4 : 3; e.dashPhase = 0; break;
-    case 'mortarx': { const n = 8 + ph * 2; for (let i = 0; i < n; i++) { const a = i / n * TAU + rand(-.2, .2), rr = rand(60, 170); hazards.push({ kind: 'circle', x: P.x + Math.cos(a) * rr, y: P.y + Math.sin(a) * rr, r: 50, t: 0, delay: 1.2 + i * 0.1, dmg: d * .85 }); } hazards.push({ kind: 'circle', x: P.x, y: P.y, r: 46, t: 0, delay: 1.5, dmg: d * .85 }); AU.sfx('alarm'); break; }
-    case 'rotlaser': { e.rlN = ph >= 2 ? 4 : 3; e.rlA = rand(0, TAU); e.rlDir = Math.random() < .5 ? 1 : -1; for (let i = 0; i < e.rlN; i++) hazards.push({ kind: 'line', x: e.x, y: e.y, ang: e.rlA + i * TAU / e.rlN, len: 560, w: 20, t: 0, delay: 1.0, dmg: 0, thin: 1 }); AU.sfx('elaser'); break; }
+    case 'mortarx': { const n = 8 + ph * 2; for (let i = 0; i < n; i++) { const a = i / n * TAU + rand(-.2, .2), rr = rand(60, 170); hazards.push({ src: 'boss', kind: 'circle', x: P.x + Math.cos(a) * rr, y: P.y + Math.sin(a) * rr, r: 50, t: 0, delay: 1.2 + i * 0.1, dmg: d * .85 }); } hazards.push({ src: 'boss', kind: 'circle', x: P.x, y: P.y, r: 46, t: 0, delay: 1.5, dmg: d * .85 }); AU.sfx('alarm'); break; }
+    case 'rotlaser': { e.rlN = ph >= 2 ? 4 : 3; e.rlA = rand(0, TAU); e.rlDir = Math.random() < .5 ? 1 : -1; for (let i = 0; i < e.rlN; i++) hazards.push({ src: 'boss', kind: 'line', x: e.x, y: e.y, ang: e.rlA + i * TAU / e.rlN, len: 560, w: 20, t: 0, delay: 1.0, dmg: 0, thin: 1 }); AU.sfx('elaser'); break; }
     case 'turrets': { const alive = enemies.filter(o => !o.dead && o.type === 'bturret').length, n = Math.min(5 - alive, 2 + (ph >= 1 ? 1 : 0)); for (let i = 0; i < n; i++) { const a = rand(0, TAU), x = e.x + Math.cos(a) * 120, y = e.y + Math.sin(a) * 120; effects.push({ type: 'portal', x, y, t: 0, dur: .8 }); later(.7, () => { if (G.state !== 'play' || e.dead) return; const t = spawnEnemy('bturret', x, y, { obj: 1 }); t.dmg = d * .4; t.aiT = 1.2; }); } AU.sfx('portal'); break; }
     case 'firepool': { const n = 3 + ph; for (let i = 0; i < n; i++) addPool({ k: 'fire', x: P.x + (i ? rand(-150, 150) : 0), y: P.y + (i ? rand(-150, 150) : 0), r: 62, delay: 1.1, dur: 6, dps: d * .55 }); for (let i = 0; i < 5; i++) eShot(e.x, e.y, Math.atan2(P.y - e.y, P.x - e.x) + (i - 2) * .22, 170, d * .45, 'fire'); AU.sfx('flame'); break; }
     case 'frost': { for (let i = 0; i < 2 + ph; i++) addPool({ k: 'frost', x: P.x + (i ? rand(-140, 140) : 0), y: P.y + (i ? rand(-140, 140) : 0), r: 70, delay: 1.0, dur: 5, dps: d * .3 }); later(.8, () => { if (G.state === 'play' && !e.dead) { for (let i = 0; i < 14; i++) eShot(e.x, e.y, i / 14 * TAU, 140, d * .35, 'ice'); AU.sfx('freeze'); } }); break; }
-    case 'chainl': { let x = P.x + rand(-180, 180), y = P.y + rand(-180, 180); const n = 4 + ph; for (let i = 0; i < n; i++) { const x2 = i === Math.floor(n / 2) ? P.x : P.x + rand(-200, 200), y2 = i === Math.floor(n / 2) ? P.y : P.y + rand(-200, 200), ang = Math.atan2(y2 - y, x2 - x), len = Math.hypot(x2 - x, y2 - y) + 20; hazards.push({ kind: 'line', x, y, ang, len, w: 18, t: 0, delay: 1.0 + i * 0.12, dmg: d * .75, beam: 1 }); x = x2; y = y2; } AU.sfx('zap'); break; }
-    case 'gwell': { const wx = (e.x + P.x) / 2 + rand(-60, 60), wy = (e.y + P.y) / 2 + rand(-60, 60); addPool({ k: 'well', x: wx, y: wy, r: 70, delay: .8, dur: 2.6 + ph * .4, pull: 85 + ph * 15 }); hazards.push({ kind: 'circle', x: wx, y: wy, r: 95, t: 0, delay: 3.4 + ph * .4, dmg: d * 1.1 }); AU.sfx('hole'); break; }
+    case 'chainl': { let x = P.x + rand(-180, 180), y = P.y + rand(-180, 180); const n = 4 + ph; for (let i = 0; i < n; i++) { const x2 = i === Math.floor(n / 2) ? P.x : P.x + rand(-200, 200), y2 = i === Math.floor(n / 2) ? P.y : P.y + rand(-200, 200), ang = Math.atan2(y2 - y, x2 - x), len = Math.hypot(x2 - x, y2 - y) + 20; hazards.push({ src: 'boss', kind: 'line', x, y, ang, len, w: 18, t: 0, delay: 1.0 + i * 0.12, dmg: d * .75, beam: 1 }); x = x2; y = y2; } AU.sfx('zap'); break; }
+    case 'gwell': { const wx = (e.x + P.x) / 2 + rand(-60, 60), wy = (e.y + P.y) / 2 + rand(-60, 60); addPool({ k: 'well', x: wx, y: wy, r: 70, delay: .8, dur: 2.6 + ph * .4, pull: 85 + ph * 15 }); hazards.push({ src: 'boss', kind: 'circle', x: wx, y: wy, r: 95, t: 0, delay: 3.4 + ph * .4, dmg: d * 1.1 }); AU.sfx('hole'); break; }
     case 'ult': bossUltStart(e); break;
   }
 }
 function bossArchUpdate(e, dt) {
   switch (e.ps) {
     case 'dashx':
-      if (e.dashPhase === 0) { e.dang = Math.atan2(P.y - e.y, P.x - e.x); hazards.push({ kind: 'line', x: e.x, y: e.y, ang: e.dang, len: 330, w: e.r * 1.5, t: 0, delay: .55, dmg: 0 }); e.dashPhase = 1; e.sub = 0; }
+      if (e.dashPhase === 0) { e.dang = Math.atan2(P.y - e.y, P.x - e.x); hazards.push({ src: 'boss', kind: 'line', x: e.x, y: e.y, ang: e.dang, len: 330, w: e.r * 1.5, t: 0, delay: .55, dmg: 0 }); e.dashPhase = 1; e.sub = 0; }
       else if (e.dashPhase === 1 && e.sub >= .55) { e.dashPhase = 2; e.sub = 0; AU.sfx('dash'); }
       else if (e.dashPhase === 2) { e.x += Math.cos(e.dang) * 640 * dt; e.y += Math.sin(e.dang) * 640 * dt; if (Q.level && Math.random() < .7) addPart(e.x, e.y + e.r * .5, rand(-40, 40), rand(-40, 40), '#bcaaa4', .4, 5);
         if (e.sub >= .45) { e.dashPhase = 0; e.dn--; G.shake = Math.max(G.shake, 6); effects.push({ type: 'xring', x: e.x, y: e.y, r: e.r * 2.6, t: 0, dur: .4, col: '#ffccbc' }); for (let i = 0; i < 10; i++) eShot(e.x, e.y, i / 10 * TAU, 150, e.dmg * .4, e.bdef.shot || 'orb'); AU.sfx('slam'); if (e.dn <= 0) endPattern(e); } }
@@ -100,14 +102,14 @@ function bossUltStart(e) {
   toast(`☠ 보스 필살기: ${A.un}!`, 1.8, '#ff1744');
   switch (A.ult) {
     case 'meteor': e.dn = 5; e.dashPhase = 0; break;
-    case 'carpet': for (let i = 0; i < 26; i++) { const gx = (i % 6 - 2.5) * 80 + rand(-20, 20), gy = (Math.floor(i / 6) - 2) * 80 + rand(-20, 20); hazards.push({ kind: 'circle', x: P.x + gx, y: P.y + gy, r: 54, t: 0, delay: 1.4 + i * 0.07, dmg: d }); } break;
-    case 'crossbeam': e.rlN = 6; e.rlA = rand(0, TAU); e.rlDir = 1; for (let i = 0; i < 6; i++) hazards.push({ kind: 'line', x: e.x, y: e.y, ang: e.rlA + i * TAU / 6, len: 600, w: 22, t: 0, delay: 1.3, dmg: 0, thin: 1 }); break;
+    case 'carpet': for (let i = 0; i < 26; i++) { const gx = (i % 6 - 2.5) * 80 + rand(-20, 20), gy = (Math.floor(i / 6) - 2) * 80 + rand(-20, 20); hazards.push({ src: 'boss', kind: 'circle', x: P.x + gx, y: P.y + gy, r: 54, t: 0, delay: 1.4 + i * 0.07, dmg: d }); } break;
+    case 'crossbeam': e.rlN = 6; e.rlA = rand(0, TAU); e.rlDir = 1; for (let i = 0; i < 6; i++) hazards.push({ src: 'boss', kind: 'line', x: e.x, y: e.y, ang: e.rlA + i * TAU / 6, len: 600, w: 22, t: 0, delay: 1.3, dmg: 0, thin: 1 }); break;
     case 'horde': for (let i = 0; i < 16; i++) { const a = i / 16 * TAU, x = P.x + Math.cos(a) * 260, y = P.y + Math.sin(a) * 260; effects.push({ type: 'portal', x, y, t: 0, dur: .9 }); later(.8, () => { if (G.state === 'play' && !e.dead) spawnEnemy(e.bdef.summon, x, y); }); } later(1, () => { if (G.state === 'play' && !e.dead) spawnElite(); }); break;
     case 'fortress': bossArchStart(e, 'turrets'); bossArchStart(e, 'mortarx'); later(1.2, () => { if (G.state === 'play' && !e.dead) bossArchStart(e, 'turrets'); }); break;
-    case 'inferno': { const gap = rand(0, TAU); for (let i = 0; i < 9; i++) { const a = gap + (i + 1) / 10 * TAU; addPool({ k: 'fire', x: P.x + Math.cos(a) * 120, y: P.y + Math.sin(a) * 120, r: 58, delay: 1.3, dur: 6, dps: e.dmg * .6 }); } hazards.push({ kind: 'circle', x: P.x, y: P.y, r: 60, t: 0, delay: 2.2, dmg: d }); break; }
-    case 'blizzard': later(1.2, () => { if (G.state === 'play') P.slowT = Math.max(P.slowT, 4); }); for (let i = 0; i < 20; i++) hazards.push({ kind: 'circle', x: P.x + rand(-220, 220), y: P.y + rand(-220, 220), r: 46, t: 0, delay: 1.4 + i * .12, dmg: d * .8 }); break;
+    case 'inferno': { const gap = rand(0, TAU); for (let i = 0; i < 9; i++) { const a = gap + (i + 1) / 10 * TAU; addPool({ k: 'fire', x: P.x + Math.cos(a) * 120, y: P.y + Math.sin(a) * 120, r: 58, delay: 1.3, dur: 6, dps: e.dmg * .6 }); } hazards.push({ src: 'boss', kind: 'circle', x: P.x, y: P.y, r: 60, t: 0, delay: 2.2, dmg: d }); break; }
+    case 'blizzard': later(1.2, () => { if (G.state === 'play') P.slowT = Math.max(P.slowT, 4); }); for (let i = 0; i < 20; i++) hazards.push({ src: 'boss', kind: 'circle', x: P.x + rand(-220, 220), y: P.y + rand(-220, 220), r: 46, t: 0, delay: 1.4 + i * .12, dmg: d * .8 }); break;
     case 'storm': for (let w = 0; w < 3; w++) later(w * .9, () => { if (G.state === 'play' && !e.dead) { e.bar2 = e.bar; bossArchStart(e, 'chainl'); } }); break;
-    case 'blackhole': addPool({ k: 'well', x: e.x, y: e.y, r: 90, delay: 1.0, dur: 3.4, pull: 95 }); hazards.push({ kind: 'circle', x: e.x, y: e.y, r: 170, t: 0, delay: 4.4, dmg: d * 1.4 }); break;
+    case 'blackhole': addPool({ k: 'well', x: e.x, y: e.y, r: 90, delay: 1.0, dur: 3.4, pull: 95 }); hazards.push({ src: 'boss', kind: 'circle', x: e.x, y: e.y, r: 170, t: 0, delay: 4.4, dmg: d * 1.4 }); break;
     case 'apocalypse': bossArchStart(e, 'mortarx'); later(1.4, () => { if (G.state === 'play' && !e.dead) { e.rlN = 4; e.ps = 'rotlaser'; e.sub = 0; bossArchStart(e, 'rotlaser'); } }); later(2.6, () => { if (G.state === 'play' && !e.dead) bossArchStart(e, 'gwell'); }); break;
   }
 }
@@ -177,6 +179,7 @@ const VCH_IC = { bike: '🏍️', buggy: '🏎️', jeep: '🚙', rover: '🚐',
 function trackTargets() {
   const L = [];
   for (const v of vehs) if (!v.dead && v !== G.veh && v.time > 0) L.push({ x: v.x, y: v.y, ic: VCH_IC[v.def.ch] || '🚘', col: '#4dd0e1', lb: v.drop ? '착륙 중' : '탑승', veh: 1 });
+  for (const p of pickups) if (!p.dead && p.kind === 'tdrop') L.push({ x: p.x, y: p.y, ic: (TURRETS[p.item] || TURRETS.mg).ic, col: '#64ffda', lb: '터렛' });
   for (const r of rescues) if (!r.done) L.push({ x: r.x, y: r.y, ic: (ACL[r.spec.cls] || {}).ic || '🙋', col: '#69f0ae', lb: r.active ? '구출 중' : '구출' });
   return L;
 }
@@ -187,7 +190,7 @@ function updFinBtn() {
   if (on) { const s = Math.max(0, Math.ceil(G.winT)); if (s !== finSec) { finSec = s; $('finT').textContent = s; } }
 }
 function drawTrackers(W, H) {
-  updFinBtn();
+  updFinBtn(); drawTurretGhost();
   if (G.state !== 'play' && G.state !== 'pause') return;
   const L = trackTargets(); if (!L.length) return;
   const cx = W / 2, cy = H / 2, mL = 30 + SAFE.l, mR = 30 + SAFE.r, mT = 200 + SAFE.t, mB = 205 + SAFE.b;

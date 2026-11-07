@@ -647,7 +647,7 @@ function extEvent() {
   else if (ev === 'artillery') { G.artWarn = 2.2; toast('🚀 경고: 적의 미사일 포격!<br><span style="font-size:14px">빨간 원을 피하세요</span>', 2.2, '#ff5252'); AU.sfx('alarm'); }
   else if (ev === 'ambush') {
     toast('⚠ 적의 대규모 기습 임박!<br><span style="font-size:14px">양쪽에서 몰려옵니다</span>', 2, '#ff7043'); AU.sfx('alarm');
-    later(2, () => { if (G.state !== 'play' || G.bossState !== 0) return; const base = rand(0, TAU), n = Math.min(50, 12 + G.stage * 1.5) * DF().cnt, rad = Math.max(VW, VH) * .55; for (let s = 0; s < 2; s++) for (let i = 0; i < n / 2; i++) { const aa = base + s * Math.PI + rand(-.5, .5); spawnEnemy(wpick(G.st.mobs), P.x + Math.cos(aa) * rad * rand(1, 1.2), P.y + Math.sin(aa) * rad * rand(1, 1.2)); } });
+    later(2, () => { if (G.state !== 'play' || G.bossState !== 0) return; const base = rand(0, TAU), n = Math.min(50, 12 + G.stage * 1.5) * DF().cnt * densF(), rad = Math.max(VW, VH) * .55; for (let s = 0; s < 2; s++) for (let i = 0; i < n / 2; i++) { const aa = base + s * Math.PI + rand(-.5, .5); spawnEnemy(wpick(G.st.mobs), P.x + Math.cos(aa) * rad * rand(1, 1.2), P.y + Math.sin(aa) * rad * rand(1, 1.2)); } });
   } else if (ev === 'eliteRaid') { toast('⚠ 정예 몬스터 습격!', 1.4, '#ff9800'); later(1.5, () => { if (G.state === 'play' && G.bossState === 0) { spawnElite(); if (G.stage > 10) later(2, () => { if (G.state === 'play' && G.bossState === 0) spawnElite(); }); } }); }
 }
 function updateExtEvents(dt) {
@@ -658,7 +658,7 @@ function updateExtEvents(dt) {
   if (G.artWarn > 0) { G.artWarn -= dt; if (G.artWarn <= 0) G.artT = 8; }
   if (G.artT > 0) {
     G.artT -= dt; G.artTick -= dt;
-    if (G.artTick <= 0) { G.artTick = .75; const x = P.x + rand(-120, 120) + P.lastMx * 60, y = P.y + rand(-120, 120) + P.lastMy * 60; hazards.push({ kind: 'circle', x, y, r: 55, t: 0, delay: 1.4, dmg: (10 + G.stage * 0.8) }); later(1.15, () => { if (G.state === 'play') effects.push({ type: 'skybeam', x, y, r: 7, t: 0, dur: .25, col: '#ff8a80' }); }); }
+    if (G.artTick <= 0) { G.artTick = .75; const x = P.x + rand(-120, 120) + P.lastMx * 60, y = P.y + rand(-120, 120) + P.lastMy * 60; hazards.push({ src: 'env', kind: 'circle', x, y, r: 55, t: 0, delay: 1.4, dmg: (10 + G.stage * 0.8) }); later(1.15, () => { if (G.state === 'play') effects.push({ type: 'skybeam', x, y, r: 7, t: 0, dur: .25, col: '#ff8a80' }); }); }
   }
   // 구조 요청 이벤트
   const R = G.radio;
@@ -724,7 +724,7 @@ function extDirector(dt) {
       G.surroundT = n >= 4 && DF().pat >= 2 ? 26 : 34;
       toast('⚠ 적이 포위해 옵니다!', 1.3, '#ff7043');
       const pool = G.st.mobs.filter(m => !ET[m[0]].ai || ['zig', 'chase', 'dash'].includes(ET[m[0]].ai)), type = (pool.length ? pick(pool) : G.st.mobs[0])[0];
-      const cnt = Math.round(Math.min(40, 10 + G.stage) * DF().cnt), rad = Math.max(VW, VH) * .5;
+      const cnt = Math.round(Math.min(40, 10 + G.stage) * DF().cnt * densF()), rad = Math.max(VW, VH) * .5;
       later(1.2, () => { if (G.state !== 'play' || G.bossState !== 0) return; for (let i = 0; i < cnt; i++) { const a = i / cnt * TAU; const e = spawnEnemy(type, P.x + Math.cos(a) * rad, P.y + Math.sin(a) * rad); e.spd *= 1.15; } });
     }
   }
@@ -788,8 +788,8 @@ function bossExtStart(e, pat) {
   const lv = DF().pat;
   if (typeof bossArchStart === 'function') bossArchStart(e, pat);
   if (pat === 'missile') { e.msN = (e.p2 ? 6 : 4) + lv; toast('🚀 보스 미사일 발사 준비!', .9, '#ff8a80'); }
-  if (pat === 'barrage') { const n = (e.p2 ? 9 : 6) + lv * 2; for (let i = 0; i < n; i++) { const x = P.x + rand(-170, 170) + (i === 0 ? 0 : 0), y = P.y + rand(-170, 170); hazards.push({ kind: 'circle', x: i === 0 ? P.x : x, y: i === 0 ? P.y : y, r: 52, t: 0, delay: 1.2 + i * 0.12, dmg: e.dmg * 0.9 }); } AU.sfx('alarm'); }
-  if (pat === 'sweep') { e.swA = Math.atan2(P.y - e.y, P.x - e.x) - 1.2; e.swDir = Math.random() < .5 ? 1 : -1; if (e.swDir < 0) e.swA += 2.4; hazards.push({ kind: 'line', x: e.x, y: e.y, ang: e.swA, len: 520, w: 22, t: 0, delay: 1.0, dmg: 0 }); AU.sfx('elaser'); }
+  if (pat === 'barrage') { const n = (e.p2 ? 9 : 6) + lv * 2; for (let i = 0; i < n; i++) { const x = P.x + rand(-170, 170) + (i === 0 ? 0 : 0), y = P.y + rand(-170, 170); hazards.push({ src: 'boss', kind: 'circle', x: i === 0 ? P.x : x, y: i === 0 ? P.y : y, r: 52, t: 0, delay: 1.2 + i * 0.12, dmg: e.dmg * 0.9 }); } AU.sfx('alarm'); }
+  if (pat === 'sweep') { e.swA = Math.atan2(P.y - e.y, P.x - e.x) - 1.2; e.swDir = Math.random() < .5 ? 1 : -1; if (e.swDir < 0) e.swA += 2.4; hazards.push({ src: 'boss', kind: 'line', x: e.x, y: e.y, ang: e.swA, len: 520, w: 22, t: 0, delay: 1.0, dmg: 0 }); AU.sfx('elaser'); }
 }
 function bossExtUpdate(e, dt) {
   if (typeof bossArchUpdate === 'function' && bossArchUpdate(e, dt)) return true;

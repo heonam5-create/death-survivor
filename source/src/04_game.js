@@ -84,7 +84,7 @@ function initQuests(st) {
     }
   }
 }
-function mkQ(q, main, f) { const o = Object.assign({ main, cur: 0, done: false }, q); if (o.n) o.n = Math.max(1, Math.round(o.n * f)); if (o.sec) o.sec = Math.max(15, Math.round(o.sec * f)); return o; }
+function mkQ(q, main, f) { const o = Object.assign({ main, cur: 0, done: false }, q); if (o.n) o.n = Math.max(1, Math.round(o.n * f * (q.k === 'kill' || q.k === 'killTag' ? densF() : 1))); if (o.sec) o.sec = Math.max(15, Math.round(o.sec * f)); return o; }
 function qLabel(q) {
   switch (q.k) {
     case 'kill': return '몬스터 처치'; case 'killTag': return TAG_NAME[q.tag] + ' 처치'; case 'elite': return '정예 몬스터 처치';
@@ -148,6 +148,7 @@ function spawnEnemy(type, x, y, o = {}) {
   let hp = d.hp * G.hpMul * (o.obj ? (1 + G.stage * 0.12) * (type === 'device' && G.stage > 27 ? 0.7 : 1) : (1 + p * 3 + late * 3)) * (el ? 11 : 1);
   if (type === 'golden') hp = d.hp * G.hpMul * 2;
   hp *= o.obj ? Math.sqrt(DF().hp) : DF().hp * (1 + adaptNow());
+  if (!o.obj && !o.boss) hp *= 1 + (DENS_COMP() - 1) * 0.2;   // v9: 밀도 감소 보정 (초반 +8% ~ 후반 +3%)
   const e = { id: ++G.eid, type, d, x, y, r: d.r * sc, hp, maxHp: hp, dmg: d.dmg * G.dmgMul * (el ? 1.4 : 1),
     spd: d.spd * rand(0.9, 1.1) * G.spdMul * (1 + p * 0.1) * (el ? 0.85 : 1) * DF().spd, elite: el, face: 1, flash: 0, atkCd: 0, kx: 0, ky: 0,
     seed: Math.random() * 10, burn: 0, burnDps: 0, burnTick: 0, poison: 0, poisonDps: 0, slowT: 0, slowF: 1, stunT: 0, shredT: 0, chill: 0,
@@ -156,7 +157,11 @@ function spawnEnemy(type, x, y, o = {}) {
   if (o.tgtGen) e.tgtGen = true;
   enemies.push(e); return e;
 }
-function maxEnemies() { return Math.min(Q.level === 0 ? 210 : Q.level === 1 ? 420 : 640, Math.round((Q.level === 0 ? 130 : 200 + G.stage * 4) * G.st.crowd * CNT())); }
+// v9: 몬스터 밀도 — 초반 약 72%, 후반 약 82%까지 점진 증가. 정예·보스가 있으면 일반 몬스터를 더 줄임
+function densF() { return 0.72 + 0.10 * Math.min(1, ((G.stage || 1) - 1) / 30); }
+function crowdBusy() { let el = 0; for (const e of enemies) if (!e.dead && e.elite && !e.boss) el++; return (G.bossState === 2 ? 0.7 : 1) / (1 + Math.min(4, el) * 0.06); }
+function maxEnemies() { return Math.min(Q.level === 0 ? 180 : Q.level === 1 ? 330 : 470, Math.round((Q.level === 0 ? 130 : 200 + G.stage * 4) * G.st.crowd * CNT() * densF() * crowdBusy())); }
+const DENS_COMP = () => 1 / densF();   // 수가 줄어든 만큼 개체당 보상·체력 일부 보정 (템포 유지)
 function aliveCount() { let n = 0; for (const e of enemies) if (!e.dead) n++; return n; }
 function director(dt) {
   const st = G.st, p = progress();
@@ -165,7 +170,7 @@ function director(dt) {
   if ((G.bossState === 0 || G.bossState === 2) && G.clearing === 0) {
     G.spawnT -= dt;
     if (G.spawnT <= 0) {
-      G.spawnT = lerp(0.7, 0.2, p) / st.crowd * (G.bossState === 2 ? 3.0 : 1) * (1 - late * 0.4) / (CNT() * allySpawnMul());
+      G.spawnT = lerp(0.7, 0.2, p) / st.crowd * (G.bossState === 2 ? 3.0 : 1) * (1 - late * 0.4) / (CNT() * allySpawnMul() * densF() * crowdBusy());
       const batch = 1 + Math.floor(p * 4.5 + Math.random() * 1.5);
       let alive = aliveCount(); let ranged = 0; for (const e of enemies) if (!e.dead && e.d.ai === 'ranged') ranged++;
       for (let i = 0; i < batch && alive < maxEnemies(); i++, alive++) {
@@ -402,13 +407,14 @@ function killEnemy(e) {
     if (e.cmd) { qAdd('commander'); G.cmdKilled = true; dropPickup('chest', e.x - 16, e.y); }
     if (Math.random() < 0.15) dropPickup('hpot', e.x - 12, e.y + 6);
     if (G.veh && G.veh.repairs < 2 && Math.random() < 0.08) dropPickup('rkit', e.x + 12, e.y + 6);
+    if (Math.random() < 0.22) turDropAt(e.x - 14, e.y + 10);
     if (Math.random() < 0.35) { const id = pickDropWeapon(2); if (id) { dropPickup('wdrop', e.x + 14, e.y, 0, id); toast('🔫 정예가 무기를 떨어뜨렸다!', 1.3, '#64b5f6'); } }
   }
   if (e.d.split) for (let i = 0; i < 2; i++) { const s = spawnEnemy(e.d.split, e.x + rand(-8, 8), e.y + rand(-8, 8)); s.kx = rand(-150, 150); s.ky = rand(-150, 150); }
   if (e.d.ai === 'bomb') explode(e.x, e.y, 34, 0, false);
   if (e.type === 'golden') { for (let i = 0; i < 18; i++) dropPickup('coin', e.x + rand(-30, 30), e.y + rand(-30, 30), randi(2, 4)); toast('💰 황금 몬스터 처치!', 1.2, '#ffd54f'); }
-  if (!e.d.noDrop || Math.random() < 0.4) dropGem(e.x, e.y, e.elite ? 25 : e.d.xp);
-  if (Math.random() < (e.elite ? 1 : 0.035)) dropPickup('coin', e.x + rand(-10, 10), e.y + rand(-10, 10), e.elite ? randi(15, 30) : randi(1, 3));
+  if (!e.d.noDrop || Math.random() < 0.4) dropGem(e.x, e.y, e.elite ? 25 : e.d.xp * DENS_COMP());
+  if (Math.random() < (e.elite ? 1 : 0.035 * DENS_COMP())) dropPickup('coin', e.x + rand(-10, 10), e.y + rand(-10, 10), e.elite ? randi(15, 30) : randi(1, 3));
   if (Math.random() < 0.012) dropPickup('meat', e.x, e.y);
   if (Math.random() < 0.003) dropPickup('magnet', e.x, e.y);
   if (e.elite) dropPickup('chest', e.x, e.y);
@@ -467,6 +473,7 @@ function collect(p) {
   if (extCollect(p)) return;
   switch (p.kind) {
     case 'gem': gainXp(p.v); AU.sfx('gem'); break;
+    case 'tdrop': if (!turPick(p)) dropPickup('tdrop', p.x + 30, p.y, 0, p.item, true); break;
     case 'coin': { const g = goldX(p.v * P.greed); G.gold += g; AU.sfx('coin'); if (g > 0) texts.push({ x: P.x, y: P.y - 26, t: 0, v: '+' + g + 'G', col: '#ffd54f', pl: 1 }); break; }
     case 'meat': heal(25); break;
     case 'magnet': for (const q of pickups) if (q.kind === 'gem') q.mag = true; AU.sfx('heal'); toast('🧲 자석!', 0.8, '#90caf9'); break;
@@ -478,7 +485,9 @@ function collect(p) {
     case 'chest': case 'secret': {
       AU.sfx('chest'); const g = goldX(randi(25, 45) * (p.kind === 'secret' ? 2.5 : 1) * (1 + G.stage * 0.15) * P.greed); G.gold += g;
       G.pendingLv++; effects.push({ type: 'pillar', x: p.x, y: p.y, t: 0, dur: 1.0, col: '#ffd54f' });
-      toast(`🎁 ${p.kind === 'secret' ? '비밀 보물 상자' : '보물 상자'}! +${g}G`, 1.4, '#ffd54f'); break;
+      toast(`🎁 ${p.kind === 'secret' ? '비밀 보물 상자' : '보물 상자'}! +${g}G`, 1.4, '#ffd54f');
+      if (Math.random() < (p.kind === 'secret' ? 0.8 : 0.4)) turDropAt(p.x + 26, p.y + 6);
+      break;
     }
   }
 }
@@ -991,16 +1000,16 @@ function bossUpdate(e, dt) {
   }
 }
 function startPattern(e, pat) {
-  if (pat === 'charge') { e.cang = Math.atan2(P.y - e.y, P.x - e.x); hazards.push({ kind: 'line', x: e.x, y: e.y, ang: e.cang, len: 440, w: e.r * 1.6, t: 0, delay: 0.9, dmg: 0 }); }
-  if (pat === 'slam') { const n = e.p2 ? 6 : 4; for (let i = 0; i < n; i++) { const x = i === 0 ? P.x : P.x + rand(-130, 130), y = i === 0 ? P.y : P.y + rand(-130, 130); hazards.push({ kind: 'circle', x, y, r: 58, t: 0, delay: 1.15 + i * 0.06, dmg: e.dmg * 1.1 }); } }
-  if (pat === 'laser') { const n = e.p2 ? 5 : 3, a0 = Math.atan2(P.y - e.y, P.x - e.x); for (let i = 0; i < n; i++) { const a = a0 + (i - (n - 1) / 2) * (e.p2 ? 0.5 : 0.65); hazards.push({ kind: 'line', x: e.x, y: e.y, ang: a, len: 560, w: 26, t: 0, delay: 1.0, dmg: e.dmg * 1.1, beam: 1 }); } }
+  if (pat === 'charge') { e.cang = Math.atan2(P.y - e.y, P.x - e.x); hazards.push({ src: 'boss', kind: 'line', x: e.x, y: e.y, ang: e.cang, len: 440, w: e.r * 1.6, t: 0, delay: 0.9, dmg: 0 }); }
+  if (pat === 'slam') { const n = e.p2 ? 6 : 4; for (let i = 0; i < n; i++) { const x = i === 0 ? P.x : P.x + rand(-130, 130), y = i === 0 ? P.y : P.y + rand(-130, 130); hazards.push({ src: 'boss', kind: 'circle', x, y, r: 58, t: 0, delay: 1.15 + i * 0.06, dmg: e.dmg * 1.1 }); } }
+  if (pat === 'laser') { const n = e.p2 ? 5 : 3, a0 = Math.atan2(P.y - e.y, P.x - e.x); for (let i = 0; i < n; i++) { const a = a0 + (i - (n - 1) / 2) * (e.p2 ? 0.5 : 0.65); hazards.push({ src: 'boss', kind: 'line', x: e.x, y: e.y, ang: a, len: 560, w: 26, t: 0, delay: 1.0, dmg: e.dmg * 1.1, beam: 1 }); } }
   if (pat === 'summon') {
     const cnt = e.mini ? 4 : e.p2 ? 9 : 6;
     for (let i = 0; i < cnt; i++) { const a = i / cnt * TAU, x = e.x + Math.cos(a) * 90, y = e.y + Math.sin(a) * 90; effects.push({ type: 'portal', x, y, t: 0, dur: 0.7 }); later(0.6, () => { if (G.state === 'play' && !e.dead) spawnEnemy(e.bdef.summon, x, y); }); }
     AU.sfx('portal');
   }
   bossExtStart(e, pat);
-  if (pat === 'jump') { e.jx0 = e.x; e.jy0 = e.y; e.jx = P.x; e.jy = P.y; hazards.push({ kind: 'circle', x: P.x, y: P.y, r: e.r * 1.7, t: 0, delay: 1.1, dmg: 0 }); }
+  if (pat === 'jump') { e.jx0 = e.x; e.jy0 = e.y; e.jx = P.x; e.jy = P.y; hazards.push({ src: 'boss', kind: 'circle', x: P.x, y: P.y, r: e.r * 1.7, t: 0, delay: 1.1, dmg: 0 }); }
 }
 function endPattern(e, next) {
   if (!next && ['charge', 'slam', 'jump', 'sweep', 'barrage'].includes(e.ps) && !e.mini) { e.exposeT = 1.6; texts.push({ x: e.x, y: e.y - e.r - 10, t: 0, v: '약점 노출!', col: '#ffd54f', big: 1 }); }
@@ -1118,7 +1127,7 @@ function updateEnemies(dt) {
 function staticUpdate(e, dt, pdist) {
   if (e.type === 'portal') { e.aiT -= dt; if (e.aiT <= 0 && pdist < 650) { e.aiT = 4.5; for (let i = 0; i < 2; i++) { if (aliveCount() >= maxEnemies()) break; const a = rand(0, TAU); spawnEnemy(wpick(G.st.mobs), e.x + Math.cos(a) * 40, e.y + Math.sin(a) * 40); } effects.push({ type: 'portal', x: e.x, y: e.y, t: 0, dur: .5 }); } }
   if (e.type === 'egg') { e.hatch -= dt; if (e.hatch <= 0) { e.dead = true; effects.push({ type: 'poof', x: e.x, y: e.y, r: e.r * 1.5, t: 0, dur: .4 }); for (let i = 0; i < 3; i++) spawnEnemy('xeno', e.x + rand(-15, 15), e.y + rand(-15, 15)); } }
-  if (e.type === 'bturret') { e.aiT -= dt; if (e.aiT <= 0 && pdist < 620) { e.aiT = 1.7; const a = Math.atan2(P.y - e.y, P.x - e.x); hazards.push({ kind: 'line', x: e.x, y: e.y - 10, ang: a, len: 420, w: 8, t: 0, delay: .5, dmg: 0, thin: 1 }); later(.5, () => { if (!e.dead && G.state === 'play') { eShot(e.x, e.y - 10, a, 230, e.dmg, 'laser'); AU.sfx('laser', .7); } }); } }
+  if (e.type === 'bturret') { e.aiT -= dt; if (e.aiT <= 0 && pdist < 620) { e.aiT = 1.7; const a = Math.atan2(P.y - e.y, P.x - e.x); hazards.push({ src: 'boss', kind: 'line', x: e.x, y: e.y - 10, ang: a, len: 420, w: 8, t: 0, delay: .5, dmg: 0, thin: 1 }); later(.5, () => { if (!e.dead && G.state === 'play') { eShot(e.x, e.y - 10, a, 230, e.dmg, 'laser'); AU.sfx('laser', .7); } }); } }
   if (e.type === 'device') { e.aiT -= dt; if (e.aiT <= 0 && pdist < 330) { e.aiT = G.stage > 27 ? 4.2 : 3.5; for (let i = 0; i < 8; i++) eShot(e.x, e.y - 20, i / 8 * TAU + G.time, 130, e.dmg, 'orb'); AU.sfx('eshot'); } }
 }
 function updateEProjs(dt) {
@@ -1134,6 +1143,7 @@ function updateHazards(dt) {
     if (h.dead) continue; h.t += dt;
     if (h.t >= h.delay) {
       h.dead = true;
+      if (!h.src && h.dmg > 0 && !h.dmgAdj) { h.dmgAdj = 1; h.dmg *= 0.6; }   // v9: 경고 표시 없는 몬스터 범위 공격은 피해 60%
       if (h.kind === 'circle' && h.dmg > 0) {
         effects.push({ type: 'shock', x: h.x, y: h.y, r: h.r, t: 0, dur: 0.35 }); AU.sfx('slam'); G.shake = Math.max(G.shake, 5);
         for (let i = 0; i < 10; i++) addPart(h.x, h.y, rand(-150, 150), rand(-150, 150), '#a1887f', .5, 4);
@@ -1181,9 +1191,9 @@ function update(dt) {
     if (p.dead) continue; p.t += dt;
     if (p.kind !== 'gem' && p.z !== undefined && p.t < 0.5) { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 300 * dt; }
     const dx = P.x - p.x, dy = P.y - p.y, d2 = dx * dx + dy * dy;
-    const big = p.kind === 'hpot' || p.kind === 'rkit' || p.kind === 'wsup' || p.kind === 'scrate' || p.kind === 'chest' || p.kind === 'meat' || p.kind === 'magnet' || p.kind === 'crate' || p.kind === 'secret' || p.kind === 'power' || p.kind === 'wdrop' || p.kind === 'legend';
+    const big = p.kind === 'hpot' || p.kind === 'rkit' || p.kind === 'wsup' || p.kind === 'scrate' || p.kind === 'chest' || p.kind === 'meat' || p.kind === 'magnet' || p.kind === 'crate' || p.kind === 'secret' || p.kind === 'power' || p.kind === 'wdrop' || p.kind === 'legend' || p.kind === 'tdrop';
     const rng = big ? 24 * 24 : p.kind === 'qitem' ? Math.max(mg2, 55 * 55) : mg2;
-    if (p.t > 0.4 && d2 < rng) p.mag = true;
+    if (p.t > 0.4 && d2 < rng) { if (p.kind === 'tdrop' && G.tInv.length >= TUR_MAX) { if (G.time - (G.tFullMsg || 0) > 3) { G.tFullMsg = G.time; toast('🗼 터렛 슬롯이 가득 찼어요 (먼저 설치하세요)', 1.2); } } else p.mag = true; }
     if (p.mag) { const d = Math.sqrt(d2) || 1, sp = 260 + p.t * 60; p.x += dx / d * sp * dt; p.y += dy / d * sp * dt; if (d < P.r + 6) { p.dead = true; collect(p); } }
   }
   for (const q of parts) { q.life -= dt; q.x += q.vx * dt; q.y += q.vy * dt; q.vy += q.grav * dt; q.vx *= 0.96; q.vy *= 0.96; }
