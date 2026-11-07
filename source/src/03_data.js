@@ -364,6 +364,23 @@ STAGES.forEach((s, i) => {
   s.sig = 'sig' + n; s.eliteSkill = ELITE_SKILLS[i % ELITE_SKILLS.length];
   s.wp = stageWeapons(n);
 });
+// V10: 스테이지별 신규 무기 4종 — 같은 스테이지·기존 주력 무기와 중복 없음, 앞 스테이지와 겹치지 않게,
+// 소총·에너지·폭발·미래형 계열을 섞어서 고름. 스테이지 번호로 고정된 난수라 저장·불러오기해도 같은 조합.
+(() => {
+  const rng = seed => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const ORDER = ['rifle', 'energy', 'blast', 'future', 'special'];
+  let prev = [];
+  STAGES.forEach(s => {
+    const n = s.n, R = rng(n * 7919 + 13);
+    // 비슷한 시기의 무기 위주 (너무 강한 후반 무기가 초반에 나오지 않게), 전설·신화 제외
+    let cand = WEAPONS.filter(w => w.t <= 2 && w.st !== n && w.st >= n - 8 && w.st <= n + (n <= 3 ? 3 : 1) && !prev.includes(w.id) && !s.wp.includes(w.id));
+    if (n <= 3) cand = cand.filter(w => w.t === 1 || w.st < n);
+    const pick = [];
+    for (const c of ORDER) { if (pick.length >= 4) break; const pool = cand.filter(w => w.c === c && !pick.includes(w.id)); if (pool.length) pick.push(pool[Math.floor(R() * pool.length)].id); }
+    while (pick.length < 4) { const pool = cand.filter(w => !pick.includes(w.id)); if (!pool.length) break; pick.push(pool[Math.floor(R() * pool.length)].id); }
+    s.wpx = pick; prev = pick;
+  });
+})();
 // 무기 해금: 해당 스테이지까지 등장한 무기
 function unlockedWeapons(upto) { const set = new Set(); for (let i = 0; i < Math.min(upto, STAGES.length); i++) for (const w of STAGES[i].wp) set.add(w); return set; }
 function firstStageOf(id) { const w = WMAP[id]; return w ? w.st : 99; }

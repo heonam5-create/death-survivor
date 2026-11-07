@@ -325,6 +325,29 @@ function nearest(x, y, maxD = 9999, skip) {
   for (const e of enemies) { if (e.dead || (skip && skip.has(e.id))) continue; const dx = e.x - x, dy = e.y - y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = e; } }
   return best;
 }
+// V10: 보스 우선 자동조준 — 보스가 사거리 안이면 무기별로 약 75%는 보스, 나머지는 일반 몬스터.
+// 목표는 1.2초 단위로 고정(잦은 변경 방지), 플레이어에게 바짝 붙은 몬스터는 예외로 먼저 처리.
+const BOSS_AIM = 0.75;
+function bossPick(range) {
+  let best = null, bs = 1e18;
+  for (const e of enemies) { if (e.dead || !e.boss) continue; const d = Math.hypot(e.x - P.x, e.y - P.y) - e.r; if (d > range) continue;
+    const sc = d * d * (0.6 + 0.4 * e.hp / e.maxHp); if (sc < bs) { bs = sc; best = e; } }   // 가깝고 체력이 적은(위협·마무리 가능) 보스 우선
+  return best;
+}
+function nearestNonBoss(range) { let best = null, bd = range * range; for (const e of enemies) { if (e.dead || e.boss) continue; const d = (e.x - P.x) ** 2 + (e.y - P.y) ** 2; if (d < bd) { bd = d; best = e; } } return best; }
+function aimTarget(w, range) {
+  const b = bossPick(range);
+  if (!b) { w.aimBoss = undefined; return nearest(P.x, P.y, range); }   // 보스 없음/사거리 밖 → 기존 방식
+  if (w.aimBoss === undefined || G.time >= (w.aimT || 0)) {
+    // 여러 무기를 쓰면 무기마다 역할을 나눔(4개 중 3개는 보스, 순번이 4초마다 돌아감), 무기가 적으면 1.2초 단위 확률 배분
+    const i = G.weapons.indexOf(w), n = G.weapons.length;
+    w.aimBoss = (n >= 3 && i >= 0) ? ((i + Math.floor(G.time / 4)) % 4 !== 3) : Math.random() < BOSS_AIM;
+    w.aimT = G.time + 1.2; w.aimGuard = Math.random() < 0.25;
+  }
+  if (!w.aimBoss) return nearestNonBoss(range) || b;   // 나머지 몫: 가장 가까운(=가장 위협적인) 일반 몬스터
+  if (w.aimGuard) { const touch = nearestNonBoss(40); if (touch) return touch; }   // 몸에 붙은 몬스터는 예외로 처리
+  return b;
+}
 function nearestK(x, y, maxD, k) {
   const arr = []; const m2 = maxD * maxD;
   for (const e of enemies) { if (e.dead) continue; const d = (e.x - x) ** 2 + (e.y - y) ** 2; if (d < m2) arr.push([d, e]); }
@@ -453,12 +476,12 @@ function damagePlayer(dmg, src) {
 }
 // 드롭 무기 선택: 이번 스테이지 무기 중 미보유 우선 (maxTier 이하)
 function pickDropWeapon(maxTier, bossMode) {
-  const st = G.st.wp.map(id => WMAP[id]).filter(w => w.t <= maxTier);
+  const st = G.st.wp.concat(bossMode ? [] : (G.st.wpx || [])).map(id => WMAP[id]).filter(w => w.t <= maxTier);
   const unfound = st.filter(w => !save.codex[w.id] && !G.weapons.some(x => x.id === w.id));
   const pool = unfound.length ? unfound : (bossMode ? [] : st.filter(w => !G.weapons.some(x => x.id === w.id)));
   if (!pool.length) return null;
   const wt = w => bossMode ? [0, 1, 2, 3, 3][w.t] : [0, 3, 1.5, 0.4, 0.2][w.t];
-  return wpick(pool.map(w => [w.id, wt(w)]));
+  return wpick(pool.map(w => [w.id, wt(w) * ((G.st.wpx || []).includes(w.id) ? 0.6 : 1)]));
 }
 // 무기 획득 처리 (보스·정예·상자 공통)
 function acquireWeapon(id, src) {
@@ -570,7 +593,7 @@ function updateWeapons(dt) {
     if (m === 'drone') { updateDrones(w, s, dt); continue; }
     if (m === 'saw') { updateSaw(w, s, dt); continue; }
     if (w.beamT > 0) updateBeam(w, s, dt);
-    if (w.burstLeft > 0) { w.burstT -= dt; if (w.burstT <= 0) { w.burstLeft--; w.burstT = s.gap; const t = nearest(P.x, P.y, s.range); fireGun(w, s, t ? Math.atan2(t.y - P.y, t.x - P.x) : w.burstAng, true); } }
+    if (w.burstLeft > 0) { w.burstT -= dt; if (w.burstT <= 0) { w.burstLeft--; w.burstT = s.gap; const t = aimTarget(w, s.range); fireGun(w, s, t ? Math.atan2(t.y - P.y, t.x - P.x) : w.burstAng, true); } }
     w.cd -= dt; if (w.cd > 0) continue;
     const range = s.range || 300;
     let tgt;
@@ -578,7 +601,7 @@ function updateWeapons(dt) {
     else if (m === 'nova') tgt = nearest(P.x, P.y, s.r * 0.95);
     else if (m === 'lob' && s.far) tgt = densest(range) || nearest(P.x, P.y, range);
     else if (m === 'turret' || m === 'mine') tgt = nearest(P.x, P.y, 330);
-    else tgt = nearest(P.x, P.y, range);
+    else tgt = aimTarget(w, range);
     if (!tgt) { w.cd = 0.12; if (s.spin) w.spinV = Math.max(0, (w.spinV || 0) - 0.5); continue; }
     const a = Math.atan2(tgt.y - P.y, tgt.x - P.x);
     w.cd = s.cd;
@@ -678,7 +701,7 @@ function fireRail(w, s, a) {
   if (s.charge > 0) { effects.push({ type: 'charge', t: 0, dur: s.charge, col: s.col }); later(s.charge, shoot); } else shoot();
 }
 function updateBeam(w, s, dt) {
-  w.beamT -= dt; const t = nearest(P.x, P.y, s.len + 40);
+  w.beamT -= dt; const t = aimTarget(w, s.len + 40);
   if (t) { const ta = Math.atan2(t.y - P.y, t.x - P.x); w.beamAng += angDiff(ta, w.beamAng) * Math.min(1, dt * 6); }
   P.aim = w.beamAng; P.atkT = 0.1; P.atkW = w.id; if (Math.abs(Math.cos(w.beamAng)) > 0.2) P.face = Math.cos(w.beamAng) > 0 ? 1 : -1;
   w.beamTick -= dt;
@@ -705,7 +728,7 @@ function updateSpin(w, s, dt) {
   if (w.tick <= 0) { w.tick = 0.15; if (enemies.length && Math.random() < .3) AU.sfx('beam', s.s[1]); }
 }
 function firePlasma(w, s, a) {
-  setAim(a, w, s); const [x, y] = muzzle(a); const t = nearest(P.x, P.y, s.range); const dist = t ? Math.hypot(t.x - x, t.y - y) + 50 : s.range;
+  setAim(a, w, s); const [x, y] = muzzle(a); const t = aimTarget(w, s.range); const dist = t ? Math.hypot(t.x - x, t.y - y) + 50 : s.range;
   mkProj({ kind: 'plasma', x, y, vx: Math.cos(a) * s.spd, vy: Math.sin(a) * s.spd, ang: a, r: s.size, dmg: s.dmg, pierce: 999, life: Math.min(s.range, dist) / s.spd, col: s.col, boom: s.boom, burn: s.burn, storm: s.storm, wid: w.id, size: s.size, explodeEnd: 1 });
   flash(a, s.col, 1.5); wsnd(s);
 }
@@ -735,7 +758,7 @@ function fireTazer(w, s) {
   wsnd(s);
 }
 function updateCone(w, s, dt) {
-  const t = nearest(P.x, P.y, s.range + 25); w.coneOn = !!t; w.coneS = s;
+  const t = aimTarget(w, s.range + 25); w.coneOn = !!t; w.coneS = s;
   if (!t) return;
   const a = Math.atan2(t.y - P.y, t.x - P.x); w.coneAng = a; P.aim = a; P.atkT = 0.1; P.atkW = w.id; if (Math.abs(Math.cos(a)) > 0.2) P.face = Math.cos(a) > 0 ? 1 : -1;
   w.tick = (w.tick || 0) - dt;

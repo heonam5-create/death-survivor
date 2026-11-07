@@ -112,7 +112,7 @@ function render() {
   for (const w of G.weapons) if (!G.veh && w.coneOn && w.coneS && QC.glow) { const [mx, my] = muzzle(w.coneAng); ctx.globalAlpha = .18; ctx.fillStyle = w.coneS.col; ctx.beginPath(); ctx.moveTo(mx, my); ctx.arc(mx, my, w.coneS.range, w.coneAng - w.coneS.arc, w.coneAng + w.coneS.arc); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1; }
   drawWorldExt('over');
   // 투사체
-  for (const p of projs) drawProj(p);
+  for (const p of projs) { if (p.hl && QC.glow && !p.dead) { const r = 9 + 5 * p.hl; ctx.globalAlpha = .3 + .1 * p.hl; ctx.drawImage(glowSprite(p.col), p.x - r, p.y - r, r * 2, r * 2); ctx.globalAlpha = 1; } drawProj(p); }   // V10: 강화된 아군 발사체는 은은한 빛
   for (const b of eprojs) drawEProj(b);
   for (const f of effects) if (f.x === undefined || (Math.abs(f.x - G.camX) < VW / 2 + 260 && Math.abs(f.y - G.camY) < VH / 2 + 260)) drawEffect(f);
   for (const q of parts) { const a = Math.max(0, q.life / q.max); ctx.globalAlpha = a; ctx.fillStyle = q.col; if (q.grow) { circ(ctx, q.x, q.y, q.size * (1 + (1 - a) * q.grow)); ctx.fill(); } else ctx.fillRect(q.x - q.size / 2, q.y - q.size / 2, q.size, q.size); }

@@ -21,7 +21,9 @@ function buildOptions() {
     // 이번 스테이지 무기: 일반·고급만 레벨업 카드로 등장 (전설·신화는 보스·전설 상자 전용)
     for (const id of G.st.wp) { const W_ = WMAP[id]; if (W_.t <= 2 && !G.weapons.find(w => w.id === id)) pool.push({ kind: 'wnew', id, wt: W_.t === 1 ? 1.6 : 0.8 }); }
     // 이전 스테이지 무기: 이미 발견한 무기 위주로 낮은 확률
-    for (let k = 1; k < G.stage; k++) for (const id of STAGES[k - 1].wp) { const W_ = WMAP[id]; if (W_.t <= 2 && !G.weapons.find(w => w.id === id)) pool.push({ kind: 'wnew', id, wt: save.codex[id] ? 0.6 / Math.max(1, G.stage - 1) * 3 : 0.04 }); }
+    // V10: 이번 스테이지 신규 무기 4종 (주력보다 낮은 확률로 등장 → 난이도 급락 방지)
+    for (const id of (G.st.wpx || [])) { const W_ = WMAP[id]; if (!G.weapons.find(w => w.id === id) && !pool.some(o => o.id === id)) pool.push({ kind: 'wnew', id, wt: W_.t === 1 ? 0.9 : 0.45, nx: 1 }); }
+    for (let k = 1; k < G.stage; k++) for (const id of STAGES[k - 1].wp) { if (pool.some(o => o.id === id)) continue; const W_ = WMAP[id]; if (W_.t <= 2 && !G.weapons.find(w => w.id === id)) pool.push({ kind: 'wnew', id, wt: save.codex[id] ? 0.6 / Math.max(1, G.stage - 1) * 3 : 0.04 }); }
   }
   const owned = Object.keys(G.pass).length;
   for (const id in PASSIVES) { const lv = G.pass[id] || 0; if (lv < PASSIVES[id].max && (lv > 0 || owned < PSLOTS)) pool.push({ kind: 'pas', id, wt: 1 }); }
@@ -54,6 +56,7 @@ function openLevelUp() {
       icon = W_.ic; name = W_.nm; desc = weaponCardInfo(o.id, cur); tag = o.kind === 'wnew' ? (G.knownBefore[o.id] ? 'NEW 무기' : '✨ 첫 발견!') : `Lv ${cur} → ${cur + 1}`;
       pips = '★'.repeat(cur + 1) + '☆'.repeat(WMAX - cur - 1); if (o.kind === 'wnew') b.classList.add('new'); b.style.borderColor = TIER_COL[W_.t];
       if (o.kind === 'wnew' && G.st.wp.includes(o.id)) tag += ' · 이번 스테이지 주력';
+      else if (o.kind === 'wnew' && (G.st.wpx || []).includes(o.id)) tag += ' · 🆕 스테이지 신규 무기';
     } else if (o.kind === 'evo') {
       const ev = EVOS[o.id]; icon = ev.ic; name = '진화! ' + ev.n; desc = ev.d; tag = WMAP[o.id].nm + ' 진화'; b.classList.add('evo');
     } else if (o.kind === 'pas') {
@@ -171,7 +174,7 @@ function renderStageInfo(lockedN) {
     ${stageMissions(s.n).map(m => '🏅 [특별] ' + SPM_LABEL[m.k] + (m.n > 1 ? ' ' + m.n : '') + (m.sec ? ' ' + m.sec + '초' : '')).join('<br>')}<br>
     🚘 탑승 장비: ${VEH_ST[s.n].map(v => `<span style="color:${save.vfound[v.id] ? '#80deea' : '#b0bec5'}">${s.n <= save.cleared + 1 ? v.name : '???'}</span>`).join(', ')}<br>
     🤝 구조 대상: ${ALLY_ST[s.n].slice(0, 2).map(a => ACL[a.cls].ic + ' ' + a.name + ' <small>(' + APERK[a.perk].n + ')</small>').join(', ')}<br>
-    👾 ${mobs}<br>🔫 주력 무기: ${s.wp.map(id => `<span style="color:${TIER_COL[WMAP[id].t]}">${WMAP[id].ic}${WMAP[id].nm}</span>`).join(', ')}
+    👾 ${mobs}<br>🔫 주력 무기: ${s.wp.map(id => `<span style="color:${TIER_COL[WMAP[id].t]}">${WMAP[id].ic}${WMAP[id].nm}</span>`).join(', ')}<br>🆕 신규 무기: ${(s.wpx || []).map(id => `<span style="color:${TIER_COL[WMAP[id].t]}">${WMAP[id].ic}${WMAP[id].nm}</span>`).join(', ')}
     ${best ? `<br>🏅 최고 기록: ${fmtTime(best.time)}` : ''}<br>🔁 계승 무기: ${inheritLabel(save.inherit)}<br>👑 보스 체력바: ${bossBarsFor(s.n, s.special)}줄</div>`;
   $('sGo').style.visibility = 'visible';
   [...$('sGrid').children].forEach((c, i) => c.style.outline = i + 1 === selStage ? '3px solid #fff' : '');

@@ -341,7 +341,7 @@ function vFlash(x, y, a, col, size) { if (effects.length < 170) effects.push({ t
 function vWeapon(v, key, i, dt) {
   const W = VWPN[key], S = vSlot(v, i), dm = vehDmg(key, i), rate = (v.ovT > 0 ? 2 : 1) * (1 / P.cdMul);
   if (key === 'flame') {
-    const FR = W.range * (1 + .15 * (v.tier || 0)); const t = nearest(P.x, P.y, FR + 20); S.on = !!t; if (!t) return;
+    const FR = W.range * (1 + .15 * (v.tier || 0)); const t = aimTarget(S, FR + 20); S.on = !!t; if (!t) return;
     const ta = Math.atan2(t.y - P.y, t.x - P.x); S.ang += angDiff(ta, S.ang) * Math.min(1, dt * 8); if (!i) v.aim = S.ang; else v.aim2 = S.ang;
     S.tick -= dt * rate;
     const [mx, my] = vMuzzle(v, S.ang);
@@ -350,7 +350,7 @@ function vWeapon(v, key, i, dt) {
     return;
   }
   if (S.beamT > 0) {
-    S.beamT -= dt; const t = nearest(P.x, P.y, W.range + 30);
+    S.beamT -= dt; const t = aimTarget(S, W.range + 30);
     if (t) { const ta = Math.atan2(t.y - P.y, t.x - P.x); S.ang += angDiff(ta, S.ang) * Math.min(1, dt * 5); }
     if (!i) v.aim = S.ang; else v.aim2 = S.ang;
     S.tick -= dt; const [x1, y1] = vMuzzle(v, S.ang), x2 = x1 + Math.cos(S.ang) * W.range, y2 = y1 + Math.sin(S.ang) * W.range;
@@ -361,7 +361,7 @@ function vWeapon(v, key, i, dt) {
     return;
   }
   S.cd -= dt * rate; if (S.cd > 0) return;
-  const tgt = (key === 'mortar' || key === 'mlrs') ? (densest(W.range) || nearest(P.x, P.y, W.range)) : nearest(P.x, P.y, W.range);
+  const tgt = (key === 'mortar' || key === 'mlrs') ? (densest(W.range) || nearest(P.x, P.y, W.range)) : aimTarget(S, W.range);
   if (!tgt) { S.cd = 0.15; S.spin = Math.max(0, S.spin - 0.3); return; }
   const a = Math.atan2(tgt.y - P.y, tgt.x - P.x); S.ang = a; if (!i) v.aim = a; else v.aim2 = a;
   if (Math.abs(Math.cos(a)) > 0.25 && !i) v.face = Math.cos(a) > 0 ? 1 : -1;
@@ -458,10 +458,12 @@ function addAlly(spec, x, y) {
 function allyGrowth() {
   let lvs = 0; for (const w of G.weapons) lvs += w.lv + (w.evo ? 2 : 0); const avg = G.weapons.length ? lvs / G.weapons.length : 1;
   const idx = P.dmgMul * (1 + 0.04 * (G.lv - 1)) * (1 + 0.08 * (avg - 1));
-  return 1 + 0.5 * Math.max(0, idx - 1);
+  return Math.min(2.2, 1 + 0.5 * Math.max(0, idx - 1));   // V10: 성장 상한 2.2배 (무한 강화 방지)
 }
+function allyTier() { const g = allyGrowth(); return Math.min(2, (g < 1.3 ? 0 : g < 1.7 ? 1 : 2) + (G.stage >= 26 ? 1 : 0)); }   // 발사체 외형 단계
 function aRank() { return Math.min(5, 1 + Math.floor((G.lv - 1) / 6)); }
-function allyBase() { return 5 * enemyH() / Math.sqrt(DF().hp) * allyGrowth() * (G.allyBoost || 1) / 27; }
+const ALLY_PWR = 1.3;   // V10: 동료 기본 공격 효율 +30%
+function allyBase() { return 5 * enemyH() / Math.sqrt(DF().hp) * allyGrowth() * (G.allyBoost || 1) / 27 * ALLY_PWR; }
 function aDmg(a) { return allyBase() * (a.spec.perk === 'vet' ? 1.25 : 1) * (a.spec.special ? 1.4 : 1); }
 function linkAllies(v, quiet) {
   const L = v.ch.link; let seats = L === 'A' ? 2 : (L === 'A1' && (v.def.idx % 2 === 0)) ? 1 : 0;
@@ -494,10 +496,16 @@ function allyHit(a, e, base, o = {}) {
   if (p === 'shock' && Math.random() < .3 && !e.dead) { const t2 = nearest(e.x, e.y, 120, new Set([e.id])); if (t2) zap(e.x, e.y, t2, base * .5, { col: '#ffee58' }); }
   if (p === 'heavy' && Math.random() < .35) explode(e.x, e.y, 30, base * .4, true, '#ff9100');
 }
+function brightC(c) { const m = /^#([0-9a-f]{6})$/i.exec(c); if (!m) return c; const n = parseInt(m[1], 16), f = v => Math.min(255, v + 70); return '#' + [f(n >> 16), f((n >> 8) & 255), f(n & 255)].map(v => v.toString(16).padStart(2, '0')).join(''); }
 function allyShoot(a, t, dm, rk = 1) {
   const c = a.c, ang = Math.atan2(t.y - a.y, t.x - a.x), x = a.x + Math.cos(ang) * 12, y = a.y - 6 + Math.sin(ang) * 12, p = a.spec.perk;
   a.aim = ang; a.atkT = .2; if (Math.abs(Math.cos(ang)) > .2) a.face = Math.cos(ang) > 0 ? 1 : -1;
-  const sz = 1 + .08 * (rk - 1); const pr = (o) => { if (o.size) o.size *= sz; if (o.r) o.r *= sz; o.ally = a; return mkProj(o); };
+  const tier = allyTier(), sz = (1 + .08 * (rk - 1)) * (1.25 + .12 * tier);   // V10: 발사체 크게·선명하게, 성장 단계별 빛
+  const pr = (o) => { if (o.size) o.size *= sz; if (o.r) o.r *= sz; if (o.len) o.len *= 1.2 + .15 * tier; o.hl = tier; if (tier >= 2 && o.col && o.kind !== 'cball') o.col = brightC(o.col); o.ally = a; return mkProj(o); };
+  // 전투 드론(에너지 계열): 강화 단계에서 3발마다 연쇄 전기 충격
+  if (a.cls === 'drone' && tier >= 1 && (a.zapN = (a.zapN || 0) + 1) % 3 === 0) { let cur = t, px = a.x, py = a.y - 26; const hit = new Set();
+    for (let k = 0; k < 2 + tier && cur; k++) { hit.add(cur); effects.push({ type: 'bolt', pts: [[px, py], [cur.x, cur.y]], t: 0, dur: .15, seed: Math.random() * 100, col: '#80d8ff' }); allyHit(a, cur, 6 * dm * (k ? .7 : 1), { slow: .3 }); px = cur.x; py = cur.y;
+      let nb = null, nd = 110 * 110; for (const o of query(cur.x, cur.y, 110)) if (!o.dead && !hit.has(o) && !o.obj) { const d = (o.x - cur.x) ** 2 + (o.y - cur.y) ** 2; if (d < nd) { nd = d; nb = o; } } cur = nb; } }
   switch (a.cls) {
     case 'rifle': for (let k = 0; k < (rk >= 4 ? 4 : 3); k++) later(k * 0.08, () => { if (G.state !== 'play' || a.down > 0 || a.seated) return; const aa = Math.atan2(t.y - a.y, t.x - a.x) + rand(-.06, .06); pr({ kind: 'tracer', x: a.x + Math.cos(aa) * 12, y: a.y - 6 + Math.sin(aa) * 12, vx: Math.cos(aa) * 720, vy: Math.sin(aa) * 720, ang: aa, r: 4, dmg: 8 * dm, pierce: (p === 'pierce' ? 3 : 1) + (rk >= 3 ? 1 : 0), life: c.range / 720, col: rk >= 3 ? '#80deea' : '#ffe082', size: .9, kb: 25 }); AU.sfx('rifle', 1.25); }); break;
     case 'sniper': pr({ kind: 'slug', x, y, vx: Math.cos(ang) * 1200, vy: Math.sin(ang) * 1200, ang, r: 4, dmg: 62 * dm, pierce: 5 + rk, boom: rk >= 4 ? 34 : 0, life: c.range / 1200, col: '#fff176', size: 1.3, kb: 100, ap: .4 }); effects.push({ type: 'rail', x1: x, y1: y, x2: x + Math.cos(ang) * 120, y2: y + Math.sin(ang) * 120, w: 2, col: '#fff59d', t: 0, dur: .12 }); AU.sfx('rifle', .6); break;
