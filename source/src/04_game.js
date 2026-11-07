@@ -148,7 +148,7 @@ function spawnEnemy(type, x, y, o = {}) {
   let hp = d.hp * G.hpMul * (o.obj ? (1 + G.stage * 0.12) * (type === 'device' && G.stage > 27 ? 0.7 : 1) : (1 + p * 3 + late * 3)) * (el ? 11 : 1);
   if (type === 'golden') hp = d.hp * G.hpMul * 2;
   hp *= o.obj ? Math.sqrt(DF().hp) : DF().hp * (1 + adaptNow());
-  if (!o.obj && !o.boss) hp *= 1 + (DENS_COMP() - 1) * 0.2;   // v9: 밀도 감소 보정 (초반 +8% ~ 후반 +3%)
+  if (!o.obj && !o.boss) hp *= (1 + (DENS_COMP() - 1) * 0.2) * 1.2;   // 밸런스 수정: 일반·정예 체력 +20%   // v9: 밀도 감소 보정 (초반 +8% ~ 후반 +3%)
   const e = { id: ++G.eid, type, d, x, y, r: d.r * sc, hp, maxHp: hp, dmg: d.dmg * G.dmgMul * (el ? 1.4 : 1),
     spd: d.spd * rand(0.9, 1.1) * G.spdMul * (1 + p * 0.1) * (el ? 0.85 : 1) * DF().spd, elite: el, face: 1, flash: 0, atkCd: 0, kx: 0, ky: 0,
     seed: Math.random() * 10, burn: 0, burnDps: 0, burnTick: 0, poison: 0, poisonDps: 0, slowT: 0, slowF: 1, stunT: 0, shredT: 0, chill: 0,
@@ -160,7 +160,8 @@ function spawnEnemy(type, x, y, o = {}) {
 // v9: 몬스터 밀도 — 초반 약 72%, 후반 약 82%까지 점진 증가. 정예·보스가 있으면 일반 몬스터를 더 줄임
 function densF() { return 0.72 + 0.10 * Math.min(1, ((G.stage || 1) - 1) / 30); }
 function crowdBusy() { let el = 0; for (const e of enemies) if (!e.dead && e.elite && !e.boss) el++; return (G.bossState === 2 ? 0.7 : 1) / (1 + Math.min(4, el) * 0.06); }
-function maxEnemies() { return Math.min(Q.level === 0 ? 180 : Q.level === 1 ? 330 : 470, Math.round((Q.level === 0 ? 130 : 200 + G.stage * 4) * G.st.crowd * CNT() * densF() * crowdBusy())); }
+const MOB_X = 1.3;   // 밸런스 수정: 일반 몬스터 출현량 +30%
+function maxEnemies() { return Math.min(Math.round((Q.level === 0 ? 180 : Q.level === 1 ? 330 : 470) * MOB_X), Math.round(MOB_X * (Q.level === 0 ? 130 : 200 + G.stage * 4) * G.st.crowd * CNT() * densF() * crowdBusy())); }
 const DENS_COMP = () => 1 / densF();   // 수가 줄어든 만큼 개체당 보상·체력 일부 보정 (템포 유지)
 function aliveCount() { let n = 0; for (const e of enemies) if (!e.dead) n++; return n; }
 function director(dt) {
@@ -170,7 +171,7 @@ function director(dt) {
   if ((G.bossState === 0 || G.bossState === 2) && G.clearing === 0) {
     G.spawnT -= dt;
     if (G.spawnT <= 0) {
-      G.spawnT = lerp(0.7, 0.2, p) / st.crowd * (G.bossState === 2 ? 3.0 : 1) * (1 - late * 0.4) / (CNT() * allySpawnMul() * densF() * crowdBusy());
+      G.spawnT = lerp(0.7, 0.2, p) / st.crowd * (G.bossState === 2 ? 3.0 : 1) * (1 - late * 0.4) / (CNT() * allySpawnMul() * densF() * crowdBusy() * MOB_X);
       const batch = 1 + Math.floor(p * 4.5 + Math.random() * 1.5);
       let alive = aliveCount(); let ranged = 0; for (const e of enemies) if (!e.dead && e.d.ai === 'ranged') ranged++;
       for (let i = 0; i < batch && alive < maxEnemies(); i++, alive++) {

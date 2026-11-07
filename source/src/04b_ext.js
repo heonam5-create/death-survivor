@@ -647,7 +647,7 @@ function extEvent() {
   else if (ev === 'artillery') { G.artWarn = 2.2; toast('🚀 경고: 적의 미사일 포격!<br><span style="font-size:14px">빨간 원을 피하세요</span>', 2.2, '#ff5252'); AU.sfx('alarm'); }
   else if (ev === 'ambush') {
     toast('⚠ 적의 대규모 기습 임박!<br><span style="font-size:14px">양쪽에서 몰려옵니다</span>', 2, '#ff7043'); AU.sfx('alarm');
-    later(2, () => { if (G.state !== 'play' || G.bossState !== 0) return; const base = rand(0, TAU), n = Math.min(50, 12 + G.stage * 1.5) * DF().cnt * densF(), rad = Math.max(VW, VH) * .55; for (let s = 0; s < 2; s++) for (let i = 0; i < n / 2; i++) { const aa = base + s * Math.PI + rand(-.5, .5); spawnEnemy(wpick(G.st.mobs), P.x + Math.cos(aa) * rad * rand(1, 1.2), P.y + Math.sin(aa) * rad * rand(1, 1.2)); } });
+    later(2, () => { if (G.state !== 'play' || G.bossState !== 0) return; const base = rand(0, TAU), n = Math.min(65, (12 + G.stage * 1.5) * MOB_X) * DF().cnt * densF(), rad = Math.max(VW, VH) * .55; for (let s = 0; s < 2; s++) for (let i = 0; i < n / 2; i++) { const aa = base + s * Math.PI + rand(-.5, .5); spawnEnemy(wpick(G.st.mobs), P.x + Math.cos(aa) * rad * rand(1, 1.2), P.y + Math.sin(aa) * rad * rand(1, 1.2)); } });
   } else if (ev === 'eliteRaid') { toast('⚠ 정예 몬스터 습격!', 1.4, '#ff9800'); later(1.5, () => { if (G.state === 'play' && G.bossState === 0) { spawnElite(); if (G.stage > 10) later(2, () => { if (G.state === 'play' && G.bossState === 0) spawnElite(); }); } }); }
 }
 function updateExtEvents(dt) {
@@ -724,7 +724,7 @@ function extDirector(dt) {
       G.surroundT = n >= 4 && DF().pat >= 2 ? 26 : 34;
       toast('⚠ 적이 포위해 옵니다!', 1.3, '#ff7043');
       const pool = G.st.mobs.filter(m => !ET[m[0]].ai || ['zig', 'chase', 'dash'].includes(ET[m[0]].ai)), type = (pool.length ? pick(pool) : G.st.mobs[0])[0];
-      const cnt = Math.round(Math.min(40, 10 + G.stage) * DF().cnt * densF()), rad = Math.max(VW, VH) * .5;
+      const cnt = Math.round(Math.min(52, (10 + G.stage) * MOB_X) * DF().cnt * densF()), rad = Math.max(VW, VH) * .5;
       later(1.2, () => { if (G.state !== 'play' || G.bossState !== 0) return; for (let i = 0; i < cnt; i++) { const a = i / cnt * TAU; const e = spawnEnemy(type, P.x + Math.cos(a) * rad, P.y + Math.sin(a) * rad); e.spd *= 1.15; } });
     }
   }

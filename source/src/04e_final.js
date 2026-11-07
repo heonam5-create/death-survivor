@@ -132,18 +132,18 @@ function bossUltTick(e, dt) {
 // 보석은 바닥에 그대로 남고, 정리 시간(POSTBOSS_T초) 동안 직접 주울 수 있음. '바로 클리어' 버튼으로 즉시 종료 가능.
 function postBossFinish() { if (G.bossState === 3 && G.state === 'play') G.winT = 0; }
 /* ------------------------- 클리어 화면: 골드 강화 + 무기 2개 계승 + 다음 버튼 ------------------------- */
-const INH_MAX = 2;
+const INH_MAX = 2, INH_LV = 2;   // 계승 무기는 다음 스테이지에서 Lv.2부터
 function inhList() { const a = Array.isArray(save.inherit) ? save.inherit : save.inherit ? [save.inherit] : []; return a.filter(x => x && WMAP[x.id]).slice(0, INH_MAX); }
 function renderClearExtras() {
   // 무기 계승 선택 (최대 2개, 선택 즉시 저장)
-  const sel = new Set(inhList().filter(x => G.weapons.some(w => w.id === x.id && w.lv === x.lv)).map(x => x.id));
+  const sel = new Set(inhList().filter(x => G.weapons.some(w => w.id === x.id)).map(x => x.id));
   G.inhSel = sel;
   const draw = () => {
     const list = G.weapons.slice().sort((a, b) => (b.evo - a.evo) || (b.lv - a.lv));
     $('rInhSel').innerHTML = `<div class="secT">🔁 다음 스테이지에 가져갈 무기 (최대 ${INH_MAX}개) — <b>${G.inhSel.size}/${INH_MAX}</b></div><div class="ihg">` +
       list.map(w => { const W_ = WMAP[w.id], on = G.inhSel.has(w.id), nm = w.evo ? EVOS[w.id].n : W_.nm;
-        return `<button class="ihc${on ? ' on' : ''}" data-id="${w.id}" style="border-color:${on ? '#64ffda' : TIER_COL[W_.t]}"><span class="ii">${w.evo ? EVOS[w.id].ic : W_.ic}</span><span class="in">${nm}</span><span class="il">Lv${w.lv}${w.evo ? ' 🔥' : ''} ${'★'.repeat(w.lv)}</span>${on ? '<span class="ic2">✔</span>' : ''}</button>`; }).join('') +
-      `</div><div class="ihnote">선택하지 않은 무기는 초기화됩니다. 선택 안 함도 가능.</div>`;
+        return `<button class="ihc${on ? ' on' : ''}" data-id="${w.id}" style="border-color:${on ? '#64ffda' : TIER_COL[W_.t]}"><span class="ii">${w.evo ? EVOS[w.id].ic : W_.ic}</span><span class="in">${nm}</span><span class="it">${CLASS_NAME[W_.c] || ''} · ${TIER_NAME[W_.t]}</span><span class="il">현재 Lv${w.lv}${w.evo ? ' 🔥' : ''} → 다음 Lv${INH_LV}</span>${on ? '<span class="ic2">✔</span>' : ''}</button>`; }).join('') +
+      `</div><div class="ihnote">선택한 무기만 다음 스테이지로 가져가며 <b>강화 단계는 Lv.2로 초기화</b>됩니다 (무기 종류·특성은 유지). 선택하지 않은 무기는 사라집니다.</div>`;
   };
   draw();
   $('rInhSel').onclick = ev => {
@@ -155,7 +155,7 @@ function renderClearExtras() {
   renderClearShop();
 }
 function saveInheritSel() {
-  save.inherit = G.weapons.filter(w => G.inhSel.has(w.id)).map(w => ({ id: w.id, lv: w.lv, evo: !!w.evo, from: G.stage }));
+  save.inherit = G.weapons.filter(w => G.inhSel.has(w.id)).map(w => ({ id: w.id, lv: INH_LV, evo: !!w.evo, from: G.stage, prevLv: w.lv }));
   writeSave();
 }
 function renderClearShop() {

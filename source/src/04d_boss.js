@@ -28,12 +28,12 @@ function barBreak(e) {
 
 /* ------------------------- 무기 계승 ------------------------- */
 function inheritValid(ih) { return ih && typeof ih === 'object' && WMAP[ih.id] ? ih : null; }
-// 계승 무기 최대 2개 장착 (레벨·진화 상태 유지)
+// 계승 무기 최대 2개 장착 (진화 상태 유지, 강화 단계는 Lv.2로 시작)
 function applyInherit() {
   const names = [];
   for (const ih of inhList()) {
     let w = G.weapons.find(x => x.id === ih.id); if (!w) { if (G.weapons.length >= WSLOTS) continue; w = addWeapon(ih.id); }
-    w.lv = clamp(ih.lv | 0, 1, WMAX); w.evo = !!ih.evo && !!EVOS[ih.id]; w.inh = true;
+    w.lv = clamp(Math.min(ih.lv | 0, INH_LV), 1, WMAX); w.evo = !!ih.evo && !!EVOS[ih.id]; w.inh = true;
     const c = codexOf(w.id); c.maxLv = Math.max(c.maxLv || 1, w.lv);
     names.push(`${w.evo ? EVOS[w.id].n : WMAP[w.id].nm} Lv${w.lv}`);
   }

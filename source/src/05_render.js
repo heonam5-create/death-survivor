@@ -66,9 +66,16 @@ function render() {
     if (z > 0) { ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(e.x, e.y + e.r, e.r, e.r * .3, 0, 0, TAU); ctx.fill(); }
     if (e.alpha < 1) ctx.globalAlpha = e.alpha;
     const sq = e.hitT > 0 ? e.hitT : 0;
-    ctx.setTransform((e.static ? 1 : e.face) * K * (1 + sq * 2), 0, 0, K * (1 - sq * 1.5), cx + (e.x - G.camX) * K, cy + (e.y - z - G.camY) * K);
-    ctx.drawImage(s.c, -s.box / 2, -s.box / 2, s.box, s.box);
-    setW(); ctx.globalAlpha = 1;
+    if (sq === 0) {   // 최적화: 찌그러짐 연출이 없을 때는 변환 없이 바로 그림 (좌우 반전 그림은 캐시)
+      const flip = !e.static && e.face < 0; let img = s.c;
+      if (flip) { if (!s.cf) { const c2 = document.createElement('canvas'); c2.width = s.c.width; c2.height = s.c.height; const g2 = c2.getContext('2d'); g2.translate(c2.width, 0); g2.scale(-1, 1); g2.drawImage(s.c, 0, 0); s.cf = c2; } img = s.cf; }
+      ctx.drawImage(img, e.x - s.box / 2, e.y - z - s.box / 2, s.box, s.box);
+    } else {
+      ctx.setTransform((e.static ? 1 : e.face) * K * (1 + sq * 2), 0, 0, K * (1 - sq * 1.5), cx + (e.x - G.camX) * K, cy + (e.y - z - G.camY) * K);
+      ctx.drawImage(s.c, -s.box / 2, -s.box / 2, s.box, s.box);
+      setW();
+    }
+    ctx.globalAlpha = 1;
     if (e.elite && !e.boss) {
       ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(G.time * 1.5); ctx.setLineDash([8, 6]); ctx.globalAlpha = .45; ctx.strokeStyle = e.affix === 'aura' ? '#ffab91' : '#ffd54f'; ctx.lineWidth = 1.5; circ(ctx, 0, 0, e.r * 1.25); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
       ctx.fillStyle = '#ffd54f'; ctx.beginPath(); ctx.moveTo(e.x - 10, e.y - e.r * 1.25); ctx.lineTo(e.x - 6, e.y - e.r * 1.25 - 10); ctx.lineTo(e.x, e.y - e.r * 1.25 - 4); ctx.lineTo(e.x + 6, e.y - e.r * 1.25 - 10); ctx.lineTo(e.x + 10, e.y - e.r * 1.25); ctx.closePath(); ctx.fill(); ctx.strokeStyle = OL; ctx.lineWidth = 1.2; ctx.stroke();

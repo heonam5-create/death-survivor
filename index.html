@@ -69,7 +69,8 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
 #squad{position:absolute;left:calc(10px + env(safe-area-inset-left));bottom:calc(168px + env(safe-area-inset-bottom));display:flex;gap:4px;pointer-events:none}
 #squad .ally{width:28px;height:28px;border-radius:50%;background:rgba(10,40,20,.7);border:2px solid #69f0ae;display:flex;align-items:center;justify-content:center;font-size:15px}
 #squad .ally.sp{border-color:#ffd54f;box-shadow:0 0 6px #ffd54f}#squad .ally.down{opacity:.4;border-color:#ff5252}#squad .ally.seat{border-color:#4dd0e1;border-style:dashed}
-.csec{margin-top:10px;background:rgba(0,0,0,.25);border-radius:12px;padding:8px}.secT{font-size:13px;font-weight:900;margin-bottom:6px;display:flex;justify-content:space-between;gap:6px}.ihg{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}.ihc{position:relative;font-family:inherit;background:#241a45;border:2px solid #6f5ab8;border-radius:10px;color:#fff;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:2px}.ihc.on{background:#004d40;box-shadow:0 0 10px #64ffda}.ihc .ii{font-size:22px}.ihc .in{font-size:10.5px;font-weight:700;line-height:1.2;text-align:center}.ihc .il{font-size:10px;color:#ffd54f}.ihc .ic2{position:absolute;right:4px;top:2px;color:#64ffda;font-weight:900}.ihnote{font-size:11px;opacity:.75;margin-top:6px;line-height:1.4}.shrow.sm{padding:4px 2px}.shrow.sm .cd{font-size:11px}
+.csec{margin-top:10px;background:rgba(0,0,0,.25);border-radius:12px;padding:8px}.secT{font-size:13px;font-weight:900;margin-bottom:6px;display:flex;justify-content:space-between;gap:6px}.ihg{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}.ihc{position:relative;font-family:inherit;background:#241a45;border:2px solid #6f5ab8;border-radius:10px;color:#fff;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:2px}.ihc.on{background:#004d40;box-shadow:0 0 10px #64ffda}.ihc .ii{font-size:22px}.ihc .in{font-size:10.5px;font-weight:700;line-height:1.2;text-align:center}.ihc .it{font-size:9px;opacity:.75;text-align:center}
+.ihc .il{font-size:10px;color:#ffd54f;text-align:center}.ihc .ic2{position:absolute;right:4px;top:2px;color:#64ffda;font-weight:900}.ihnote{font-size:11px;opacity:.75;margin-top:6px;line-height:1.4}.shrow.sm{padding:4px 2px}.shrow.sm .cd{font-size:11px}
 .diffbox{margin:6px 0 2px;text-align:center}.diffbox .seg{justify-content:center;flex-wrap:wrap}.diffnote{font-size:11.5px;opacity:.85;margin-top:4px;line-height:1.4}
 /* ---------- screens ---------- */
 .scr{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
@@ -335,7 +336,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
    <p>📍 <b>위치 표시</b> — 투하된 차량(종류별 아이콘)과 구출할 동료(병과별 아이콘)는 화면 가장자리에 방향과 거리(m)로 표시됩니다.</p>
    <p>📈 <b>성장 속도</b> — 레벨이 오를수록 다음 레벨까지 필요한 경험치가 점점 늘어납니다. 강화소는 최대 단계가 약 2배로 늘었고(연사 강화 추가), 기존 최대 이후 단계는 효과가 완만하게 오릅니다.</p>
    <p>👑 <b>보스 체력바</b> — 모든 보스는 3줄의 체력바(빨강→주황→보라)를 가집니다. 보스마다 돌진·포격·레이저·소환·기계·화염·냉기·전기·중력·최종 유형의 고유 패턴이 있고, 줄이 바뀔 때마다 빨라지며 새 기술을 씁니다. 마지막 보라 줄에서는 <b>고유 필살기</b>! 빨간 경고를 잘 피하세요.</p>
-   <p>🔁 <b>무기 계승</b> — 보스를 쓰러뜨리면 8초 동안 남은 보석을 직접 주울 수 있고('바로 클리어' 버튼으로 생략 가능), 이어지는 클리어 화면에서 무기 최대 2개를 골라 레벨 그대로 다음 스테이지에 가져갈 수 있습니다. 골드 강화도 클리어 화면에서 바로! '다음 스테이지' 버튼을 눌러야 이동합니다.</p>
+   <p>🔁 <b>무기 계승</b> — 보스를 쓰러뜨리면 8초 동안 남은 보석을 직접 주울 수 있고('바로 클리어' 버튼으로 생략 가능), 이어지는 클리어 화면에서 무기 최대 2개를 골라 다음 스테이지에 가져갈 수 있습니다 (무기 종류·특성은 유지, 강화 단계는 Lv.2부터 다시 시작). 골드 강화도 클리어 화면에서 바로! '다음 스테이지' 버튼을 눌러야 이동합니다.</p>
    <p>🔥 <b>콤보</b> — 빠르게 연속 처치하면 콤보! 10·30·50·100 콤보마다 보너스. 한꺼번에 여러 마리를 쓰러뜨리면 <b>연쇄 폭발</b>이 일어납니다.</p>
    <p>🎖️ <b>정예 몬스터</b> — 스테이지마다 고유한 정예가 등장합니다. 빨간 경고를 피하고 처치하면 <b>보상 선택</b>!</p>
    <p>🎁 <b>무기 보급 상자</b> — 20초 동안 화력·발사체·연사 강화.</p>
@@ -1960,7 +1961,7 @@ function spawnEnemy(type, x, y, o = {}) {
   let hp = d.hp * G.hpMul * (o.obj ? (1 + G.stage * 0.12) * (type === 'device' && G.stage > 27 ? 0.7 : 1) : (1 + p * 3 + late * 3)) * (el ? 11 : 1);
   if (type === 'golden') hp = d.hp * G.hpMul * 2;
   hp *= o.obj ? Math.sqrt(DF().hp) : DF().hp * (1 + adaptNow());
-  if (!o.obj && !o.boss) hp *= 1 + (DENS_COMP() - 1) * 0.2;   // v9: 밀도 감소 보정 (초반 +8% ~ 후반 +3%)
+  if (!o.obj && !o.boss) hp *= (1 + (DENS_COMP() - 1) * 0.2) * 1.2;   // 밸런스 수정: 일반·정예 체력 +20%   // v9: 밀도 감소 보정 (초반 +8% ~ 후반 +3%)
   const e = { id: ++G.eid, type, d, x, y, r: d.r * sc, hp, maxHp: hp, dmg: d.dmg * G.dmgMul * (el ? 1.4 : 1),
     spd: d.spd * rand(0.9, 1.1) * G.spdMul * (1 + p * 0.1) * (el ? 0.85 : 1) * DF().spd, elite: el, face: 1, flash: 0, atkCd: 0, kx: 0, ky: 0,
     seed: Math.random() * 10, burn: 0, burnDps: 0, burnTick: 0, poison: 0, poisonDps: 0, slowT: 0, slowF: 1, stunT: 0, shredT: 0, chill: 0,
@@ -1972,7 +1973,8 @@ function spawnEnemy(type, x, y, o = {}) {
 // v9: 몬스터 밀도 — 초반 약 72%, 후반 약 82%까지 점진 증가. 정예·보스가 있으면 일반 몬스터를 더 줄임
 function densF() { return 0.72 + 0.10 * Math.min(1, ((G.stage || 1) - 1) / 30); }
 function crowdBusy() { let el = 0; for (const e of enemies) if (!e.dead && e.elite && !e.boss) el++; return (G.bossState === 2 ? 0.7 : 1) / (1 + Math.min(4, el) * 0.06); }
-function maxEnemies() { return Math.min(Q.level === 0 ? 180 : Q.level === 1 ? 330 : 470, Math.round((Q.level === 0 ? 130 : 200 + G.stage * 4) * G.st.crowd * CNT() * densF() * crowdBusy())); }
+const MOB_X = 1.3;   // 밸런스 수정: 일반 몬스터 출현량 +30%
+function maxEnemies() { return Math.min(Math.round((Q.level === 0 ? 180 : Q.level === 1 ? 330 : 470) * MOB_X), Math.round(MOB_X * (Q.level === 0 ? 130 : 200 + G.stage * 4) * G.st.crowd * CNT() * densF() * crowdBusy())); }
 const DENS_COMP = () => 1 / densF();   // 수가 줄어든 만큼 개체당 보상·체력 일부 보정 (템포 유지)
 function aliveCount() { let n = 0; for (const e of enemies) if (!e.dead) n++; return n; }
 function director(dt) {
@@ -1982,7 +1984,7 @@ function director(dt) {
   if ((G.bossState === 0 || G.bossState === 2) && G.clearing === 0) {
     G.spawnT -= dt;
     if (G.spawnT <= 0) {
-      G.spawnT = lerp(0.7, 0.2, p) / st.crowd * (G.bossState === 2 ? 3.0 : 1) * (1 - late * 0.4) / (CNT() * allySpawnMul() * densF() * crowdBusy());
+      G.spawnT = lerp(0.7, 0.2, p) / st.crowd * (G.bossState === 2 ? 3.0 : 1) * (1 - late * 0.4) / (CNT() * allySpawnMul() * densF() * crowdBusy() * MOB_X);
       const batch = 1 + Math.floor(p * 4.5 + Math.random() * 1.5);
       let alive = aliveCount(); let ranged = 0; for (const e of enemies) if (!e.dead && e.d.ai === 'ranged') ranged++;
       for (let i = 0; i < batch && alive < maxEnemies(); i++, alive++) {
@@ -3689,7 +3691,7 @@ function extEvent() {
   else if (ev === 'artillery') { G.artWarn = 2.2; toast('🚀 경고: 적의 미사일 포격!<br><span style="font-size:14px">빨간 원을 피하세요</span>', 2.2, '#ff5252'); AU.sfx('alarm'); }
   else if (ev === 'ambush') {
     toast('⚠ 적의 대규모 기습 임박!<br><span style="font-size:14px">양쪽에서 몰려옵니다</span>', 2, '#ff7043'); AU.sfx('alarm');
-    later(2, () => { if (G.state !== 'play' || G.bossState !== 0) return; const base = rand(0, TAU), n = Math.min(50, 12 + G.stage * 1.5) * DF().cnt * densF(), rad = Math.max(VW, VH) * .55; for (let s = 0; s < 2; s++) for (let i = 0; i < n / 2; i++) { const aa = base + s * Math.PI + rand(-.5, .5); spawnEnemy(wpick(G.st.mobs), P.x + Math.cos(aa) * rad * rand(1, 1.2), P.y + Math.sin(aa) * rad * rand(1, 1.2)); } });
+    later(2, () => { if (G.state !== 'play' || G.bossState !== 0) return; const base = rand(0, TAU), n = Math.min(65, (12 + G.stage * 1.5) * MOB_X) * DF().cnt * densF(), rad = Math.max(VW, VH) * .55; for (let s = 0; s < 2; s++) for (let i = 0; i < n / 2; i++) { const aa = base + s * Math.PI + rand(-.5, .5); spawnEnemy(wpick(G.st.mobs), P.x + Math.cos(aa) * rad * rand(1, 1.2), P.y + Math.sin(aa) * rad * rand(1, 1.2)); } });
   } else if (ev === 'eliteRaid') { toast('⚠ 정예 몬스터 습격!', 1.4, '#ff9800'); later(1.5, () => { if (G.state === 'play' && G.bossState === 0) { spawnElite(); if (G.stage > 10) later(2, () => { if (G.state === 'play' && G.bossState === 0) spawnElite(); }); } }); }
 }
 function updateExtEvents(dt) {
@@ -3766,7 +3768,7 @@ function extDirector(dt) {
       G.surroundT = n >= 4 && DF().pat >= 2 ? 26 : 34;
       toast('⚠ 적이 포위해 옵니다!', 1.3, '#ff7043');
       const pool = G.st.mobs.filter(m => !ET[m[0]].ai || ['zig', 'chase', 'dash'].includes(ET[m[0]].ai)), type = (pool.length ? pick(pool) : G.st.mobs[0])[0];
-      const cnt = Math.round(Math.min(40, 10 + G.stage) * DF().cnt * densF()), rad = Math.max(VW, VH) * .5;
+      const cnt = Math.round(Math.min(52, (10 + G.stage) * MOB_X) * DF().cnt * densF()), rad = Math.max(VW, VH) * .5;
       later(1.2, () => { if (G.state !== 'play' || G.bossState !== 0) return; for (let i = 0; i < cnt; i++) { const a = i / cnt * TAU; const e = spawnEnemy(type, P.x + Math.cos(a) * rad, P.y + Math.sin(a) * rad); e.spd *= 1.15; } });
     }
   }
@@ -4248,12 +4250,12 @@ function barBreak(e) {
 
 /* ------------------------- 무기 계승 ------------------------- */
 function inheritValid(ih) { return ih && typeof ih === 'object' && WMAP[ih.id] ? ih : null; }
-// 계승 무기 최대 2개 장착 (레벨·진화 상태 유지)
+// 계승 무기 최대 2개 장착 (진화 상태 유지, 강화 단계는 Lv.2로 시작)
 function applyInherit() {
   const names = [];
   for (const ih of inhList()) {
     let w = G.weapons.find(x => x.id === ih.id); if (!w) { if (G.weapons.length >= WSLOTS) continue; w = addWeapon(ih.id); }
-    w.lv = clamp(ih.lv | 0, 1, WMAX); w.evo = !!ih.evo && !!EVOS[ih.id]; w.inh = true;
+    w.lv = clamp(Math.min(ih.lv | 0, INH_LV), 1, WMAX); w.evo = !!ih.evo && !!EVOS[ih.id]; w.inh = true;
     const c = codexOf(w.id); c.maxLv = Math.max(c.maxLv || 1, w.lv);
     names.push(`${w.evo ? EVOS[w.id].n : WMAP[w.id].nm} Lv${w.lv}`);
   }
@@ -4449,18 +4451,18 @@ function bossUltTick(e, dt) {
 // 보석은 바닥에 그대로 남고, 정리 시간(POSTBOSS_T초) 동안 직접 주울 수 있음. '바로 클리어' 버튼으로 즉시 종료 가능.
 function postBossFinish() { if (G.bossState === 3 && G.state === 'play') G.winT = 0; }
 /* ------------------------- 클리어 화면: 골드 강화 + 무기 2개 계승 + 다음 버튼 ------------------------- */
-const INH_MAX = 2;
+const INH_MAX = 2, INH_LV = 2;   // 계승 무기는 다음 스테이지에서 Lv.2부터
 function inhList() { const a = Array.isArray(save.inherit) ? save.inherit : save.inherit ? [save.inherit] : []; return a.filter(x => x && WMAP[x.id]).slice(0, INH_MAX); }
 function renderClearExtras() {
   // 무기 계승 선택 (최대 2개, 선택 즉시 저장)
-  const sel = new Set(inhList().filter(x => G.weapons.some(w => w.id === x.id && w.lv === x.lv)).map(x => x.id));
+  const sel = new Set(inhList().filter(x => G.weapons.some(w => w.id === x.id)).map(x => x.id));
   G.inhSel = sel;
   const draw = () => {
     const list = G.weapons.slice().sort((a, b) => (b.evo - a.evo) || (b.lv - a.lv));
     $('rInhSel').innerHTML = `<div class="secT">🔁 다음 스테이지에 가져갈 무기 (최대 ${INH_MAX}개) — <b>${G.inhSel.size}/${INH_MAX}</b></div><div class="ihg">` +
       list.map(w => { const W_ = WMAP[w.id], on = G.inhSel.has(w.id), nm = w.evo ? EVOS[w.id].n : W_.nm;
-        return `<button class="ihc${on ? ' on' : ''}" data-id="${w.id}" style="border-color:${on ? '#64ffda' : TIER_COL[W_.t]}"><span class="ii">${w.evo ? EVOS[w.id].ic : W_.ic}</span><span class="in">${nm}</span><span class="il">Lv${w.lv}${w.evo ? ' 🔥' : ''} ${'★'.repeat(w.lv)}</span>${on ? '<span class="ic2">✔</span>' : ''}</button>`; }).join('') +
-      `</div><div class="ihnote">선택하지 않은 무기는 초기화됩니다. 선택 안 함도 가능.</div>`;
+        return `<button class="ihc${on ? ' on' : ''}" data-id="${w.id}" style="border-color:${on ? '#64ffda' : TIER_COL[W_.t]}"><span class="ii">${w.evo ? EVOS[w.id].ic : W_.ic}</span><span class="in">${nm}</span><span class="it">${CLASS_NAME[W_.c] || ''} · ${TIER_NAME[W_.t]}</span><span class="il">현재 Lv${w.lv}${w.evo ? ' 🔥' : ''} → 다음 Lv${INH_LV}</span>${on ? '<span class="ic2">✔</span>' : ''}</button>`; }).join('') +
+      `</div><div class="ihnote">선택한 무기만 다음 스테이지로 가져가며 <b>강화 단계는 Lv.2로 초기화</b>됩니다 (무기 종류·특성은 유지). 선택하지 않은 무기는 사라집니다.</div>`;
   };
   draw();
   $('rInhSel').onclick = ev => {
@@ -4472,7 +4474,7 @@ function renderClearExtras() {
   renderClearShop();
 }
 function saveInheritSel() {
-  save.inherit = G.weapons.filter(w => G.inhSel.has(w.id)).map(w => ({ id: w.id, lv: w.lv, evo: !!w.evo, from: G.stage }));
+  save.inherit = G.weapons.filter(w => G.inhSel.has(w.id)).map(w => ({ id: w.id, lv: INH_LV, evo: !!w.evo, from: G.stage, prevLv: w.lv }));
   writeSave();
 }
 function renderClearShop() {
@@ -4776,9 +4778,16 @@ function render() {
     if (z > 0) { ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(e.x, e.y + e.r, e.r, e.r * .3, 0, 0, TAU); ctx.fill(); }
     if (e.alpha < 1) ctx.globalAlpha = e.alpha;
     const sq = e.hitT > 0 ? e.hitT : 0;
-    ctx.setTransform((e.static ? 1 : e.face) * K * (1 + sq * 2), 0, 0, K * (1 - sq * 1.5), cx + (e.x - G.camX) * K, cy + (e.y - z - G.camY) * K);
-    ctx.drawImage(s.c, -s.box / 2, -s.box / 2, s.box, s.box);
-    setW(); ctx.globalAlpha = 1;
+    if (sq === 0) {   // 최적화: 찌그러짐 연출이 없을 때는 변환 없이 바로 그림 (좌우 반전 그림은 캐시)
+      const flip = !e.static && e.face < 0; let img = s.c;
+      if (flip) { if (!s.cf) { const c2 = document.createElement('canvas'); c2.width = s.c.width; c2.height = s.c.height; const g2 = c2.getContext('2d'); g2.translate(c2.width, 0); g2.scale(-1, 1); g2.drawImage(s.c, 0, 0); s.cf = c2; } img = s.cf; }
+      ctx.drawImage(img, e.x - s.box / 2, e.y - z - s.box / 2, s.box, s.box);
+    } else {
+      ctx.setTransform((e.static ? 1 : e.face) * K * (1 + sq * 2), 0, 0, K * (1 - sq * 1.5), cx + (e.x - G.camX) * K, cy + (e.y - z - G.camY) * K);
+      ctx.drawImage(s.c, -s.box / 2, -s.box / 2, s.box, s.box);
+      setW();
+    }
+    ctx.globalAlpha = 1;
     if (e.elite && !e.boss) {
       ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(G.time * 1.5); ctx.setLineDash([8, 6]); ctx.globalAlpha = .45; ctx.strokeStyle = e.affix === 'aura' ? '#ffab91' : '#ffd54f'; ctx.lineWidth = 1.5; circ(ctx, 0, 0, e.r * 1.25); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
       ctx.fillStyle = '#ffd54f'; ctx.beginPath(); ctx.moveTo(e.x - 10, e.y - e.r * 1.25); ctx.lineTo(e.x - 6, e.y - e.r * 1.25 - 10); ctx.lineTo(e.x, e.y - e.r * 1.25 - 4); ctx.lineTo(e.x + 6, e.y - e.r * 1.25 - 10); ctx.lineTo(e.x + 10, e.y - e.r * 1.25); ctx.closePath(); ctx.fill(); ctx.strokeStyle = OL; ctx.lineWidth = 1.2; ctx.stroke();
