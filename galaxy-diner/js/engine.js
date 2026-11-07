@@ -12,7 +12,7 @@
   }
   function shuffle(G, a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd(G) * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
   const card = id => CARDS[id];
-  const HAND_LIMIT = 7, TOKENS = 8, MAX_DICE = 2;
+  const HAND_LIMIT = 7, TOKENS = 8, MAX_DICE = 2, START_HAND = 6;
   const PCOLORS = ['#3fb6ff', '#ffd23f', '#ff6fa8', '#7cff8a'];
   const PNAMES = ['나', 'AI 루나', 'AI 오릭스', 'AI 넥스'];
 
@@ -21,9 +21,12 @@
   function newGame(n, diff, seed) {
     const G = { ver: 1, rng: (seed >>> 0) || 1, n, diff, round: 1, phase: 'action', over: false, log: [], turnNo: 0 };
     G.players = [];
-    for (let i = 0; i < n; i++) G.players.push({ name: PNAMES[i], ai: i !== 0, color: PCOLORS[i], hand: [], experts: [], tokens: TOKENS, dice: 2, score: 0, st: newStats(), expertLog: [] });
+    for (let i = 0; i < n; i++) G.players.push({ name: PNAMES[i], ai: i !== 0, color: PCOLORS[i], hand: [], experts: [], tokens: TOKENS, dice: 0, score: 0, st: newStats(), expertLog: [] });
     G.deck = shuffle(G, Object.keys(CARDS).map(Number));
     G.discard = [];
+    // 시작 손패: 모든 플레이어(사람·AI, 2~4인 공통) 요리카드 6장
+    G.players.forEach(P => { P.hand = G.deck.splice(0, START_HAND); });
+    if (G.players.some(P => P.hand.length !== START_HAND)) throw new Error('시작 손패 배분 오류');
     G.market = G.deck.splice(0, 5);
     // 주문카드: 위에서 아래로 인원-1(3R) / 인원(2R) / 인원+1(1R)
     const od = shuffle(G, Object.keys(ORDERS).map(Number));
@@ -452,6 +455,6 @@
     return G;
   }
 
-  const E = { newGame, run, validate, perform, openSlots, slotFoods, usableRows, mainRow, rowPoints, evalGuest, jokerBest, jokerChance, cardWinner, card, rnd, filled, HAND_LIMIT, MAX_DICE, TOKENS };
+  const E = { START_HAND, newGame, run, validate, perform, openSlots, slotFoods, usableRows, mainRow, rowPoints, evalGuest, jokerBest, jokerChance, cardWinner, card, rnd, filled, HAND_LIMIT, MAX_DICE, TOKENS };
   if (typeof module !== 'undefined') module.exports = E; else root.GE = E;
 })(this);
