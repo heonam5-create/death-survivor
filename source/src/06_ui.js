@@ -269,6 +269,16 @@ $('setReset').addEventListener('click', () => {
 });
 function confirmBox(title, text, yes, no) { $('mTitle').textContent = title; $('mText').innerHTML = text; showScreen('modal'); $('mYes').onclick = () => { AU.sfx('button'); yes(); }; $('mNo').onclick = () => { AU.sfx('button'); no(); }; }
 $('tStart').addEventListener('click', () => { AU.sfx('button'); openStageSelect(); });
+// 처음부터 새로 시작: 진행(스테이지·골드·강화·계승 무기 등)만 초기화, 설정(소리·화질·난이도)과 무기 도감은 유지. 이전 기록은 백업 보관
+$('tNew').addEventListener('click', () => {
+  AU.sfx('button');
+  confirmBox('처음부터 새로 시작', '클리어한 스테이지, 골드, 강화 단계, 계승 무기가 모두 처음 상태로 돌아갑니다.<br>(설정과 무기 도감은 유지됩니다)<br><br>정말 1스테이지부터 새로 시작할까요?', () => {
+    try { localStorage.setItem(SAVE_KEY + '_prev', JSON.stringify(save)); } catch (e) {}
+    const keep = { settings: save.settings, codex: save.codex };
+    save = DEFAULT_SAVE(); Object.assign(save, keep); writeSave();
+    toast('🔄 새 게임 시작!', 1.4); startStage(1);
+  }, () => showScreen('scrTitle'));
+});
 $('tCodex').addEventListener('click', () => { AU.sfx('button'); openCodex('scrTitle'); });
 $('tHelp').addEventListener('click', () => { AU.sfx('button'); showScreen('scrHelp'); });
 $('helpClose').addEventListener('click', () => { AU.sfx('button'); showScreen('scrTitle'); });
