@@ -211,7 +211,7 @@
     const t = myTurn(), me = G.players[0];
     $('#a-draw').disabled = !t; $('#a-dice').disabled = !t || me.dice >= E.MAX_DICE;
     $('#a-serve').disabled = !t; $('#a-guest').disabled = !t || !G.guests.length;
-    $('#a-dice').innerHTML = `<b>②</b>조커 받기 (${me.dice}/${E.MAX_DICE})`;
+    $('#a-dice').innerHTML = `<b>②</b>조커주사위<br>받기 🎲${me.dice}/${E.MAX_DICE}`;
   }
 
   // ---------- 조작 ----------
@@ -333,7 +333,7 @@
         1등 보상: <b>${esc(D.REWARD_TEXT[GG.r])}</b> ${g.first !== null ? `(이미 ${esc(G.players[g.first].name)}이(가) 1등)` : '(아직 아무도 대접 안 함!)'}<br>
         대접 완료: ${g.done.length ? g.done.map(p => esc(G.players[p].name)).join(', ') : '없음'} · ${guestLife(g)}</div>
         ${can ? `<p class="mini" style="margin-top:6px">내 손패에서 3장을 고르세요 (${sel.length}/3)</p><div class="grid">${sortedHand(me.hand).map(id => `<div class="pick ${sel.includes(id) ? 'sel' : ''}" data-id="${id}"><img src="${img.food(id)}"></div>`).join('')}</div>
-        ${me.dice > 0 ? `<label class="row-set" style="font-size:14px">🎲 조커 주사위 사용 (색 1개 대체 + 숫자 ±주사위) <input type="checkbox" id="x-j" ${useJ ? 'checked' : ''}></label><div class="mini">${jtxt}</div>` : ''}` : (g.done.includes(0) ? '<p class="mini">이미 이 손님을 대접했어요.</p>' : '')}
+        ${me.dice > 0 ? `<label class="row-set" style="font-size:14px">🎲 조커 주사위 1개 사용 (주사위 1번 굴려 숫자 ±, 색상 1개 대체 시 카드 1장 비용, 실패하면 주사위만 버려짐) <input type="checkbox" id="x-j" ${useJ ? 'checked' : ''}></label><div class="mini">${jtxt}</div>` : ''}` : (g.done.includes(0) ? '<p class="mini">이미 이 손님을 대접했어요.</p>' : '')}
         <div class="m-btns"><button class="btn ghost" id="x-c">닫기</button>${can ? `<button class="btn" id="x-ok" ${sel.length === 3 && (ev.ok || useJ) ? '' : 'disabled'}>대접하기</button>` : ''}</div>`);
       $('#x-c').onclick = () => { UI.sel = sel.slice(); closeModal(); render(); };
       $$('#m-box .pick[data-id]').forEach(el => el.onclick = () => { const id = +el.dataset.id; if (sel.includes(id)) sel = sel.filter(x => x !== id); else if (sel.length < 3) sel.push(id); SND.play('tap'); draw(); });
@@ -407,6 +407,7 @@
       }
       case 'pickMarket': pickGrid(G.market.slice(), 1, '공개 카드 1장 가져오기', '원하는 카드를 고르세요.'); break;
       case 'pickDiscard': pickGrid(G.discard.slice().reverse(), 1, '버린 덱에서 1장 얻기', '버린 카드 중 원하는 카드를 고르세요.'); break;
+      case 'jokerCost': pickGrid(sortedHand(me.hand), 1, '🎲 색상 대체 비용', '조커로 색상을 바꿨어요. 아무 색상 카드 1장을 비용으로 내세요.'); break;
       case 'discard': pickGrid(sortedHand(me.hand), req.n, `손패 한도 초과! ${req.n}장 버리기`, '손패는 최대 7장이에요. 버릴 카드를 고르세요.'); break;
       case 'give': pickGrid(sortedHand(me.hand), req.n, `${esc(G.players[req.to].name)}에게 줄 카드 ${req.n}장`, '교환으로 상대에게 줄 내 카드를 고르세요.'); break;
       case 'pickFrom': pickGrid(sortedHand(G.players[req.from].hand), req.n, `${esc(G.players[req.from].name)}의 손패`, `가져올 카드 ${req.n}장을 고르세요.`); break;
@@ -476,6 +477,7 @@
         const d = document.createElement('div'); d.className = 'die'; d.textContent = e.d; $('#fx').appendChild(d); SND.play('dice');
         await wait(1000); d.remove();
         if (!e.ok) toast(`🎲 ${e.d} — ${esc(G.players[e.p].name)} 조커 실패! 주사위를 잃었어요`, e.p === 0);
+        else if (e.info) { const f = e.info; const parts = []; if (f.dn) parts.push(`${f.card} → ${f.card + f.dn}`); if (f.col) parts.push(`색상 → ${D.COLORS[f.col] || f.col} (카드 1장 비용)`); toast(`🎲 ${e.d} 성공! ${parts.join(' · ') || '그대로 성공'}`); }
         return;
       }
       case 'guest': {
@@ -558,6 +560,6 @@
   // 첫 터치에 오디오 시작
   document.addEventListener('pointerdown', () => SND.init(), { once: true });
   refreshMenu();
-  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => { });
+  if ('serviceWorker' in navigator && location.protocol === 'https:') { const had = !!navigator.serviceWorker.controller; let done = false; navigator.serviceWorker.addEventListener('controllerchange', () => { if (had && !done) { done = true; location.reload(); } }); navigator.serviceWorker.register('sw.js').then(r => r.update()).catch(() => { }); }
   window.__G = () => G;
 })();

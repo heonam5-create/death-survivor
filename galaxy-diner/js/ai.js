@@ -200,6 +200,7 @@
     switch (req.type) {
       case 'turn': return chooseTurn(G, p, req.extra);
       case 'discard': return weakest(G, p, P.hand, req.n);
+      case 'jokerCost': return weakest(G, p, P.hand, 1);
       case 'drawSrc': {
         const L = LV[G.diff] || LV.normal;
         if (!G.market.length) return 'deck';

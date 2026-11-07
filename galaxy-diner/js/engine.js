@@ -190,14 +190,22 @@
     const sp = ok && g.s[1](cs, handAfter);
     return { ok, special: !!sp, fails };
   }
-  // 조커: 주사위 1번 굴린 결과 d로 3장 중 1장의 색상 대체 + 숫자 ±d (가장 좋은 조합 자동 선택)
+  // 조커(④ 특별한 손님, 1개만): 주사위를 딱 1번 굴린 결과 d로, 3장 중 1장의 숫자 ±d 및/또는 색상 1개 대체.
+  // 색상을 대체하면 남은 손패에서 아무 색상 카드 1장을 비용으로 냄 → 비용 낼 카드가 없으면 색상 대체 불가.
+  // 가장 좋은 조합 자동 선택 (특별조건 달성 > 비용 없음 우선)
   function jokerBest(gid, cs, handAfter, d) {
     let best = null;
+    const score = b => (b.special ? 2 : 0) + (b.pay ? 0 : 1);
     for (let i = 0; i < 3; i++) for (const col of [null, 'R', 'G', 'P', 'W']) for (const dn of [0, d, -d]) {
+      const pay = !!col && col !== cs[i].c;
+      if (col && !pay) continue;                // 같은 색으로 '대체'는 의미 없음
+      if (pay && handAfter < 1) continue;       // 비용 카드가 없으면 색상 대체 불가
       const m = cs.map((x, j) => j === i ? { n: x.n + dn, f: x.f, c: col || x.c } : x);
-      const ev = evalGuest(gid, m, handAfter);
-      if (ev.ok && (!best || (ev.special && !best.special))) best = { ok: true, special: ev.special, i, col, dn };
-      if (best && best.special) return best;
+      const ev = evalGuest(gid, m, handAfter - (pay ? 1 : 0));
+      if (!ev.ok) continue;
+      const b = { ok: true, special: ev.special, i, col: pay ? col : null, dn, pay };
+      if (!best || score(b) > score(best)) best = b;
+      if (score(best) === 3) return best;
     }
     return best || { ok: false };
   }
@@ -265,11 +273,18 @@
         const d = 1 + Math.floor(rnd(G) * 6);
         const b = jokerBest(g.id, cs, after, d);
         jinfo = { d, ...b };
-        if (H && H.event) await H.event({ t: 'roll', p, d, ok: b.ok });
+        if (H && H.event) await H.event({ t: 'roll', p, d, ok: b.ok, info: b.ok ? { card: cs[b.i].n, dn: b.dn, col: b.col, pay: b.pay } : null });
         if (!b.ok) { log(G, `${P.name} 조커 주사위(${d}) 실패 — 주사위를 잃었습니다`); return; }
         ev = { ok: true, special: b.special };
       }
       a.ids.forEach(id => { P.hand.splice(P.hand.indexOf(id), 1); G.discard.push(id); });
+      if (jinfo && jinfo.pay) { // 색상 대체 비용: 아무 색상 카드 1장
+        let c = await ask(p, { type: 'jokerCost', n: 1 });
+        c = (Array.isArray(c) ? c : [c]).filter(id => P.hand.includes(id))[0];
+        if (c == null) c = P.hand[0];
+        P.hand.splice(P.hand.indexOf(c), 1); G.discard.push(c);
+        log(G, `${P.name} 조커 색상 대체 비용으로 ${c}번 카드 냄`);
+      }
       g.done.push(p);
       P.st.guests++;
       const first = g.first === null;
