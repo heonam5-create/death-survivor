@@ -179,7 +179,9 @@ const VCH_IC = { bike: '🏍️', buggy: '🏎️', jeep: '🚙', rover: '🚐',
 function trackTargets() {
   const L = [];
   for (const v of vehs) if (!v.dead && v !== G.veh && v.time > 0) L.push({ x: v.x, y: v.y, ic: VCH_IC[v.def.ch] || '🚘', col: '#4dd0e1', lb: v.drop ? '착륙 중' : '탑승', veh: 1 });
-  for (const p of pickups) if (!p.dead && p.kind === 'tdrop') L.push({ x: p.x, y: p.y, ic: (TURRETS[p.item] || TURRETS.mg).ic, col: '#64ffda', lb: '터렛' });
+  for (const p of pickups) if (!p.dead && p.kind === 'legend') L.push({ x: p.x, y: p.y, ic: '🎁', col: '#ffd54f', lb: '전설', off: 1 });
+  for (const t of pturrets) L.push({ x: t.x, y: t.y, ic: '🗼', col: '#64ffda', lb: '내 터렛', off: 1 });
+  for (const p of pickups) if (!p.dead && p.kind === 'tdrop') L.push({ x: p.x, y: p.y, ic: (TURRETS[p.item] || TURRETS.mg).ic, col: '#64ffda', lb: '터렛', off: 1 });
   for (const r of rescues) if (!r.done) L.push({ x: r.x, y: r.y, ic: (ACL[r.spec.cls] || {}).ic || '🙋', col: '#69f0ae', lb: r.active ? '구출 중' : '구출' });
   return L;
 }
@@ -195,24 +197,28 @@ function drawTrackers(W, H) {
   const L = trackTargets(); if (!L.length) return;
   const cx = W / 2, cy = H / 2, mL = 30 + SAFE.l, mR = 30 + SAFE.r, mT = 200 + SAFE.t, mB = 205 + SAFE.b;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  const bob = Math.sin(G.time * 5) * 3; let n = 0;
+  const bob = Math.sin(G.time * 5) * 3; let n = 0; const placed = [];
   for (const t of L) {
     const sx = cx + (t.x - G.camX) * S, sy = cy + (t.y - G.camY) * S, dist = Math.round(Math.hypot(t.x - P.x, t.y - P.y) / 10);
     const on = sx > 10 && sx < W - 10 && sy > 30 && sy < H - 10;
     let bx, by, a = Math.atan2(sy - cy, sx - cx);
-    if (on) { bx = sx; by = sy - 46 + bob; }
-    else { if (++n > 6) continue; bx = clamp(cx + Math.cos(a) * 2000, mL, W - mR); by = clamp(cy + Math.sin(a) * 2000, mT, H - mB); }
+    if (on && t.off) continue;   // 화면 안에 보이는 상자·터렛은 표시 생략 (화면 깔끔하게)
+    if (on) { bx = sx; by = sy - 40 + bob; }
+    else { if (++n > 9) continue; bx = clamp(cx + Math.cos(a) * 2000, mL, W - mR); by = clamp(cy + Math.sin(a) * 2000, mT, H - mB);
+      // 같은 방향 표시가 겹치면 가장자리를 따라 옆으로 비켜서 각각 보이게
+      for (let k = 0; k < 8 && placed.some(q => Math.abs(q[0] - bx) < 44 && Math.abs(q[1] - by) < 34); k++) { const side = bx <= mL + 1 || bx >= W - mR - 1; if (side) by = clamp(by + (by > H / 2 ? -36 : 36), mT, H - mB); else bx = clamp(bx + (bx > W / 2 ? -46 : 46), mL, W - mR); }
+      placed.push([bx, by]); }
     ctx.globalAlpha = .93;
     if (!on) { // 방향 화살표
-      ctx.save(); ctx.translate(bx, by); ctx.rotate(a); ctx.fillStyle = t.col; ctx.beginPath(); ctx.moveTo(27, 0); ctx.lineTo(17, -7); ctx.lineTo(17, 7); ctx.closePath(); ctx.fill(); ctx.restore();
-    } else { ctx.fillStyle = t.col; ctx.beginPath(); ctx.moveTo(bx - 6, by + 15); ctx.lineTo(bx + 6, by + 15); ctx.lineTo(bx, by + 23); ctx.closePath(); ctx.fill(); }
-    ctx.fillStyle = 'rgba(0,0,0,.72)'; ctx.beginPath(); ctx.arc(bx, by, 16, 0, TAU); ctx.fill();
-    ctx.lineWidth = 2.5; ctx.strokeStyle = t.col; ctx.stroke();
-    ctx.font = '17px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(t.ic, bx, by + 1);
+      ctx.save(); ctx.translate(bx, by); ctx.rotate(a); ctx.fillStyle = t.col; ctx.beginPath(); ctx.moveTo(20, 0); ctx.lineTo(13, -5); ctx.lineTo(13, 5); ctx.closePath(); ctx.fill(); ctx.restore();
+    } else { ctx.fillStyle = t.col; ctx.beginPath(); ctx.moveTo(bx - 5, by + 11); ctx.lineTo(bx + 5, by + 11); ctx.lineTo(bx, by + 17); ctx.closePath(); ctx.fill(); }
+    ctx.fillStyle = 'rgba(0,0,0,.66)'; ctx.beginPath(); ctx.arc(bx, by, 12, 0, TAU); ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = t.col; ctx.stroke();
+    ctx.font = '13px sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(t.ic, bx, by + 1);
     const txt = on ? t.lb : `${t.lb} ${dist}m`;
-    ctx.font = '800 10px "Noto Sans KR",sans-serif'; const tw = ctx.measureText(txt).width + 8;
-    ctx.fillStyle = 'rgba(0,0,0,.72)'; rr(ctx, bx - tw / 2, by + 18 + (on ? 6 : 0), tw, 14, 6); ctx.fill();
-    ctx.fillStyle = t.col; ctx.fillText(txt, bx, by + 25.5 + (on ? 6 : 0));
+    ctx.font = '800 9px "Noto Sans KR",sans-serif'; const tw = ctx.measureText(txt).width + 6;
+    ctx.fillStyle = 'rgba(0,0,0,.66)'; rr(ctx, bx - tw / 2, by + 13 + (on ? 5 : 0), tw, 12, 5); ctx.fill();
+    ctx.fillStyle = t.col; ctx.fillText(txt, bx, by + 19.5 + (on ? 5 : 0));
   }
   ctx.globalAlpha = 1; ctx.textBaseline = 'alphabetic';
 }

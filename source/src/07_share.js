@@ -1,6 +1,6 @@
 /* ------------------------- 카카오톡 / 링크 공유 ------------------------- */
 const SHARE = {
-  title: '데스 서바이버 확장팩',
+  title: '데스 서바이버 확장팩 V9',
   text: '설치 없이 터치 한 번으로 바로 플레이! 무기 360종 · 탑승 장비 120종 · 40스테이지 대량 처치 액션',
   url() {
     const c = (window.GAME_CONFIG && GAME_CONFIG.url) || '';
@@ -69,3 +69,6 @@ $('shCopy').addEventListener('click', () => {
   });
 });
 $('shClose').addEventListener('click', () => { AU.sfx('button'); showScreen('scrTitle'); });
+
+// V9: 로딩 화면 닫기 (스크립트 준비 완료 후)
+(() => { const b = document.getElementById('boot'); if (b) { setTimeout(() => { b.classList.add('hide'); setTimeout(() => b.remove(), 400); }, 250); } })();

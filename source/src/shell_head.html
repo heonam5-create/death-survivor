@@ -9,7 +9,7 @@
 <meta name="description" content="설치 없이 바로 플레이! 탑승 장비 120종 · 동료 구출 · 현대 화기 360종으로 40개 지역을 돌파하는 모바일 생존 슈팅 RPG">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="데스 서바이버">
-<meta property="og:title" content="데스 서바이버 확장팩">
+<meta property="og:title" content="데스 서바이버 확장팩 V9">
 <meta property="og:description" content="설치 없이 터치 한 번으로 바로 플레이! 무기 360종 · 탑승 장비 120종 · 정예 40종 · 동료 구출 · 40스테이지 대량 처치 액션">
 <meta property="og:url" content="https://heonam5-create.github.io/death-survivor/">
 <meta property="og:image" content="https://heonam5-create.github.io/death-survivor/og.jpg?v=5">
@@ -25,7 +25,7 @@
 <meta name="apple-mobile-web-app-title" content="데스 서바이버">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
-<title>데스 서바이버 확장팩</title>
+<title>데스 서바이버 확장팩 V9</title>
 <script>window.GAME_CONFIG = { url: 'https://heonam5-create.github.io/death-survivor/', kakaoKey: '' };</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -107,7 +107,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
 .logo{text-align:center;margin-bottom:26px;filter:drop-shadow(0 6px 0 rgba(0,0,0,.5))}
 .logo .l1{font-size:clamp(40px,13vw,64px);line-height:1;background:linear-gradient(#fff3c4,#ffb300 60%,#e65100);-webkit-background-clip:text;background-clip:text;color:transparent;
  -webkit-text-stroke:2px #3b1500}
-.logo .l2{font-size:clamp(20px,6.5vw,30px);color:#ff5252;margin-top:6px;letter-spacing:2px;-webkit-text-stroke:1px #2a0000}
+.logo .l2{white-space:nowrap;font-size:clamp(20px,6.5vw,30px);color:#ff5252;margin-top:6px;letter-spacing:2px;-webkit-text-stroke:1px #2a0000}
 .logo .skull{font-size:54px;animation:bob 2s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-8px)}}
 .ver{position:absolute;bottom:calc(8px + env(safe-area-inset-bottom));font-size:11px;opacity:.5}
@@ -160,18 +160,33 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
 #modal .panel{max-width:340px;text-align:center}
 .cx7{grid-template-columns:repeat(7,minmax(0,1fr))!important}
 .swapinfo{display:flex;gap:10px;align-items:center;width:min(92vw,400px);border:3px solid;border-radius:14px;padding:8px 12px;background:#1a1233;text-align:left}
+#boot{position:fixed;inset:0;z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%,#3a0d16,#0d0818 70%);color:#fff;transition:opacity .35s}
+#boot.hide{opacity:0;pointer-events:none}
+#boot .bskull{font-size:54px}#boot .b1{font-size:clamp(30px,10vw,44px);color:#fff;margin-top:4px;white-space:nowrap}#boot .b2{font-size:clamp(20px,6.5vw,28px);color:#ff5252;letter-spacing:2px;-webkit-text-stroke:1px #2a0000;white-space:nowrap}
+#boot .bbar{width:min(60vw,220px);height:6px;border-radius:3px;background:#ffffff22;margin-top:18px;overflow:hidden}#boot .bbar i{display:block;height:100%;width:40%;background:linear-gradient(90deg,#ff5252,#ffd54f);border-radius:3px;animation:bootbar 1s ease-in-out infinite}
+@keyframes bootbar{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}#boot .b3{font-size:12px;opacity:.7;margin-top:8px}
+.pttl{font-size:15px;color:#ff8a80;letter-spacing:1px;margin-bottom:2px;white-space:nowrap}
 .chestwrap{position:relative;width:180px;height:150px;margin-bottom:4px}
-.rays{position:absolute;left:50%;top:50%;width:320px;height:320px;margin:-160px 0 0 -160px;background:repeating-conic-gradient(rgba(255,214,0,.35) 0 10deg,transparent 10deg 24deg);border-radius:50%;animation:rot 6s linear infinite;-webkit-mask:radial-gradient(circle,#000 30%,transparent 70%);mask:radial-gradient(circle,#000 30%,transparent 70%)}
+.rays{position:absolute;left:50%;top:50%;width:320px;height:320px;margin:-160px 0 0 -160px;background:repeating-conic-gradient(rgba(255,214,0,.16) 0 10deg,transparent 10deg 24deg);border-radius:50%;animation:rot 14s linear infinite;-webkit-mask:radial-gradient(circle,#000 30%,transparent 70%);mask:radial-gradient(circle,#000 30%,transparent 70%)}
 @keyframes rot{to{transform:rotate(360deg)}}
-.chestbox{position:absolute;left:50%;top:50%;width:120px;height:90px;margin:-35px 0 0 -60px}
-.chestbox .base{position:absolute;bottom:0;left:0;right:0;height:58px;border-radius:8px;background:linear-gradient(#c8901e,#8a5a0a);border:4px solid #3b2400;box-shadow:inset 0 0 0 6px #ffd54f}
-.chestbox .lid{position:absolute;top:0;left:-4px;right:-4px;height:40px;border-radius:18px 18px 6px 6px;background:linear-gradient(#ffe082,#ffb300);border:4px solid #3b2400;transform-origin:50% 100%;transition:transform .5s cubic-bezier(.3,1.6,.5,1);z-index:2}
-.chestbox .lock{position:absolute;left:50%;top:-8px;width:22px;height:26px;margin-left:-11px;background:#d50000;border:3px solid #ffd600;border-radius:6px}
-.chestbox.shake{animation:shake .12s infinite}
+.chestbox{position:absolute;left:50%;top:50%;width:124px;height:92px;margin:-36px 0 0 -62px;transform-style:preserve-3d}
+.chestbox .base{position:absolute;bottom:0;left:0;right:0;height:58px;border-radius:6px 6px 10px 10px;background:linear-gradient(180deg,#b8791a 0%,#8a5208 55%,#5e3604 100%);border:3px solid #3b2400;box-shadow:inset 0 0 0 5px #f2c14e,inset 0 0 0 7px #7a4a06,0 8px 14px rgba(0,0,0,.45);z-index:1}
+.chestbox .base::before,.chestbox .base::after{content:"";position:absolute;top:0;bottom:0;width:12px;background:linear-gradient(90deg,#ffe082,#c99a2e);border-left:2px solid #6d4300;border-right:2px solid #6d4300}
+.chestbox .base::before{left:16px}.chestbox .base::after{right:16px}
+.chestbox .lid{position:absolute;top:0;left:-4px;right:-4px;height:40px;border-radius:22px 22px 4px 4px;background:linear-gradient(180deg,#fff3c4 0%,#ffd54f 35%,#e0a326 100%);border:3px solid #3b2400;box-shadow:inset 0 -5px 0 #b77b12,inset 0 3px 0 rgba(255,255,255,.6);transform-origin:15% 100%;transition:transform .7s cubic-bezier(.25,1.3,.4,1),filter .7s;z-index:3}
+.chestbox .lid::before{content:"";position:absolute;left:30px;right:30px;top:0;bottom:0;background:linear-gradient(90deg,transparent 0 10px,#c99a2e 10px 18px,transparent 18px calc(100% - 18px),#c99a2e calc(100% - 18px) calc(100% - 10px),transparent calc(100% - 10px))}
+.chestbox .glow{position:absolute;left:8px;right:8px;top:30px;height:24px;border-radius:50%;background:radial-gradient(ellipse at 50% 60%,rgba(255,248,200,.95),rgba(255,214,90,.5) 45%,transparent 75%);opacity:0;transition:opacity .6s .15s,transform .9s .15s;z-index:2;transform:scaleY(.4)}
+.chestbox.open .glow{opacity:1;transform:scaleY(2.6) translateY(-6px)}
+.chestbox .lock{position:absolute;left:50%;top:6px;width:20px;height:24px;margin-left:-10px;background:radial-gradient(circle at 50% 35%,#ff6e6e,#b00000 70%);border:3px solid #ffd600;border-radius:5px;box-shadow:0 2px 0 #6d4300;z-index:4}
+.chestbox.open .lock{opacity:.9}
+.chestbox.shake{animation:shake .16s infinite}
 @keyframes shake{0%{transform:translate(-2px,0) rotate(-3deg)}50%{transform:translate(2px,-2px) rotate(3deg)}100%{transform:translate(-2px,0) rotate(-3deg)}}
-.chestbox.open .lid{transform:translateY(-26px) rotateX(70deg) rotate(-14deg)}
-.chestbox.open::after{content:"";position:absolute;left:50%;top:30%;width:20px;height:20px;margin-left:-10px;border-radius:50%;background:#fff;box-shadow:0 0 60px 40px rgba(255,236,130,.9);animation:burst .7s ease-out forwards}
-@keyframes burst{from{transform:scale(.2);opacity:1}to{transform:scale(3);opacity:0}}
+.chestbox.open .lid{transform:translate(-6px,-14px) rotate(-24deg);filter:brightness(.92)}
+.chestbox.open::after{content:"";position:absolute;left:50%;top:22%;width:20px;height:20px;margin-left:-10px;border-radius:50%;background:rgba(255,250,220,.85);box-shadow:0 0 36px 22px rgba(255,226,120,.55);animation:burst 1.1s ease-out forwards;z-index:2}
+.chestwrap .spk{position:absolute;width:6px;height:6px;border-radius:50%;background:#fff6c8;box-shadow:0 0 8px 2px rgba(255,214,90,.8);opacity:0;left:50%;top:55%}
+#scrChest.opened .spk{animation:spk 1.6s ease-out forwards}
+@keyframes spk{0%{opacity:0;transform:translate(0,0) scale(.4)}20%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1)}}
+@keyframes burst{from{transform:scale(.3);opacity:.9}to{transform:scale(2.6);opacity:0}}
 .chestttl{font-family:"Black Han Sans",sans-serif;font-size:30px;color:#ffd54f;text-shadow:0 3px 0 #6d4c00,0 0 18px #ffb300}
 .gobar{position:sticky;bottom:-16px;padding:8px 0 10px;background:linear-gradient(rgba(26,18,51,0),#1a1233 35%);margin:0 -16px -16px}
 #scrStage h2{font-size:22px;margin-bottom:6px}
@@ -197,6 +212,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
 </style>
 </head>
 <body>
+<div id="boot"><div class="bskull">💀</div><div class="b1 title-font">데스 서바이버</div><div class="b2 title-font">확장팩 V9</div><div class="bbar"><i></i></div><div class="b3">불러오는 중…</div></div>
 <div id="app">
  <canvas id="cv"></canvas>
  <div id="safe"></div>
@@ -220,14 +236,14 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
   <div class="logo">
    <div class="skull">💀</div>
    <div class="l1 title-font">데스 서바이버</div>
-   <div class="l2 title-font">확장팩</div>
+   <div class="l2 title-font">확장팩 V9</div>
   </div>
   <button class="btn" id="tStart">⚔️ 게임 시작</button>
   <button class="btn blue" id="tCodex">📖 무기 도감</button>
   <button class="btn blue" id="tHelp">🎮 조작 방법</button>
   <div class="trow"><button class="btn gray sm" id="tSet">⚙️ 설정</button><button class="btn kakao sm" id="tShare">💬 카카오톡 공유</button></div>
   <button class="btn red sm" id="tNew" style="margin-top:2px">🔄 처음부터 새로 시작</button>
-  <div class="ver">확장팩 v9 · 무기 360종 · 탑승 장비 120종 · 정예 40종 · 40스테이지</div>
+  <div class="ver">확장팩 V9 · 무기 360종 · 탑승 장비 120종 · 정예 40종 · 40스테이지</div>
  </div>
 
  <!-- 스테이지 선택 -->
@@ -260,6 +276,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
  <!-- 일시정지 -->
  <div class="scr dim" id="scrPause">
   <div class="panel center">
+   <div class="pttl title-font">데스 서바이버 확장팩 V9</div>
    <h2>일시정지</h2>
    <div id="pInfo" style="width:100%;margin-bottom:8px"></div>
    <div class="diffbox" style="width:100%"><div style="font-size:12px;opacity:.8;margin-bottom:3px">난이도 변경 (즉시 적용)</div><div class="seg" id="segDiffP"><button data-v="0">🌱 쉬움</button><button data-v="1">⚔️ 보통</button><button data-v="2">🔥 어려움</button><button data-v="3">👹 지옥</button></div></div>
@@ -350,7 +367,7 @@ body{font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
  </div>
 
  <div class="scr dim" id="scrChest">
-  <div class="chestwrap"><div class="rays"></div><div class="chestbox" id="chestBox"><div class="lid"></div><div class="base"><div class="lock"></div></div></div></div>
+  <div class="chestwrap"><div class="rays"></div><div class="chestbox" id="chestBox"><div class="lid"></div><div class="glow"></div><div class="base"><div class="lock"></div></div></div><i class="spk" style="--dx:-60px;--dy:-70px"></i><i class="spk" style="--dx:55px;--dy:-80px;animation-delay:.1s"></i><i class="spk" style="--dx:-30px;--dy:-100px;animation-delay:.2s"></i><i class="spk" style="--dx:75px;--dy:-40px;animation-delay:.05s"></i><i class="spk" style="--dx:-80px;--dy:-30px;animation-delay:.15s"></i><i class="spk" style="--dx:20px;--dy:-110px;animation-delay:.25s"></i></div>
   <div class="chestttl">✨ 전설 보물상자 ✨</div>
   <div id="chestMsg" style="font-weight:700;margin:4px 0 6px">전설 보물상자를 여는 중…</div>
   <div id="chestCards" class="center"></div>

@@ -260,18 +260,7 @@ function drawPickup(p) {
       ctx.globalAlpha = .55; const gr = ctx.createLinearGradient(p.x, p.y - 120, p.x, p.y); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(1, col); ctx.fillStyle = gr; ctx.fillRect(p.x - 8, p.y - 120, 16, 120); ctx.globalAlpha = 1;
       if (QC.glow) { ctx.globalAlpha = .7; ctx.drawImage(glowSprite(col), p.x - 26, p.y - 30, 52, 52); ctx.globalAlpha = 1; }
       ctx.save(); ctx.translate(p.x, p.y - 6 - bob); rr(ctx, -15, -15, 30, 30, 8); fs(ctx, 'rgba(20,12,40,.9)', 0); ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.stroke(); ctx.font = '18px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#fff'; ctx.fillText(W_.ic, 0, 7); ctx.restore(); break; }
-    case 'legend': {
-      const y = p.y - bob * 1.5, t = G.time;
-      ctx.save(); ctx.translate(p.x, y);
-      ctx.globalAlpha = .45; ctx.rotate(t * 0.6); ctx.fillStyle = '#ffd54f'; for (let i = 0; i < 10; i++) { ctx.rotate(TAU / 10); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-7, -70); ctx.lineTo(7, -70); ctx.closePath(); ctx.fill(); } ctx.restore();
-      ctx.globalAlpha = .6; const gr = ctx.createLinearGradient(p.x, p.y - 220, p.x, p.y); gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(1, '#ffd54f'); ctx.fillStyle = gr; ctx.fillRect(p.x - 14, p.y - 220, 28, 220); ctx.globalAlpha = 1;
-      if (QC.glow) { ctx.globalAlpha = .8; ctx.drawImage(glowSprite('#ffd600'), p.x - 50, y - 54, 100, 100); ctx.globalAlpha = 1; }
-      ctx.save(); ctx.translate(p.x, y); ctx.scale(1.6, 1.6);
-      rr(ctx, -13, -6, 26, 16, 2.5); fs(ctx, '#b8860b', 1.8); rr(ctx, -14, -13, 28, 9, 4); fs(ctx, '#ffca28', 1.8);
-      ctx.fillStyle = '#fff59d'; ctx.fillRect(-14, -6, 28, 2.5); ctx.fillStyle = '#d50000'; circ(ctx, 0, -2, 3.5); ctx.fill(); ctx.strokeStyle = '#ffd600'; ctx.lineWidth = 1.2; ctx.stroke();
-      ctx.restore();
-      if (Q.level && Math.random() < .4) addPart(p.x + rand(-24, 24), p.y + rand(-20, 6), rand(-15, 15), rand(-60, -25), pick(['#fff59d', '#ffd54f', '#ffffff']), .7, 3);
-      break; }
+    case 'legend': { drawLegendChest(p, bob); break; }
     case 'coin': ctx.fillStyle = '#ffc107'; circ(ctx, p.x, p.y - bob, 5.5); ctx.fill(); ctx.strokeStyle = '#8d6e00'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.fillStyle = '#fff59d'; ctx.fillRect(p.x - 1, p.y - 3 - bob, 2, 6); break;
     case 'meat': ctx.save(); ctx.translate(p.x, p.y - bob); ctx.rotate(-0.6); ctx.fillStyle = '#eee'; ctx.fillRect(4, -2, 8, 4); circ(ctx, 12, -2, 2.5); ctx.fill(); circ(ctx, 12, 2, 2.5); ctx.fill(); ctx.beginPath(); ctx.ellipse(0, 0, 8, 6, 0, 0, TAU); fs(ctx, '#bf5f30', 1.5); ctx.restore(); break;
     case 'magnet': ctx.save(); ctx.translate(p.x, p.y - bob); ctx.strokeStyle = '#e53935'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(0, 0, 7, Math.PI, 0); ctx.stroke(); ctx.fillStyle = '#ccc'; ctx.fillRect(-9.5, 0, 5, 4); ctx.fillRect(4.5, 0, 5, 4); ctx.restore(); break;
@@ -376,7 +365,7 @@ function drawEffect(f) {
 function drawArrows() {
   const list = [];
   for (const e of enemies) if (!e.dead && (e.static || e.boss || e.type === 'golden')) list.push([e.x, e.y, e.boss ? '#ff1744' : e.type === 'golden' ? '#ffd54f' : '#e040fb']);
-  for (const p of pickups) if (!p.dead && (p.kind === 'qitem' || p.kind === 'secret' || p.kind === 'crate' || p.kind === 'legend' || p.kind === 'wdrop')) list.unshift([p.x, p.y, p.kind === 'qitem' ? QITEMS[p.item].col : p.kind === 'secret' ? '#e040fb' : p.kind === 'legend' ? '#ffd600' : p.kind === 'wdrop' ? '#64b5f6' : '#90caf9', p.kind === 'legend']);
+  for (const p of pickups) if (!p.dead && (p.kind === 'qitem' || p.kind === 'secret' || p.kind === 'crate' || p.kind === 'wdrop')) list.unshift([p.x, p.y, p.kind === 'qitem' ? QITEMS[p.item].col : p.kind === 'secret' ? '#e040fb' : p.kind === 'legend' ? '#ffd600' : p.kind === 'wdrop' ? '#64b5f6' : '#90caf9', p.kind === 'legend']);
   for (const e of enemies) if (!e.dead && e.elite) list.push([e.x, e.y, '#ff9800']);
   for (const g of gens) if (!g.dead) list.push([g.x, g.y, '#00e676']);
   extArrows(list);
@@ -465,4 +454,41 @@ function drawHUD() {
   ctx.fillStyle = 'rgba(0,0,0,.3)'; circ(ctx, jx, jy, jr); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 3; ctx.stroke();
   ctx.fillStyle = 'rgba(255,255,255,.85)'; circ(ctx, kx, ky, 22); ctx.fill(); ctx.strokeStyle = '#7e57c2'; ctx.lineWidth = 3; ctx.stroke();
   ctx.globalAlpha = 1;
+}
+
+/* V9: 전설 보물상자 — 원래 크기로 직접 그려 선명하게(확대 없음), 은은한 빛 */
+const LEG_CACHE = {};
+function legendSprite(scale) {
+  const k = Math.round(scale * 4) / 4; if (LEG_CACHE[k]) return LEG_CACHE[k];
+  const w = 64, h = 56, c = document.createElement('canvas'); c.width = Math.ceil(w * k); c.height = Math.ceil(h * k);
+  const g = c.getContext('2d'); g.scale(k, k); g.translate(w / 2, h - 6); g.lineJoin = 'round';
+  // 그림자
+  g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.ellipse(0, 2, 26, 6, 0, 0, TAU); g.fill();
+  // 몸통
+  let gr = g.createLinearGradient(0, -26, 0, 0); gr.addColorStop(0, '#c58a1c'); gr.addColorStop(.6, '#8c560a'); gr.addColorStop(1, '#5e3604');
+  rr(g, -24, -26, 48, 26, 4); g.fillStyle = gr; g.fill(); g.lineWidth = 2; g.strokeStyle = '#3b2400'; g.stroke();
+  g.strokeStyle = '#f2c14e'; g.lineWidth = 1.6; rr(g, -21, -23, 42, 20, 3); g.stroke();
+  // 금띠
+  for (const x of [-15, 9]) { gr = g.createLinearGradient(x, 0, x + 6, 0); gr.addColorStop(0, '#ffe082'); gr.addColorStop(1, '#c99a2e'); g.fillStyle = gr; g.fillRect(x, -26, 6, 26); g.strokeStyle = '#6d4300'; g.lineWidth = 1; g.strokeRect(x, -26, 6, 26); }
+  // 뚜껑
+  gr = g.createLinearGradient(0, -44, 0, -26); gr.addColorStop(0, '#fff3c4'); gr.addColorStop(.4, '#ffd54f'); gr.addColorStop(1, '#d99a1e');
+  g.beginPath(); g.moveTo(-26, -26); g.lineTo(-26, -34); g.quadraticCurveTo(-26, -45, -14, -45); g.lineTo(14, -45); g.quadraticCurveTo(26, -45, 26, -34); g.lineTo(26, -26); g.closePath();
+  g.fillStyle = gr; g.fill(); g.lineWidth = 2; g.strokeStyle = '#3b2400'; g.stroke();
+  g.strokeStyle = 'rgba(255,255,255,.65)'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(-18, -41); g.lineTo(18, -41); g.stroke();
+  for (const x of [-15, 9]) { g.fillStyle = '#c99a2e'; g.fillRect(x, -45, 6, 19); }
+  // 자물쇠 + 보석
+  rr(g, -6, -32, 12, 13, 3); g.fillStyle = '#ffd600'; g.fill(); g.strokeStyle = '#6d4300'; g.lineWidth = 1.3; g.stroke();
+  gr = g.createRadialGradient(-1, -27, 1, 0, -26, 5); gr.addColorStop(0, '#ff8a80'); gr.addColorStop(1, '#b00020'); g.fillStyle = gr; g.beginPath(); g.arc(0, -26, 3.6, 0, TAU); g.fill();
+  LEG_CACHE[k] = { c, w, h }; return LEG_CACHE[k];
+}
+function drawLegendChest(p, bob) {
+  const t = G.time, y = p.y - bob * 1.2;
+  // 바닥의 부드러운 원형 빛 + 천천히 도는 옅은 빛줄기 (과한 번쩍임 없음)
+  const pulse = .75 + .25 * Math.sin(t * 2.2);
+  const rg = ctx.createRadialGradient(p.x, p.y, 4, p.x, p.y, 62); rg.addColorStop(0, `rgba(255,224,130,${.38 * pulse})`); rg.addColorStop(1, 'rgba(255,224,130,0)');
+  ctx.fillStyle = rg; ctx.beginPath(); ctx.ellipse(p.x, p.y, 62, 30, 0, 0, TAU); ctx.fill();
+  if (Q.level) { ctx.save(); ctx.translate(p.x, y - 16); ctx.rotate(t * .35); ctx.globalAlpha = .12 * pulse; ctx.fillStyle = '#fff3c4';
+    for (let i = 0; i < 8; i++) { ctx.rotate(TAU / 8); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-5, -52); ctx.lineTo(5, -52); ctx.closePath(); ctx.fill(); } ctx.restore(); ctx.globalAlpha = 1; }
+  const sp = legendSprite(Math.min(3, DPR * S)); ctx.drawImage(sp.c, p.x - sp.w / 2, y - sp.h + 6, sp.w, sp.h);
+  if (Q.level && Math.random() < .18) addPart(p.x + rand(-20, 20), y - rand(10, 40), rand(-8, 8), rand(-40, -20), pick(['#fff59d', '#ffe082']), .8, 2.5);
 }

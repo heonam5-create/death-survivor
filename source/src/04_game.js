@@ -49,7 +49,7 @@ function startStage(n) {
   G.stage = n; G.st = st; G.t = 0; G.time = 0;
   G.hpMul = 1 + (n - 1) * 0.16; G.dmgMul = 1 + (n - 1) * 0.07; G.spdMul = 1 + (n - 1) * 0.006;
   P = { x: 0, y: 0, r: 12, hp: 100, maxHp: 100, face: 1, aim: 0, walkT: 0, moving: false, inv: 0, hurtT: 0, dashT: 0, dashVx: 0, dashVy: 0, lastMx: 1, lastMy: 0, slowT: 0, atkT: 0, recoil: 0 };
-  G.pass = {}; G.buff = { atk: 0, aspd: 0, crit: 0, spd: 0, barrier: 0, vamp: 0 }; G.swapQ = []; G.legT = st.D * rand(0.22, 0.45); G.legSpawned = false; G.legGot = false; G.mergeT = 0; G.weapons = []; G.newFound = []; G.xpTotal = 0; G.goldFrac = 0; G.allyAura = 0; G.newVeh = 0; G.knownBefore = {}; for (const k in save.codex) G.knownBefore[k] = 1;
+  G.pass = {}; G.buff = { atk: 0, aspd: 0, crit: 0, spd: 0, barrier: 0, vamp: 0 }; G.swapQ = []; G.legT = 0; G.legSpawned = false; G.legGot = false; G.legAt = [0.2, 0.5, 0.8].map(x => x + rand(-0.04, 0.04)); G.legN = 0; G.legOpened = 0; G.legBossT = 0; G.mergeT = 0; G.weapons = []; G.newFound = []; G.xpTotal = 0; G.goldFrac = 0; G.allyAura = 0; G.newVeh = 0; G.knownBefore = {}; for (const k in save.codex) G.knownBefore[k] = 1;
   recalc(); P.hp = P.maxHp;
   let sw = save.startW; if (!WMAP[sw] || !save.codex[sw] || firstStageOf(sw) > Math.max(save.cleared + 1, n)) sw = 'rifle';
   addWeapon(sw);
@@ -182,7 +182,11 @@ function director(dt) {
   }
   if (G.bossState === 1) { G.warnT -= dt; if (G.warnT <= 0) spawnBoss(st.boss); }
   G.mergeT -= dt; if (G.mergeT <= 0) { G.mergeT = 0.5; mergeGems(); }
-  if (!G.legSpawned && G.clearing === 0) { G.legT -= dt; if (G.legT <= 0) spawnLegendChest(); }
+  // V9: 전설 보물상자 스테이지당 3개 — 진행률 20%·50%·80% 부근에 하나씩 (보스전이 먼저 시작되면 남은 상자를 15초 간격으로)
+  if (G.legN < 3 && G.clearing === 0 && G.bossState !== 3) {
+    if (progress() >= G.legAt[G.legN]) spawnLegendChest();
+    else if (G.bossState >= 1) { G.legBossT -= dt; if (G.legBossT <= 0) { G.legBossT = 15; spawnLegendChest(); } }
+  }
   extDirector(dt);
   if (G.bossState !== 0 || G.clearing) return;
   // 무작위 이벤트
@@ -219,12 +223,25 @@ function eliteSkill(e, dt, pdist) {
   e.skT *= 0.9;
 }
 // 전설 보물상자: 스테이지마다 최소 1회 등장 (맵에 실제 배치)
+function legSpot() {   // 플레이어가 갈 수 있는 열린 곳: 다른 상자·목표물·차량·터렛과 겹치지 않게
+  for (let k = 0; k < 30; k++) {
+    const a = rand(0, TAU), d = rand(280, 460), x = P.x + Math.cos(a) * d, y = P.y + Math.sin(a) * d;
+    let ok = true;
+    for (const p of pickups) if (!p.dead && p.kind === 'legend' && Math.hypot(p.x - x, p.y - y) < 220) ok = false;
+    for (const e of enemies) if (!e.dead && (e.static || e.boss) && Math.hypot(e.x - x, e.y - y) < e.r + 60) ok = false;
+    for (const g of gens) if (Math.hypot(g.x - x, g.y - y) < g.r + 60) ok = false;
+    for (const v of vehs) if (!v.dead && Math.hypot(v.x - x, v.y - y) < 70) ok = false;
+    for (const t of pturrets) if (Math.hypot(t.x - x, t.y - y) < 50) ok = false;
+    if (ok) return [x, y];
+  }
+  const a = rand(0, TAU); return [P.x + Math.cos(a) * 320, P.y + Math.sin(a) * 320];
+}
 function spawnLegendChest() {
-  G.legSpawned = true; const a = rand(0, TAU), d = rand(230, 320);
-  const x = P.x + Math.cos(a) * d, y = P.y + Math.sin(a) * d;
+  G.legSpawned = true; G.legN++;
+  const [x, y] = legSpot();
   dropPickup('legend', x, y, 0, null, true);
   effects.push({ type: 'pillar', x, y, t: 0, dur: 2.5, col: '#ffd54f' });
-  toast('✨ 전설 보물상자 출현! ✨<br><span style="font-size:15px">화살표 방향으로 가서 획득하세요</span>', 2.6, '#ffd54f'); AU.sfx('legend');
+  toast(`✨ 전설 보물상자 출현! (${G.legN}/3) ✨<br><span style="font-size:15px">화면 가장자리 🎁 표시를 따라가세요</span>`, 2.6, '#ffd54f'); AU.sfx('legend');
 }
 // 경험치 구슬 자동 합치기 (성능 유지)
 function mergeGems() {
@@ -479,7 +496,7 @@ function collect(p) {
     case 'magnet': for (const q of pickups) if (q.kind === 'gem') q.mag = true; AU.sfx('heal'); toast('🧲 자석!', 0.8, '#90caf9'); break;
     case 'qitem': AU.sfx('item'); qAdd('collect', 1, q => q.item === p.item); texts.push({ x: P.x, y: P.y - 30, t: 0, v: QITEMS[p.item].ic + '+1', col: QITEMS[p.item].col, pl: 1 }); break;
     case 'wdrop': acquireWeapon(p.item, 'drop'); break;
-    case 'legend': G.legGot = true; openLegendChest(); break;
+    case 'legend': G.legGot = true; G.legOpened = (G.legOpened || 0) + 1; openLegendChest(); break;
     case 'power': G.powerT = 15; AU.sfx('power'); toast('⚡ 공격력 1.5배 (15초)!', 1.4, '#ff8a80'); break;
     case 'crate': { heal(30); const g = goldX(10 * G.stage * P.greed); G.gold += g; for (let i = 0; i < 8; i++) dropGem(p.x + rand(-30, 30), p.y + rand(-30, 30), 3); qAdd('collect', 1, q => q.item === 'supply'); AU.sfx('chest'); toast(`📦 보급! 체력 회복 +${g}G`, 1.2, '#90caf9'); break; }
     case 'chest': case 'secret': {

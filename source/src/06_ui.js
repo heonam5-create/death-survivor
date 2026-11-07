@@ -371,7 +371,7 @@ function rollChest() {
   const leg = STAGES.slice(0, G.stage).flatMap(x => x.wp).filter(id => WMAP[id].t >= 3 && !own(id) && WMAP[id].st >= G.stage - 4);
   const legLocal = st.wp.filter(id => WMAP[id].t >= 3 && !own(id));
   const legPool = legLocal.length ? legLocal : leg;
-  if (legPool.length) pool.push({ k: 'leg', id: pick(legPool), w: 0.55 });
+  if (legPool.length) pool.push({ k: 'leg', id: pick(legPool), w: [0.55, 0.3, 0.2][Math.min(2, (G.legOpened || 1) - 1)] });
   const nw = st.wp.filter(id => WMAP[id].t <= 2 && !own(id)); if (nw.length) pool.push({ k: 'wpn', id: pick(nw.filter(id => !save.codex[id]).length ? nw.filter(id => !save.codex[id]) : nw), w: 3 });
   if (G.weapons.some(w => w.lv < WMAX)) pool.push({ k: 'up', w: 2.2 });
   pool.push({ k: 'atk', w: 1.5 }, { k: 'aspd', w: 1.5 }, { k: 'crit', w: 1.1 }, { k: 'spd', w: 0.9 }, { k: 'barrier', w: 1 });
@@ -391,9 +391,9 @@ function openLegendChest() {
   const opts = rollChest();
   if (window.__botPick) { G.chestLog = (G.chestLog || []).concat(opts.map(o => o.k)); chooseChest(opts.find(o => o.k === 'leg') || opts[0]); return; }
   G.state = 'levelup'; joy.id = null; joy.mag = 0;
-  $('chestCards').innerHTML = ''; $('chestBox').className = 'chestbox shake'; $('chestMsg').textContent = '전설 보물상자를 여는 중…';
+  $('chestCards').innerHTML = ''; $('chestBox').className = 'chestbox shake'; $('scrChest').classList.remove('opened'); $('chestMsg').textContent = '전설 보물상자를 여는 중…';
   showScreen('scrChest'); AU.sfx('legend');
-  setTimeout(() => { $('chestBox').className = 'chestbox open'; AU.sfx('chest'); $('chestMsg').textContent = '보상 1개를 선택하세요!'; }, 900);
+  setTimeout(() => { $('chestBox').className = 'chestbox open'; $('scrChest').classList.add('opened'); AU.sfx('chest'); $('chestMsg').textContent = '보상 1개를 선택하세요!'; }, 900);
   setTimeout(() => {
     for (const o of opts) {
       const [ic, nm, d] = CHEST_TXT[o.k](o); const b = document.createElement('button'); b.className = 'card' + (o.k === 'leg' ? ' evo' : o.k === 'wpn' ? ' new' : '');
@@ -410,5 +410,6 @@ function chooseChest(o) {
     case 'atk': G.buff.atk += 0.15; break; case 'aspd': G.buff.aspd += 0.12; break; case 'crit': G.buff.crit += 0.08; break; case 'spd': G.buff.spd += 0.10; break;
     case 'heal': heal(P.maxHp); break; case 'barrier': G.buff.barrier += 5; break; case 'vamp': G.buff.vamp = 1; break;
   }
+  { const [ic, nm] = CHEST_TXT[o.k](o); if (o.k !== 'up') toast(`${ic} ${nm} 획득!`, 1.4, '#ffd54f'); }
   recalc(); closeOverlay();
 }
