@@ -293,6 +293,7 @@ html,body{height:100%;background:#040506;color:#e9e4d4;font-family:var(--font);o
         <button class="tab" data-tab="col">도감</button>
       </div>
       <div id="shop-content"></div>
+      <button class="btn" id="btn-ad-gold" style="margin-top:12px;display:none">📺 광고 보고 금화 +0 G</button>
       <button class="btn gold" id="btn-next" style="margin-top:12px">다음 층으로 ▶</button>
     </div>
   </div>
@@ -385,6 +386,7 @@ html,body{height:100%;background:#040506;color:#e9e4d4;font-family:var(--font);o
       <div class="rec" id="over-best"></div>
       <p id="over-msg" style="margin:6px 0"></p>
       <button class="btn gold" id="btn-cp-retry" style="display:none">체크포인트 재도전</button>
+      <button class="btn gold" id="btn-ad-revive" style="display:none">📺 광고 보고 이 층 다시 도전</button>
       <button class="btn red" id="btn-retry">1층부터 새 게임</button>
       <button class="btn" id="btn-over-title">메인 메뉴</button>
     </div>
@@ -1301,6 +1303,8 @@ html,body{height:100%;background:#040506;color:#e9e4d4;font-family:var(--font);o
 </script>
 
 <script>
+/* 저장소 : 게임 사이트(플레이가마 등)에서는 사이트 저장소(PGStorage), 그 외에는 브라우저 저장소 */
+const STORE = window.PGStorage || (() => { try { const ls = window['local' + 'Storage']; ls.setItem('__t', '1'); ls.removeItem('__t'); return ls; } catch (e){ const m = new Map(); return { getItem:k => m.has(k) ? m.get(k) : null, setItem:(k, v) => m.set(k, String(v)), removeItem:k => m.delete(k) }; } })();
 'use strict';
 /* =====================================================================
    Dark Dungeon: Rock Paper Scissors (다크 던전 가위바위보)
@@ -1537,7 +1541,7 @@ EN = {
   '지금은 저장할 수 없습니다.':'Can\'t save right now.', '저장한 층부터 다시 시작할까요? (지금 진행 중인 내용은 사라집니다)':'Restart from the saved floor? (current progress will be lost)',
   '저장된 원정이 있습니다. 새로 시작하면 덮어씁니다. 계속할까요?':'A saved run exists. Starting new will overwrite it. Continue?', '이어하기 (지하 {0}층)':'Continue (B{0}F)',
   // ── 설정 ──
-  '언어':'Language', '친구에게 공유':'Share with friends', '게임 링크를 복사했습니다. 카카오톡 대화창에 붙여넣기 하세요.':'Game link copied. Paste it into a chat.', '아래 링크를 길게 눌러 복사하세요.':'Long-press the link below to copy it.', 'Dark Dungeon: 가위바위보 던전에 도전해 보세요!':'Try Dark Dungeon: Rock Paper Scissors!', '화면 흔들림 · 카메라':'Screen shake · camera', '플래시 · 화면 색조':'Flash · screen tint', '히트스톱':'Hit stop', '슬로우 모션':'Slow motion', '사운드 (음량)':'Sound (volume)',
+  '언어':'Language', '📺 광고 보고 금화 +{0} G':'📺 Watch ad: +{0} G', '📺 광고 보고 이 층 다시 도전':'📺 Watch ad: retry this floor', '광고 보상 : 금화 +{0} G':'Ad reward: +{0} G', '광고를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.':'The ad could not be loaded. Please try again later.', '부활!':'Revived!', '지하 {0}층 다시 도전':'Retry floor B{0}', '친구에게 공유':'Share with friends', '게임 링크를 복사했습니다. 카카오톡 대화창에 붙여넣기 하세요.':'Game link copied. Paste it into a chat.', '아래 링크를 길게 눌러 복사하세요.':'Long-press the link below to copy it.', 'Dark Dungeon: 가위바위보 던전에 도전해 보세요!':'Try Dark Dungeon: Rock Paper Scissors!', '화면 흔들림 · 카메라':'Screen shake · camera', '플래시 · 화면 색조':'Flash · screen tint', '히트스톱':'Hit stop', '슬로우 모션':'Slow motion', '사운드 (음량)':'Sound (volume)',
   '플래시 감소 모드 (빛 민감)':'Reduced flashing (photosensitivity)', '진동 (모바일)':'Vibration (mobile)', '승리 손 날리기 연출':'Flying hand on win', '연출 설정은 전투 결과(승패·피해)에 영향을 주지 않습니다.':'Effect settings never change battle results (wins or damage).',
   // ── 정적 HTML ──
   '심연 / 50층':'Abyss / 50F', '지하 · 50층 중':'Floor / 50', '― 심연의 지배자 ―':'― Ruler of the Abyss ―', '패링 & 룻':'Parry & Loot', '이어하기':'Continue', '새 원정 시작':'New Run',
@@ -2560,15 +2564,15 @@ const Sound = {
 /* ============ 6-1. 영구 저장 (금화 / 장비 / 도감 / 기록) ============ */
 const META_KEY = 'parryLoot_meta_v2';
 function loadMeta(){
-  const defSet = { lang:'en', langSet:false,                                           // 기본 언어 = 영어 (설정에서 한국어 선택)
+  const defSet = { lang:(window.PG && PG.lang === 'ko') ? 'ko' : 'en', langSet:false,                                           // 기본 언어 = 영어 (설정에서 한국어 선택)
     shake:{ on:true, amt:1 }, flash:{ on:true, amt:1 }, hitstop:{ on:true, amt:1 }, slow:{ on:true, amt:1 }, sound:{ on:true, amt:1 }, music:{ on:true, amt:0.4 }, musicV:3, keys:null, keyGuideSeen:false,
     flashReduce:false, vibrate:true, handFly:true };
   const def = { progBest:0, gold:0, equip:{ weapon:0, armor:0, accessory:0, crit:0, combo:0, ward:0 }, rare:[], collection:[], bestFloor:0, bestCombo:0, clears:0, settings:defSet };
   try {
-    const m = JSON.parse(localStorage.getItem(META_KEY) || 'null');
+    const m = JSON.parse(STORE.getItem(META_KEY) || 'null');
     // 마이그레이션 : 예전 저장에 settings가 없으면 기본값으로 채움 (진행 데이터는 그대로)
     if (m){ const st = { ...defSet, ...(m.settings || {}) }; ['shake', 'flash', 'hitstop', 'slow', 'sound', 'music'].forEach(k => st[k] = { ...defSet[k], ...((m.settings || {})[k] || {}) });
-      if (!st.langSet) st.lang = 'en';
+      if (!st.langSet) st.lang = (window.PG && PG.lang === 'ko') ? 'ko' : 'en';
       if (st.musicV !== 3){ st.music = { on:true, amt:0.4 }; st.musicV = 3; }   // 배경음악 기본 음량 40%                                    // 직접 고른 적 없으면 영어로
       return { ...def, ...m, settings:st, equip:{ ...def.equip, ...(m.equip || {}) }, rare:Array.isArray(m.rare) ? m.rare : [], collection:Array.isArray(m.collection) ? m.collection : [] }; }
   } catch (e){}
@@ -2578,7 +2582,7 @@ const RELIC_BACKUP_KEY = 'darkDungeon_relics_v1';   // 유물 기록 별도 백�
 let meta = loadMeta();
 // 유물 기록 정리 + 백업과 합치기 (메인 저장이 깨졌거나 비어도 유물은 최대한 보존)
 (function fixRelics(){
-  let bk = null; try { bk = JSON.parse(localStorage.getItem(RELIC_BACKUP_KEY) || 'null'); } catch (e){}
+  let bk = null; try { bk = JSON.parse(STORE.getItem(RELIC_BACKUP_KEY) || 'null'); } catch (e){}
   const all = [...(meta.collection || []), ...((bk && Array.isArray(bk.c)) ? bk.c : [])];
   meta.collection = [...new Set(all.filter(i => Number.isInteger(i) && i >= 0 && i < 25))];
   if (!Array.isArray(meta.setsDone)) meta.setsDone = (bk && Array.isArray(bk.s)) ? bk.s : [];
@@ -2586,7 +2590,7 @@ let meta = loadMeta();
   if (typeof meta.relicPity !== 'number') meta.relicPity = (bk && bk.p) || 0;
 })();
 function saveMeta(){
-  try { localStorage.setItem(RELIC_BACKUP_KEY, JSON.stringify({ c:meta.collection, s:meta.setsDone || [], p:meta.relicPity || 0 })); } catch (e){} try { localStorage.setItem(META_KEY, JSON.stringify(meta)); } catch (e){} }
+  try { STORE.setItem(RELIC_BACKUP_KEY, JSON.stringify({ c:meta.collection, s:meta.setsDone || [], p:meta.relicPity || 0 })); } catch (e){} try { STORE.setItem(META_KEY, JSON.stringify(meta)); } catch (e){} }
 const colCount = () => meta.collection.length;
 
 /* ============ 6-2. 원정 저장 / 불러오기 (층 단위) ============ */
@@ -2600,13 +2604,13 @@ function saveRun(){
   const floor = POST_KILL() ? game.floor + 1 : game.floor;
   if (floor > MAX_FLOOR) return false;
   const data = runData(floor);
-  try { localStorage.setItem(RUN_KEY, JSON.stringify(data)); } catch (e){ return false; }
+  try { STORE.setItem(RUN_KEY, JSON.stringify(data)); } catch (e){ return false; }
   saveMeta(); return true;
 }
 function runData(floor){
   return { v:5, floor, potions:{ ...game.potions }, immortalUsed:!!game.immortalUsed, mgPenalty:!!game.mgPenalty, pGauge:Math.round(game.pGauge * BAL.gauge.carry), eGauge:Math.round(game.eGauge * BAL.gauge.carry), loseStreak:game.loseStreak, runSeed:game.runSeed, hp:Math.max(1, Math.round(player.hp)), maxCombo:game.maxCombo, perfects:game.perfects, kills:game.kills,
     relics:game.relicList.map(r => r.id), grails:game.grails, inventory:game.inventory.map(it => ({ id:it.type.id, value:it.value })),
-    phoenixUsed:game.phoenixUsed, abyssReviveUsed:game.abyssReviveUsed, order:game.order, rooms:game.rooms, roomSeed:game.roomSeed, mgWins:game.mgWins || 0, savedAt:Date.now() };
+    phoenixUsed:game.phoenixUsed, abyssReviveUsed:game.abyssReviveUsed, order:game.order, rooms:game.rooms, roomSeed:game.roomSeed, mgWins:game.mgWins || 0, adRevive:!!game.adReviveUsed, savedAt:Date.now() };
 }
 /* ── 10층 단위 체크포인트 : 10·20·30·40층 시작 상태를 기록해 두었다가 그 층을 클리어하면 해금 (새 게임을 해도 해금 기록 유지) ── */
 function checkpointSnapshotAtStart(){
@@ -2624,15 +2628,15 @@ const bestCheckpointFor = f => { const cps = meta.checkpoints || {}; return Obje
 function retryFromCheckpoint(f){
   const cp = (meta.checkpoints || {})[f]; if (!cp) return false;
   meta.gold = cp.gold; meta.equip = { ...meta.equip, ...cp.equip }; meta.rare = [...(cp.rare || [])]; meta.cpRetries = (meta.cpRetries || 0) + 1;
-  try { localStorage.setItem(RUN_KEY, JSON.stringify(cp.run)); } catch (e){ return false; }
+  try { STORE.setItem(RUN_KEY, JSON.stringify(cp.run)); } catch (e){ return false; }
   saveMeta(); return continueRun();
 }
 function loadRunData(){
   try {
-    let d = JSON.parse(localStorage.getItem(RUN_KEY) || 'null');
+    let d = JSON.parse(STORE.getItem(RUN_KEY) || 'null');
     if (!d){ // 마이그레이션 : v4 (25층) → v5 (50층) : 층·체력·유물·가방·기세 유지, 몬스터/방 배치만 50층용으로 다시 만듦
-      let o = JSON.parse(localStorage.getItem(RUN_KEY_V4) || 'null');
-      if (!o){ const o3 = JSON.parse(localStorage.getItem(RUN_KEY_OLD) || 'null');   // v3 → v4 → v5
+      let o = JSON.parse(STORE.getItem(RUN_KEY_V4) || 'null');
+      if (!o){ const o3 = JSON.parse(STORE.getItem(RUN_KEY_OLD) || 'null');   // v3 → v4 → v5
         if (o3 && o3.v === 3 && Array.isArray(o3.order)) o = { ...o3, v:4, pGauge:0, eGauge:0, loseStreak:0, runSeed:(Math.random() * 0xffffffff) >>> 0 }; }
       if (o && o.v === 4 && Array.isArray(o.order)) d = { ...o, v:5, order:null, rooms:null, potions:{ potionS:0, potionL:0, feather:0 }, migrated:true };
     }
@@ -2642,7 +2646,7 @@ function loadRunData(){
     return d;
   } catch (e){ return null; }
 }
-function clearRun(){ try { localStorage.removeItem(RUN_KEY); localStorage.removeItem(RUN_KEY_V4); localStorage.removeItem(RUN_KEY_OLD); } catch (e){} }
+function clearRun(){ try { STORE.removeItem(RUN_KEY); STORE.removeItem(RUN_KEY_V4); STORE.removeItem(RUN_KEY_OLD); } catch (e){} }
 function continueRun(){
   const d = loadRunData(); if (!d) return false;
   const rel = (d.relics || []).map(id => RELICS.find(r => r.id === id)).filter(Boolean);
@@ -2651,6 +2655,7 @@ function continueRun(){
     relics:new Set(rel.map(r => r.id)), relicList:rel, inventory:(d.inventory || []).map(it => ({ type:ITEM_TYPES.find(t => t.id === it.id) || ITEM_TYPES[0], value:it.value })),
     grails:d.grails || 0, phoenixUsed:!!d.phoenixUsed, aegisUsed:false, abyssReviveUsed:!!d.abyssReviveUsed, immortalUsed:!!d.immortalUsed, mgPenalty:!!d.mgPenalty, potions:{ potionS:0, potionL:0, feather:0, ...(d.potions || {}) }, order:d.order, rooms:d.rooms, roomSeed:d.roomSeed || 1, mgWins:d.mgWins || 0,
     pGauge:(d.pGauge || 0) / BAL.gauge.carry, eGauge:(d.eGauge || 0) / BAL.gauge.carry, loseStreak:d.loseStreak || 0, runSeed:d.runSeed >>> 0, log:[], stats:{ turns:0, tricks:0, unpreviewedTrickDamage:0, counters:0 } });
+  game.adReviveUsed = !!d.adRevive;
   player.maxHp = calcMaxHp(); player.hp = clamp(d.hp, 1, player.maxHp); player.dead = false; player.anim = 'idle';
   renderRelicStrip(); startFloor();
   addBanner('불러오기 완료', tr('지하 {0}층부터 이어합니다', game.floor), '#8fe3c8', 1.6);
@@ -2951,7 +2956,8 @@ function say(who, text, life = 2.2){ bubbles[who] = { text, life:0, max:life }; 
 /* ============ 10. 흐름 제어 (State Machine) ============ */
 let prevState = null;      // 도감을 열기 전 상태 (닫을 때 복귀)
 function setState(s){
-  state = s;
+  const prev = state; state = s;
+  try { if (typeof Ads !== 'undefined' && Ads.on){ if (prev === S.COMBAT && (s === S.MENU || s === S.TITLE)) Ads.msg('level_paused'); else if (prev === S.MENU && s === S.COMBAT) Ads.msg('level_resumed'); } } catch (e){}
   // 배경음악 : 타이틀·일반 층 = 던전 신스 1, 정예·보스·최종 층 = 던전 신스 2, 게임 오버 때는 작게
   try { if ((s === S.TITLE || s === S.COMBAT) && !Sound.bgmWant) Sound.bgmRandom();
     Sound.bgmDuck = s === S.GAMEOVER || s === S.DEFEAT ? 0.3 : 1; Sound.bgmVol(); } catch (e){}
@@ -2984,7 +2990,7 @@ function closeCollection(){
 function resetRunState(){
   Object.assign(game, { floor:1, combo:0, maxCombo:0, perfects:0, floorPerfects:0, kills:0, runGold:0, newFrags:[],
     relics:new Set(), relicList:[], inventory:[], grails:0, phoenixUsed:false, aegisUsed:false, abyssReviveUsed:false, immortalUsed:false, mgPenalty:false, potions:{ potionS:0, potionL:0, feather:0 }, mgWins:0, mgId:null, mgDone:false,
-    pGauge:0, eGauge:0, loseStreak:0, log:[], lastWinHand:0, turnRec:'', stats:{ turns:0, tricks:0, unpreviewedTrickDamage:0, counters:0 } });
+    pGauge:0, eGauge:0, loseStreak:0, log:[], lastWinHand:0, turnRec:'', adReviveUsed:false, adGoldUsed:false, revSnap:null, lastKillGold:0, stats:{ turns:0, tricks:0, unpreviewedTrickDamage:0, counters:0 } });
   Object.assign(player, { dead:false, anim:'idle', animT:0, flash:0, lockout:0, kb:0, cd:{ DEFEND:0, FOCUS:0, READ:0 }, readUses:ACT.READ.usesPerFloor, focusNext:false, focusActive:false });
   Object.assign(fx, { hitStop:0, slowMo:0, shake:0, hurt:0, white:0 });
   FX.reset();
@@ -3005,7 +3011,7 @@ const hasProgress = () => meta.gold > 0 || (meta.rare || []).length > 0 || Objec
 /** 설정 > '유물 및 영구 성장 초기화' : 최종 확인 후에만 삭제 */
 function resetRelics(){
   askConfirm(tr('모든 유물과 영구 성장 능력치를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'), () => setTimeout(() => askConfirm(tr('마지막 확인 : 정말로 모든 유물·세트·영구 능력치·체크포인트를 삭제할까요?'), () => {
-    meta.collection = []; meta.setsDone = []; meta.relicPity = 0; meta.checkpoints = {}; saveMeta(); try { localStorage.removeItem(RELIC_BACKUP_KEY); } catch (e){}
+    meta.collection = []; meta.setsDone = []; meta.relicPity = 0; meta.checkpoints = {}; saveMeta(); try { STORE.removeItem(RELIC_BACKUP_KEY); } catch (e){}
     player.maxHp = calcMaxHp(); player.hp = Math.min(player.hp, player.maxHp);
     addBanner(tr('초기화 완료'), tr('유물과 영구 성장이 삭제되었습니다'), '#ff8a7a', 1.6); renderSettings();
   }), 80));
@@ -3106,7 +3112,7 @@ function startFloor(){
   saveMeta();
   setState(S.COMBAT);
   saveRun();
-  checkpointSnapshotAtStart();                                    // 상태가 COMBAT이 된 뒤 저장해야 타이틀·게임오버에서 시작해도 1층 저장이 남음
+  checkpointSnapshotAtStart(); try { game.revSnap = { floor:game.floor, run:runData(game.floor), gold:meta.gold }; } catch (e){ game.revSnap = null; } game.adGoldUsed = false; Ads.msg('level_started');                                    // 상태가 COMBAT이 된 뒤 저장해야 타이틀·게임오버에서 시작해도 1층 저장이 남음
 }
 
 /* =====================================================================
@@ -3594,7 +3600,7 @@ function startVictory(){
     game.inventory.push({ type, value });
     lootDrops.push({ img:Sprites.items[type.id], x:boss.x + rand(-6, 6), gy:boss.y + rand(0, 26), h:30, vx:rand(-50, 50), vgy:rand(-5, 15), vh:rand(150, 210), t:0, delay:1.6, collect:false, done:false });
   }
-  addBanner('처형 완료!', tr('+{0} G · 전리품 {1}개', goldTotal, drops), '#e8b84a', 1.6);
+  addBanner('처형 완료!', tr('+{0} G · 전리품 {1}개', goldTotal, drops), '#e8b84a', 1.6); game.lastKillGold = goldTotal; Ads.msg('level_completed');
   // ── 영구 유물 : 1~50층 어디서나 낮은 확률 · 미획득 유물만 · 희귀도 가중치 · 오래 못 얻으면 약한 보정 ──
   const got = rollRelicDrop(floorRank(game.floor), Math.random, Math.random);
   if (got >= 0){
@@ -3738,7 +3744,7 @@ function renderShop(flashId){
   document.getElementById('shop-gold').innerHTML = `${tr('보유 금화')} <b>${meta.gold.toLocaleString()} G</b>`;
   document.querySelectorAll('#shop-tabs .tab').forEach(t => t.classList.toggle('on', t.dataset.tab === shopTab));
   let html = '';
-  document.getElementById('btn-next').textContent = tr(game.mgDone ? '다음 층으로 ▶' : '거절하고 다음 층으로 ▶');
+  document.getElementById('btn-next').textContent = tr(game.mgDone ? '다음 층으로 ▶' : '거절하고 다음 층으로 ▶'); Ads.refreshButtons();
   if (shopTab === 'mg'){
     const def = MINIGAMES[game.mgId], d = mgDiff();
     html += `<div class="row" style="align-items:flex-start"><img src="${Sprites.merchantURL}" style="width:56px;height:74px">
@@ -3854,10 +3860,13 @@ function handleShopAction(e){
 }
 document.getElementById('shop-content').addEventListener('click', handleShopAction);
 document.getElementById('col-content').addEventListener('click', handleShopAction);
-function nextFloor(){ if (state !== S.SHOP && state !== S.MGRESULT) return; Sound.click(); game.newFrags = []; merchant = null; bubbles.merchant = null; game.floor++; startFloor(); }
+function nextFloor(){ if (state !== S.SHOP && state !== S.MGRESULT) return; if (Ads.busy) return;
+  if (Ads.wantBreak(game.floor)){ Ads.interstitial(() => nextFloor0()); return; } nextFloor0(); }
+function nextFloor0(){ if (state !== S.SHOP && state !== S.MGRESULT) return; Sound.click(); game.newFrags = []; merchant = null; bubbles.merchant = null; game.floor++; startFloor(); }
 
 /* ---------- 패배 / 게임 오버 ---------- */
 function startDefeat(){
+  Ads.msg('level_failed');
   player.hp = 0; player.dead = true; setState(S.DEFEAT);
   defeat = { t:0 }; slowMo(0.8); shake(8);
   say('boss', '네 영혼은 이제 내 것이다...', 2.5);
@@ -3881,7 +3890,7 @@ function showGameOver(){
   const cpf = bestCheckpointFor(game.floor), cb = document.getElementById('btn-cp-retry');
   cb.style.display = cpf ? '' : 'none'; cb.textContent = tr('체크포인트 재도전 ({0}층)', cpf); cb.dataset.f = cpf;
   document.getElementById('over-msg').innerHTML = `${tr('유물과 영구 능력치는 그대로 남습니다.')}<br>${cpf ? tr('체크포인트는 그 층에 처음 도착했을 때의 상태(체력·금화·물약·아이템)로 다시 시작합니다.') : tr('10층을 클리어하면 체크포인트가 생깁니다.')}`;
-  setState(S.GAMEOVER);
+  setState(S.GAMEOVER); Ads.refreshButtons();
 }
 function showClear(){
   const { sold } = saveRecords(true); clearRun(); Sound.fanfare(); setTimeout(() => Sound.upgrade(), 700);
@@ -5621,13 +5630,13 @@ function runChecklist(){
   // 14) 새로 시작하기 : 이전 원정 상태가 남지 않는가
   { game.pGauge = 80; game.eGauge = 90; game.loseStreak = 4; game.combo = 7; game.inventory.push({ type:ITEM_TYPES[0], value:5 }); game.relics.add('fang'); game.relicList.push(RELICS[5]);
     player.cd.READ = 3; player.focusNext = true; FX.tintTarget = 0.12; FX.combo.shown = true; FX.stamp = { text:'X', t:0, max:9 }; FX.later(5, () => {}); summonMerchant(); MG.phase = 'end'; game.mgDone = true; slowMo(3); hitStop(1);
-    const sv = localStorage.getItem(RUN_KEY); resetRunState(); rollRunLayout();
+    const sv = STORE.getItem(RUN_KEY); resetRunState(); rollRunLayout();
     const left = []; const chk = (n, ok) => { if (!ok) left.push(n); };
     chk('기세', game.pGauge === 0 && game.eGauge === 0); chk('연패', game.loseStreak === 0); chk('콤보', game.combo === 0); chk('가방', game.inventory.length === 0); chk('유물', game.relicList.length === 0 && game.relics.size === 0);
     chk('쿨다운', !player.cd.DEFEND && !player.cd.FOCUS && !player.cd.READ && player.readUses === ACT.READ.usesPerFloor); chk('집중', !player.focusNext && !player.focusActive);
     chk('연출타이머', fx.hitStop === 0 && fx.slowMo === 0 && FX.queue.length === 0 && !FX.stamp && FX.tintTarget === 0 && !FX.combo.shown);
     chk('복면상인/미니게임', !merchant && MG.phase === 'none' && !game.mgDone && !game.mgId);
-    if (sv) localStorage.setItem(RUN_KEY, sv);
+    if (sv) STORE.setItem(RUN_KEY, sv);
     add('새로 시작 시 이전 원정 상태가 모두 초기화되는가', left.length === 0, left.length ? '남은 상태: ' + left.join(', ') : '기세·연패·콤보·가방·유물·쿨다운·집중·연출 타이머·상인·미니게임 모두 초기화'); }
   // 15) 손 바꾸기 페이크 빈도 : 구간별 상승 + 광폭화 시 증가 + 일반 공격과 섞임
   { const rate = (f, bz) => { const rng = mulberry32(f * 7 + bz); let n = 0; for (let i = 0; i < 6000; i++){ const d = decideIntent(ctxOf(f, { turn:3 + i, hp:0.5, bz }), rng); if (d.fakes.some(x => x.length)) n++; } return n / 6000; };
@@ -5863,10 +5872,10 @@ document.getElementById('m-title').addEventListener('click', () => {
 document.getElementById('btn-col-close').addEventListener('click', closeCollection);
 document.getElementById('btn-clear-retry').addEventListener('click', startGame);
 /* 자동 저장 : 앱 전환 · 탭 닫기 · 화면 꺼짐 때 진행상황(금화·강화·도감)과 원정을 저장 */
-const autoSave = () => { try { saveMeta(); saveRun(); } catch (e){} };
+const autoSave = () => { try { saveMeta(); saveRun(); } catch (e){} try { if (window.PGStorage) PGStorage.flush(); } catch (e){} };
 document.addEventListener('visibilitychange', () => { if (document.hidden) autoSave();
   // 앱 전환·화면 꺼짐 때 소리 정지, 돌아오면 다시 재생 (모바일 배경 재생 방지)
-  try { if (Sound.ctx){ if (document.hidden) Sound.ctx.suspend(); else Sound.ctx.resume(); } } catch (e){} });
+  try { if (Sound.ctx){ if (document.hidden) Sound.ctx.suspend(); else if (!Ads.muted) Sound.ctx.resume(); } } catch (e){} });
 window.addEventListener('pagehide', autoSave);
 setInterval(autoSave, 15000);
 
@@ -5886,11 +5895,87 @@ function resize(){
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', () => setTimeout(resize, 200));
 
+
+/* ============ 광고 (게임 사이트용) ============
+   window.bridge(플레이가마 API 형식, 사이트별 어댑터가 제공)가 있을 때만 작동. 카카오톡·일반 링크에서는 광고 없음.
+   - 층 사이 광고 : 3층마다, 최소 2분 간격, '다음 층으로' 누를 때 (전투 중에는 절대 표시 안 함)
+   - 보상형 광고 : 게임오버 때 '이 층 다시 도전'(한 원정에 1번), 상점에서 '금화 +처치 보상'(층마다 1번)
+   - 광고 중 : 게임 정지 + 소리 끔 */
+const Ads = {
+  B:null, paused:false, muted:false, busy:false, lastAt:0, sitePause:false,
+  get on(){ return !!this.B; },
+  get interOK(){ try { return !!(this.B && this.B.advertisement.isInterstitialSupported); } catch (e){ return false; } },
+  get rewOK(){ try { return !!(this.B && this.B.advertisement.isRewardedSupported); } catch (e){ return false; } },
+  init(){
+    const B = window.bridge; if (!B || !window.PG || !PG.ok) return;
+    this.B = B; this.lastAt = performance.now();   // 시작 직후 광고 방지
+    const E = B.EVENT_NAME || {};
+    try { B.platform.on(E.PAUSE_STATE_CHANGED || 'pause_state_changed', v => { this.sitePause = !!v; this.apply(); }); } catch (e){}
+    try { B.platform.on(E.AUDIO_STATE_CHANGED || 'audio_state_changed', v => { this.siteMute = !v; this.apply(); }); } catch (e){}
+    try { if (B.platform.isAudioEnabled === false){ this.siteMute = true; } } catch (e){}
+    this.apply();
+  },
+  apply(){
+    this.paused = this.sitePause || this.adPlaying;
+    this.muted = !!(this.siteMute || this.adPlaying);
+    try { if (Sound.ctx){ if (this.muted) Sound.ctx.suspend(); else if (!document.hidden) Sound.ctx.resume(); } } catch (e){}
+  },
+  msg(id){ if (!this.B) return; try { this.B.platform.sendMessage(id); } catch (e){} },
+  wantBreak(clearedFloor){ return this.interOK && clearedFloor % 3 === 0 && clearedFloor < MAX_FLOOR && performance.now() - this.lastAt > 120000; },
+  /** 광고 하나 실행 : kind 'interstitial' | 'rewarded', placement = 위치 이름 → done(성공여부) 한 번만 호출 */
+  run(kind, placement, done){
+    const B = this.B; if (!B || this.busy){ done(false); return; }
+    this.busy = true; let fin = false, rewarded = false, seen = false, t1 = null, t2 = null;
+    const ev = kind === 'rewarded' ? B.EVENT_NAME.REWARDED_STATE_CHANGED : B.EVENT_NAME.INTERSTITIAL_STATE_CHANGED;
+    const end = ok => { if (fin) return; fin = true; clearTimeout(t1); clearTimeout(t2); try { B.advertisement.off(ev, h); } catch (e){}
+      this.adPlaying = false; this.busy = false; if (seen) this.lastAt = performance.now(); this.apply(); done(ok); };
+    const h = st => {
+      seen = true;
+      if (st === 'loading' && kind !== 'rewarded'){ clearTimeout(t1); t1 = setTimeout(() => end(false), 8000); }
+      else if (st === 'opened'){ clearTimeout(t1); this.adPlaying = true; this.apply(); }
+      else if (st === 'rewarded') rewarded = true;
+      else if (st === 'closed') end(kind === 'rewarded' ? rewarded : true);
+      else if (st === 'failed') end(false);
+    };
+    t1 = setTimeout(() => { if (!seen || kind !== 'rewarded') end(false); }, kind === 'rewarded' ? 12000 : 900);   // 광고가 안 나오면 그냥 진행
+    t2 = setTimeout(() => end(kind === 'rewarded' ? rewarded : true), 180000);
+    try { B.advertisement.on(ev, h); if (kind === 'rewarded') B.advertisement.showRewarded(placement); else B.advertisement.showInterstitial(placement); }
+    catch (e){ end(false); }
+  },
+  interstitial(then){ this.msg('level_paused'); this.run('interstitial', 'floor_break', () => then()); },
+  rewarded(placement, onReward){
+    this.run('rewarded', placement, ok => { if (ok) onReward(); else askConfirm(tr('광고를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'), null, null, true); });
+  },
+  refreshButtons(){
+    const g = document.getElementById('btn-ad-gold'), r = document.getElementById('btn-ad-revive');
+    if (g){ const ok = this.rewOK && !game.adGoldUsed && (game.lastKillGold || 0) > 0 && state === S.SHOP;
+      g.style.display = ok ? '' : 'none'; if (ok) g.textContent = tr('📺 광고 보고 금화 +{0} G', game.lastKillGold); }
+    if (r){ const ok = this.rewOK && !game.adReviveUsed && game.revSnap && game.revSnap.floor === game.floor;
+      r.style.display = ok ? '' : 'none'; }
+  }
+};
+document.getElementById('btn-ad-gold').addEventListener('click', () => {
+  if (game.adGoldUsed || state !== S.SHOP) return; Sound.click();
+  Ads.rewarded('double_gold', () => { if (game.adGoldUsed) return; game.adGoldUsed = true; const g = game.lastKillGold || 0; meta.gold += g; game.runGold += g; saveMeta(); Sound.coin();
+    addBanner(tr('광고 보상 : 금화 +{0} G', g), '', '#e8b84a', 1.4); renderShop(); });
+});
+document.getElementById('btn-ad-revive').addEventListener('click', () => {
+  if (state !== S.GAMEOVER || game.adReviveUsed || !game.revSnap) return; Sound.click();
+  const snap = game.revSnap;
+  Ads.rewarded('revive', () => {
+    if (state !== S.GAMEOVER) return;
+    const run = { ...snap.run, adRevive:true };
+    meta.gold = snap.gold;   // 게임오버 때 자동 환전된 전리품은 되돌림 (복제 방지)
+    try { STORE.setItem(RUN_KEY, JSON.stringify(run)); } catch (e){ return; }
+    saveMeta();
+    if (continueRun()){ game.adReviveUsed = true; player.hp = Math.max(player.hp, Math.round(player.maxHp * 0.5)); saveRun(); addBanner(tr('부활!'), tr('지하 {0}층 다시 도전', game.floor), '#8fe3c8', 1.6); }
+  });
+});
 /* ============ 16. 메인 루프 & 시작 ============ */
 let lastTime = performance.now();
 function frame(now){
   const rdt = Math.min(0.05, (now - lastTime) / 1000); lastTime = now;
-  update(rdt); render();
+  if (!Ads.paused) update(rdt); render();
   requestAnimationFrame(frame);
 }
 function init(){
@@ -5905,7 +5990,8 @@ function init(){
   document.querySelectorAll('.rps img').forEach((img, i) => img.src = Sprites.hands[i].toDataURL());
   setupFloor(); // 타이틀 배경용 1층
   showTitleRecords();
-  resize(); setState(S.TITLE); applyI18n();
+  resize(); setState(S.TITLE); applyI18n(); Ads.init();
+  if (window.bridge){ const sb = document.getElementById('btn-share'); if (sb) sb.style.display = 'none'; }   // 게임 사이트에서는 외부 링크 공유 버튼 숨김
   requestAnimationFrame(frame);
 }
 init();
