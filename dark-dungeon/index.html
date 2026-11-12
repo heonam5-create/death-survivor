@@ -2950,6 +2950,18 @@ function burst(x, y, n, colors, o = {}){
 function addText(x, y, text, o = {}){
   texts.push({ x, y, text, color:o.color || '#fff', size:o.size || 9, life:0, max:o.life || 0.9, vy:o.vy ?? -26, outline:o.outline || '#14181c', pop:o.pop ?? 1 });
 }
+function fitLines(d, text, size, maxW){
+  const words = String(text).split(' ');
+  for (let sz = size; sz >= 5; sz -= 0.5){
+    d.font = `bold ${sz}px ${FONT}`;
+    if (d.measureText(text).width <= maxW) return { size:sz, lines:[text] };
+    if (words.length > 1){ let best = null;                       // 두 줄의 길이가 가장 비슷해지는 위치에서 나눔
+      for (let i = 1; i < words.length; i++){ const a = words.slice(0, i).join(' '), b = words.slice(i).join(' ');
+        const w = Math.max(d.measureText(a).width, d.measureText(b).width); if (!best || w < best.w) best = { w, a, b }; }
+      if (best.w <= maxW && sz >= 6) return { size:sz, lines:[best.a, best.b] }; }
+  }
+  return { size:5, lines:[text] };
+}
 function addBanner(text, sub, color, life = 1.3){ banners.push({ text, sub, color, life:0, max:life }); }
 function say(who, text, life = 2.2){ bubbles[who] = { text, life:0, max:life }; }
 
@@ -4451,9 +4463,13 @@ function drawScreenFX(d){
     d.globalAlpha = a;
     d.font = `bold ${17 * sc}px ${FONT}`; d.lineWidth = 4; d.strokeStyle = '#140a04'; d.lineJoin = 'round';
     const jx = bn.text === 'PERFECT PARRY' && p < 0.3 ? rand(-1, 1) : 0;
-    const btx = tr(bn.text), bsb = tr(bn.sub);
+    const btx = tr(bn.text), bsb = tr(bn.sub), maxW = W - 12;
+    let tsz = 17 * sc; while (tsz > 9 && d.measureText(btx).width > maxW){ tsz -= 1; d.font = `bold ${tsz}px ${FONT}`; }   // 제목이 화면 밖으로 잘리지 않게
     d.strokeText(btx, W / 2 + jx, y - 3); d.fillStyle = bn.color; d.fillText(btx, W / 2 + jx, y - 3);
-    if (bn.sub){ d.font = `bold 8px ${FONT}`; d.lineWidth = 2.5; d.strokeText(bsb, W / 2, y + 11); d.fillStyle = '#efe6d2'; d.fillText(bsb, W / 2, y + 11); }
+    if (bn.sub){ const L = fitLines(d, bsb, 8, maxW), lh = L.size + 2;   // 긴 설명은 2줄로 나누고 글자 크기를 줄여 화면 안에 맞춤
+      if (L.lines.length > 1){ d.globalAlpha = a * 0.6; d.fillStyle = '#000'; d.fillRect(0, y + 17, W, lh * (L.lines.length - 1) + 2); d.globalAlpha = a; }
+      d.font = `bold ${L.size}px ${FONT}`; d.lineWidth = 2.5;
+      L.lines.forEach((ln, k) => { const ly = y + 11 + k * lh; d.strokeText(ln, W / 2, ly); d.fillStyle = '#efe6d2'; d.fillText(ln, W / 2, ly); }); }
   });
   d.globalAlpha = 1;
   drawGauges(d);
@@ -5538,8 +5554,10 @@ const DebugUI = {
       히트스톱 ${FX.lastHitstop.toFixed(3)}s · 슬로우 ${FX.lastSlow.toFixed(2)}s · 등급 ${FX.lastTier || '-'} · 품질 ${fxQuality}<br>
       변칙 ${game.stats.tricks}/${game.stats.turns}턴 · 예고없는 변칙피해 ${game.stats.unpreviewedTrickDamage}`; }
 };
-if (/[?&]debug=1/.test(location.search)) setTimeout(() => DebugUI.open(), 300);
-window.addEventListener('keydown', e => { if (e.code === 'Backquote'){ debug.on ? (DebugUI.el.style.display = 'none', debug.on = false) : DebugUI.open(); } });
+/* 디버그 패널은 출시 버전에서 열 수 없음 (개발 중에만 DEV_TOOLS = true 로 켬) */
+const DEV_TOOLS = false;
+if (DEV_TOOLS && /[?&]debug=1/.test(location.search)) setTimeout(() => DebugUI.open(), 300);
+if (DEV_TOOLS) window.addEventListener('keydown', e => { if (e.code === 'Backquote'){ debug.on ? (DebugUI.el.style.display = 'none', debug.on = false) : DebugUI.open(); } });
 
 /* ---------- 헤드리스 전투 시뮬레이션 (실제 전투 로직을 고정 프레임으로 돌림) ---------- */
 function simulateBattle(opt){
