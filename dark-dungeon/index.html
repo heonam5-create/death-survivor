@@ -1582,7 +1582,7 @@ function applyI18n(){
   for (const it of i18nNodes){ const t = it.ko.trim(); const out = tr(t); it.n.nodeValue = it.ko.replace(t, out); }
   const h = document.querySelector('#ov-title .howto'); if (h) h.innerHTML = HOWTO[LANG()] || HOWTO.ko;
   document.documentElement.lang = LANG();
-  document.title = LANG() === 'en' ? 'Parry & Loot: Ruler of the Abyss' : '패링 & 룻: 심연의 지배자';
+  document.title = LANG() === 'en' ? 'Dark Dungeon: Rock Paper Scissors' : '다크 던전 가위바위보';
   for (const k in hudCache) delete hudCache[k];
   if (typeof showTitleRecords === 'function' && state === S.TITLE) showTitleRecords();
   if (state === S.SHOP) renderShop();
