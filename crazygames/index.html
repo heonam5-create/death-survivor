@@ -6074,8 +6074,19 @@ const Ads = {
     try { if (B.platform.isAudioEnabled === false){ this.siteMute = true; } } catch (e){}
     this.apply();
   },
+  /* 광고가 닫혔다는 신호가 오지 않아도 멈춘 채로 남지 않게 : 광고가 게임 화면을 덮고 있으면 게임은 터치·키를 받을 수 없으므로,
+     멈춘 상태에서 플레이어 입력이 들어왔다는 것은 광고가 이미 사라졌다는 뜻 → 바로 이어서 진행 */
+  pausedAt:0, _force:null,
+  wake(){
+    if (!(this.sitePause || this.adPlaying)) return;
+    if (performance.now() - this.pausedAt < 1500) return;
+    this.sitePause = false;
+    if (this._force){ const f = this._force; this._force = null; f(); } else { this.adPlaying = false; this.apply(); }
+  },
   apply(){
+    const was = this.paused;
     this.paused = this.sitePause || this.adPlaying;
+    if (this.paused && !was) this.pausedAt = performance.now();
     this.muted = !!(this.siteMute || this.adPlaying);
     try { if (Sound.ctx){ if (this.muted) Sound.ctx.suspend(); else if (!document.hidden) Sound.ctx.resume(); } } catch (e){}
   },
@@ -6087,7 +6098,8 @@ const Ads = {
     this.busy = true; let fin = false, rewarded = false, seen = false, t1 = null, t2 = null;
     const ev = kind === 'rewarded' ? B.EVENT_NAME.REWARDED_STATE_CHANGED : B.EVENT_NAME.INTERSTITIAL_STATE_CHANGED;
     const end = ok => { if (fin) return; fin = true; clearTimeout(t1); clearTimeout(t2); try { B.advertisement.off(ev, h); } catch (e){}
-      this.adPlaying = false; this.busy = false; if (seen) this.lastAt = performance.now(); this.apply(); done(ok); };
+      this._force = null; this.adPlaying = false; this.busy = false; if (seen) this.lastAt = performance.now(); this.apply(); done(ok); };
+    this._force = () => end(kind === 'rewarded' ? rewarded : true);
     const h = st => {
       seen = true;
       if (st === 'loading' && kind !== 'rewarded'){ clearTimeout(t1); t1 = setTimeout(() => end(false), 8000); }
@@ -6097,7 +6109,7 @@ const Ads = {
       else if (st === 'failed') end(false);
     };
     t1 = setTimeout(() => { if (!seen || kind !== 'rewarded') end(false); }, kind === 'rewarded' ? 12000 : 900);   // 광고가 안 나오면 그냥 진행
-    t2 = setTimeout(() => end(kind === 'rewarded' ? rewarded : true), 180000);
+    t2 = setTimeout(() => end(kind === 'rewarded' ? rewarded : true), 60000);   // '닫힘' 신호가 끝내 오지 않으면 1분 뒤 이어서 진행
     try { B.advertisement.on(ev, h); if (kind === 'rewarded') B.advertisement.showRewarded(placement); else B.advertisement.showInterstitial(placement); }
     catch (e){ end(false); }
   },
@@ -6130,6 +6142,7 @@ document.getElementById('btn-ad-revive').addEventListener('click', () => {
     if (continueRun()){ game.adReviveUsed = true; player.hp = Math.max(player.hp, Math.round(player.maxHp * 0.5)); saveRun(); addBanner(tr('부활!'), tr('지하 {0}층 다시 도전', game.floor), '#8fe3c8', 1.6); }
   });
 });
+['pointerdown', 'keydown', 'touchstart'].forEach(t => document.addEventListener(t, () => { try { Ads.wake(); } catch (e){} }, { capture:true, passive:true }));
 /* ============ 16. 메인 루프 & 시작 ============ */
 let lastTime = performance.now();
 function frame(now){
