@@ -10609,7 +10609,9 @@ const V82={tab:'lv',mode:null,busy:false,sub:null,sig:'',hsig:'',lastSfx:0,side:
 function v82Mode(){
   if(V82.mode)return V82.mode;
   let m=null;try{m=localStorage.getItem('ds_v82_upMode');}catch(e){}
-  return V82.mode=['mini','rec','all'].includes(m)?m:'rec';
+  // ONE store build: phones show every option by default (scrollable list)
+  const _coarse=(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
+  return V82.mode=['mini','rec','all'].includes(m)?m:(_coarse?'all':'rec');
 }
 function v82SetMode(m){V82.mode=m;try{localStorage.setItem('ds_v82_upMode',m);}catch(e){}V82.sig='';v82Render();v82Layout(true);}
 function v82Pts(){return Math.max(0,G.upPts|0);}
@@ -10964,13 +10966,15 @@ function v82Layout(force){
   const now=performance.now();if(!force&&now-V82.lastLayout<280)return;V82.lastLayout=now;
   const ui=$('gameUI'),ur=ui.getBoundingClientRect(),vw=ur.width,vh=ur.height;
   const touch=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)||vw<700||vh<500;
-  const W=touch?(vw<=480?158:184):236;
+  const W=touch?(vw<=480?158:(vw>=760?232:196)):236;
   v82Panel.style.setProperty('--upw',W+'px');
   v82Panel.classList.toggle('touch',touch);
   const n=v82Total(),mode=v82Mode();
   const mini=mode==='mini'||n===0;
-  const needH=mini?44:mode==='all'?250:(touch?140:190);
+  const needH=mini?44:mode==='all'?(touch?200:250):(touch?140:190);
   const skip=new Set(['upPanel','upTip','safe','v39BossBoom','rbBanner','v39Guide','toast']);
+  // ONE store build: on phones (landscape) the quest panel must not squeeze the upgrade panel; overlay it instead (upPanel z-index 9 > quest 7).
+  if(touch)skip.add('v42QuestPanel');
   const obs=[];
   const els=[...ui.children];const lt=$('languageToolbar');if(lt)els.push(lt);
   for(const el of els){
@@ -10981,7 +10985,7 @@ function v82Layout(force){
   }
   const sT=(typeof SAFE!=='undefined'&&SAFE.t)||0,sB=(typeof SAFE!=='undefined'&&SAFE.b)||0,sL=(typeof SAFE!=='undefined'&&SAFE.l)||0,sR=(typeof SAFE!=='undefined'&&SAFE.r)||0;
   const gap=side=>{
-    const m=8,x0=side==='r'?vw-W-m-sR-4:0,x1=side==='r'?vw:W+m+sL+4;
+    const m=(touch&&side==='r')?54:8,x0=side==='r'?vw-W-m-sR-4:0,x1=side==='r'?vw-((touch)?58:0):W+m+sL+4;
     // 캔버스에 그려지는 HUD 예약 구역: 상단 경험치/체력 바, 좌하단 목표 안내·조이스틱
     const iv=[[0,(side==='l'?100:30)+sT]];
     if(side==='l')iv.push([vh-Math.max(230,vh*0.34)-sB,vh]);
@@ -11003,7 +11007,7 @@ function v82Layout(force){
   v82Panel.classList.toggle('side-l',side==='l');
   v82Panel.style.top=Math.round(g.t+3)+'px';
   v82Panel.style.maxHeight=Math.max(40,Math.round(g.h-6))+'px';
-  if(side==='r'){v82Panel.style.right=Math.round(8+sR)+'px';v82Panel.style.left='auto';}
+  if(side==='r'){v82Panel.style.right=Math.round((touch?54:8)+sR)+'px';v82Panel.style.left='auto';}
   else{v82Panel.style.left=Math.round(8+sL)+'px';v82Panel.style.right='auto';}
   if(v82Tip&&v82Tip.classList.contains('on'))v82PlaceTip();
 }
@@ -11164,6 +11168,12 @@ window.RB={BR,SYN,EVENTS,rbFam,elemsOf,synRecalc,rbEvoReady,fireEvent,openEvoPic
 
 </script>
 <style>
+/* ONE store build: on phones, while the live-upgrade panel is open, the quest panel moves to the left so they never overlap */
+#v42QuestPanel.ds-quest-left{left:calc(8px + env(safe-area-inset-left)) !important;right:auto !important;top:calc(132px + env(safe-area-inset-top)) !important;width:min(230px,27vw) !important;max-height:calc(100vh - 132px - 200px) !important}
+
+/* ONE store build: keep the realtime-upgrade panel above the quest panel on phones */
+#upPanel.touch.on{z-index:30 !important;background:linear-gradient(180deg,rgba(13,19,29,.97),rgba(7,11,18,.95)) !important}
+
 #dsPay{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:rgba(8,4,18,.82);font-family:inherit}
 #dsPay .box{width:min(440px,92vw);background:linear-gradient(160deg,#2a1150,#140726);border:2px solid #ffc43c;border-radius:18px;padding:22px 20px;color:#fff;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.6)}
 #dsPay h2{margin:0 0 8px;font-size:22px;color:#ffd246}
@@ -11254,6 +11264,22 @@ window.restoreBattleSnapshot = function (record) {
   return origRestore.apply(this, arguments);
 };
 window.__dsPay = { isUnlocked, openPay };
+
+/* Phones: keep quest panel and live-upgrade panel apart */
+(function(){
+  const coarse = () => (window.matchMedia && matchMedia('(pointer:coarse)').matches) || innerWidth < 700 || innerHeight < 500;
+  setInterval(() => {
+    const q = document.getElementById('v42QuestPanel'), u = document.getElementById('upPanel');
+    if (!q) return;
+    const on = !!(u && u.classList.contains('on') && !u.classList.contains('mini') && coarse());
+    if (q.classList.contains('ds-quest-left') !== on) {
+      q.classList.toggle('ds-quest-left', on);
+      const props = { left: 'calc(8px + env(safe-area-inset-left))', right: 'auto', top: 'calc(132px + env(safe-area-inset-top))', width: 'min(230px, 27vw)', 'max-height': '34px', overflow: 'hidden' };
+      for (const k in props) { if (on) q.style.setProperty(k, props[k], 'important'); else q.style.removeProperty(k); }
+    }
+  }, 150);
+})();
+
 
 /* SDK lifecycle (runs in ONE store app; elsewhere the game stays playable for free stages). */
 (async () => {
