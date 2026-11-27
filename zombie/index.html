@@ -401,6 +401,15 @@ button.pri{background:linear-gradient(#e11d48,#9f1239);box-shadow:0 3px 0 #4c051
 .slot.sel{border:2px solid #d4a24a;background:linear-gradient(170deg,#3a2e18,#201a10);box-shadow:0 0 0 2px #00000080,0 0 10px #d4a24a66}
 .slot .em0{width:26px;height:auto;image-rendering:pixelated;opacity:.35;margin:auto;font-size:0}
 .slot .wi{image-rendering:pixelated}
+/* 스킬 설명 */
+.skbtn{margin-top:6px;width:100%;font-size:11.5px;padding:6px;background:#2a241c;border:1px solid #5a4630;color:#e7dccb;position:relative;z-index:2}
+.skbox{max-width:420px}
+.skhd{width:40px;height:40px;border-radius:50%;border:2px solid;object-fit:cover;margin-right:8px}
+.sklv{margin:10px 0 4px;font-size:12px;font-weight:800;color:#c8b89a;border-bottom:1px solid #3a3229;padding-bottom:2px}
+.skr{display:flex;flex-direction:column;padding:5px 8px;margin:3px 0;background:#1f1b16;border:1px solid #3a3229;border-radius:8px}
+.skr b{font-size:13px}.skr span{font-size:11.5px;color:#a8a29e;line-height:1.35}
+.skr.has{border-color:#22c55e;background:#15231a}
+.sksm{font-size:10px;color:#a8a29e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 </style>
 <script>
 /* ===== 설정 (필요할 때만 바꾸세요) =====
@@ -2216,8 +2225,8 @@ function sfxLines(neu) {
     const m = l.m;
     if (/승리|미션 성공/.test(m) && l.k !== 'z') { Y('win', .5); return; }
     if (/^☠️ 패배/.test(m)) { P('gameover', .8, .3); Y('toll', .5); return; }
-    if (/쓰러졌|화염에 휩싸/.test(m)) { Y('ouch', .15); P('bite', .7, .2); Y('toll', .4); return; }
-    if (/부상 \d/.test(m)) { P(pickR(['zatk1', 'zatk2']), .6, .08); Y('slash', .12); Y('ouch', .1); P('bite', .4, .4); try { navigator.vibrate && navigator.vibrate(120); } catch (e) {} return; }
+    if (/쓰러졌|화염에 휩싸/.test(m)) { P('bite', .6, .1); P('pdie', .75, .5); Y('toll', .4); return; }
+    if (/부상 \d/.test(m)) { P(pickR(['zatk1', 'zatk2']), .6, .08); Y('slash', .1); P(pickR(['hurt1', 'hurt2', 'hurt3', 'hurt4', 'hurt5', 'hurt6']), .7, .05); P('bite', .35, .3); try { navigator.vibrate && navigator.vibrate(120); } catch (e) {} return; }
     if (/탈출 성공/.test(m)) { P('walk', .5, .3); Y('chime', .3); return; }
     if (/⬆️/.test(m)) { Y('level', .4); return; }
     if (/스킬 \[/.test(m)) { Y('chime', .2); return; }
@@ -2337,6 +2346,20 @@ function inviteUrl() {
 function wakeLock() { try { if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(() => {}); } catch (e) {} }
 
 /* ---------- 로비 ---------- */
+
+/* ---------- 스킬 설명 (룰북 생존자 카드처럼 레벨별) ---------- */
+function skillModal(sid) {
+  const d = ZE.SURV[sid], sv = S.survivors && S.survivors.find(x => x.id === sid), own = sv ? sv.skills : [];
+  const row = (k, lv) => { const K = ZE.SKILLS[k]; const has = own.includes(k); return `<div class="skr ${has ? 'has' : ''}"><b>${lv} ${K.n}${has ? ' ✔' : ''}</b><span>${K.d}</span></div>`; };
+  return `<div class="modal" data-a="skclose"><div class="box skbox" data-stop="1">
+    <div class="row"><img src="${EMBED_('head_' + sid)}" class="skhd" style="border-color:${d.color}"><h3 class="grow" style="color:${d.color}">${d.n} <span class="dim">${d.role}</span></h3><button class="sm" data-a="skclose">닫기</button></div>
+    <div class="sklv">🔵 파랑 레벨 — 처음부터 가진 스킬</div>${row(d.blue, '🔵')}
+    <div class="sklv">🟡 노랑 레벨 (경험치 7) — 자동으로 +1 행동</div><div class="skr"><b>🟡 +1 행동</b><span>모든 생존자 공통이에요.</span></div>
+    <div class="sklv">🟠 주황 레벨 (경험치 19) — 둘 중 하나 선택</div>${d.orange.map(k => row(k, '🟠')).join('')}
+    <div class="sklv">🔴 빨강 레벨 (경험치 43) — 셋 중 하나 선택</div>${d.red.map(k => row(k, '🔴')).join('')}
+    <div class="dim" style="font-size:11px;margin-top:8px">경험치는 좀비를 처치하거나 목표를 먹으면 올라요. 룰북의 생존자 카드와 같은 구성이에요.</div>
+  </div></div>`;
+}
 function renderLobby() {
   const host = isHost();
   const M = ZE.MISSIONS[S.mission];
@@ -2365,6 +2388,7 @@ function renderLobby() {
           <div style="margin-top:4px"><span class="tag">${s.kid ? '어린이 · 체력2 · 1턴 1회 미끄러지기' : '체력 3'}</span></div>
           <div style="font-size:12px;margin-top:4px">🔵 ${ZE.SKILLS[s.blue].n}</div>
           <div class="dim" style="font-size:11px">🟠 ${s.orange.map(k => ZE.SKILLS[k].n).join(' / ')}<br>🔴 ${s.red.map(k => ZE.SKILLS[k].n).join(' / ')}</div>
+          <button class="sm skbtn" data-a="skinfo" data-sid="${s.id}">📖 스킬 설명</button>
         </div>`; }).join('')}</div>
     </div>
     <div class="card"><h3>미션 ${host ? '' : '<span class="dim">(방장이 선택)</span>'}</h3>
@@ -2379,7 +2403,7 @@ function renderLobby() {
     ${host ? `<button class="pri" style="width:100%;padding:16px;font-size:18px" data-a="start" ${Object.keys(S.picks).length ? '' : 'disabled'}>게임 시작!</button>`
       : `<div class="card dim" style="text-align:center">방장이 게임을 시작하길 기다리는 중…</div>`}
     <div style="height:30px"></div>
-  </div>`;
+  </div>${ui.skinfo ? skillModal(ui.skinfo) : ''}`;
 }
 function statusText() {
   return { ready: '🟢 방 열림', connected: '🟢 연결됨', connecting: '🟡 연결 중…', reconnecting: '🟡 재연결 중…', nohost: '🔴 방장을 찾는 중…', slow: '🟡 연결이 느려요…', idtaken: '🔴 방 코드 충돌', error: '🔴 연결 오류', rejected: '🔴 입장 거절' }[netStatus] || netStatus || '';
@@ -2825,6 +2849,7 @@ function bottom() {
   h += `<div class="actor" data-a="detail" data-sid="${s.id}">
     <img class="hd" src="${EMBED_('head_' + s.id)}" style="border-color:${def.color}">
     <div class="grow"><b style="color:${def.color}">${def.n}</b> <span class="hp">${hearts(s)}</span>${freeTxt ? ` <span class="tag free">무료 ${freeTxt}</span>` : ''}
+      <div class="sksm">${s.skills.map(k => ZE.SKILLS[k].n).join(' · ')}</div>
       <div class="bar"><i style="width:${next ? Math.min(100, (s.ap - ZE.LEVELS[lv].ap) / (next.ap - ZE.LEVELS[lv].ap) * 100) : 100}%;background:${lvlColor(s.ap)}"></i></div></div>
     <div class="dots"><span>행동</span><div>${dots}</div></div></div>`;
   h += `<div class="coach">${coach(s)}</div>`;
@@ -2893,7 +2918,7 @@ function briefModal() {
      <h3 style="margin-top:8px">${esc(M.n)}</h3><p class="dim">${esc(M.story)}</p>
      <div class="goal">🎯 <b>목표</b> — ${esc(M.goal)}</div>
      <div style="margin:8px 0">난이도: <b>${DF.n}</b> <span class="dim">(${DF.d})</span><br>인원 보정: <b>${S.hc ? S.hc + '명' : '끄기'}</b> <span class="dim">(${ZE.HCS[S.hc || 0]})</span></div>
-     ${mine.length ? `<div class="bsv">${mine.map(x => `<div><img src="${EMBED_('head_' + x.id)}"><b>${ZE.SURV[x.id].n}</b><small>${ZE.SURV[x.id].role}</small></div>`).join('')}</div>` : ''}`,
+     ${mine.length ? `<div class="bsv">${mine.map(x => `<div><img src="${EMBED_('head_' + x.id)}"><b>${ZE.SURV[x.id].n}</b><small>${ZE.SURV[x.id].role} · 🔵 ${ZE.SKILLS[ZE.SURV[x.id].blue].n}</small></div>`).join('')}</div>` : ''}`,
     `<h3>① 라운드 진행 순서</h3>
      <ol><li><b>플레이어 단계</b>: 차례대로 생존자를 골라 <b>행동 3번</b> — 이동, 수색(건물 안), 문 열기, 공격, 목표 획득, 교환, 소음 내기.</li>
      <li><b>좀비 단계</b>: 같은 구역에 생존자가 있으면 <b>공격</b>(1마리당 부상 1), 없으면 보이는 생존자나 <b>가장 시끄러운 곳</b>으로 1칸 이동. 러너는 2번 행동!</li>
@@ -3006,6 +3031,7 @@ function modals() {
       <b style="color:${ZE.SURV[B.id].color}">${ZE.SURV[B.id].n}</b>${invHTML(B, true)}
       <button class="ok" style="width:100%;margin-top:8px" data-a="trade_done">교환 완료</button></div></div>`;
   }
+  if (ui.skinfo) m += skillModal(ui.skinfo);
   // 생존자 상세
   if (ui.detail) {
     const s = S.survivors.find(x => x.id === ui.detail);
@@ -3016,6 +3042,7 @@ function modals() {
         <div class="row"><h3 class="grow" style="color:${def.color}">${def.n} <span class="dim">${def.role}${def.kid ? ' · 어린이' : ''}</span></h3><button class="sm" data-a="closedetail">닫기</button></div>
         <div>${s.dead ? '💀 사망' : s.escaped ? '🚪 탈출' : hearts(s)} · AP ${s.ap} (${ZE.LEVELS[ZE.levelOf(s.ap)].name}) · 플레이어 ${esc(pl(s.owner).name)}</div>
         <div style="margin:8px 0">${s.skills.map(k => `<div><b>${ZE.SKILLS[k].n}</b> <span class="dim">${ZE.SKILLS[k].d}</span></div>`).join('')}</div>
+        <button class="sm" data-a="skinfo" data-sid="${s.id}">📖 레벨별 스킬 전체 보기</button>
         <div class="dim">남은 레벨업 선택지: 🟠 ${def.orange.map(k => ZE.SKILLS[k].n).join(' / ')} · 🔴 ${def.red.map(k => ZE.SKILLS[k].n).join(' / ')}</div>
         ${invHTML(s, false)}
         ${can ? `<button class="pri" style="width:100%" data-a="select" data-sid="${s.id}">이 생존자로 행동</button>` : ''}
@@ -3060,7 +3087,7 @@ document.addEventListener('click', e => {
   const t = e.target.closest('[data-a]'); if (!t) return;
   const A = t.dataset.a, D = t.dataset;
   if (A !== 'cell') SND.play('click', .1);
-  if (t.closest('[data-stop]') && (A === 'closedetail') && t.classList.contains('modal')) return;
+  if (t.classList.contains('modal') && e.target.closest('[data-stop]')) return;
   switch (A) {
     case 'create': { const n = getName(); if (!n) return; const code = newCode(); store('zsv-host', null); Net.hostRoom(code, me.pid, n); wakeLock(); break; }
     case 'resume': { const sv = store('zsv-host'); const n = getName(); if (!n || !sv) return; Net.hostRoom(sv.code, me.pid, n, sv.state); wakeLock(); break; }
@@ -3070,6 +3097,8 @@ document.addEventListener('click', e => {
     case 'share': share(); break;
     case 'copy': copy(inviteUrl()); break;
     case 'pick': act('pick', { sid: D.sid }); break;
+    case 'skinfo': ui.skinfo = D.sid; render(); break;
+    case 'skclose': ui.skinfo = null; render(); break;
     case 'pickai': e.stopPropagation(); act('pickai', { sid: D.sid }); break;
     case 'mute': SND.toggle(); render(); break;
     case 'aitake': aiFor[D.pid] = !aiFor[D.pid]; toast(aiFor[D.pid] ? '🤖 AI가 대신 플레이해요' : 'AI 대신하기 해제'); render(); aiTick(); break;
