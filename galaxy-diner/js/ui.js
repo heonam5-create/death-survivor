@@ -10,12 +10,26 @@
     expert: n => `img/expert/${n}.webp`, back: k => `img/ui/back_${k}.webp`
   };
   const SAVE = 'gd_save_v1', OPT = 'gd_opt_v1';
-  let G = null, RUN = 0;
+  let G = null, RUN = 0, ME = 0, ON = null;
   const UI = { req: null, resolve: null, sel: [], targets: [], joker: false };
   const opt = Object.assign({ sfx: true, bgm: true, fast: false }, JSON.parse(localStorage.getItem(OPT) || '{}'));
   const sp = () => (opt.fast ? 0.45 : 1);
   const wait = ms => new Promise(r => setTimeout(r, ms * sp()));
   const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
+  // ---------- 카카오톡 공유 ----------
+  // 선택: 카카오 디벨로퍼스(무료)에서 받은 JavaScript 키를 넣으면 카톡에 '바로 입장' 버튼이 달린 카드로 공유돼요.
+  // 비워 두면 폰 기본 공유창(카카오톡 선택)으로 링크가 공유돼요. 둘 다 링크 한 번 터치로 바로 실행돼요.
+  const KAKAO_JS_KEY = 'a97dadf128745c5659e2a49f44317a85';
+  if (KAKAO_JS_KEY) { const ks = document.createElement('script'); ks.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.8.5/kakao.min.js'; ks.onload = () => { try { if (!Kakao.isInitialized()) Kakao.init(KAKAO_JS_KEY); } catch (e) { } }; document.head.appendChild(ks); }
+  function kakaoShare(title, desc, url, btn) {
+    try {
+      if (!(window.Kakao && Kakao.isInitialized && Kakao.isInitialized())) return false;
+      const imageUrl = new URL('img/og.jpg', location.href.split('?')[0]).href;
+      Kakao.Share.sendDefault({ objectType: 'feed', content: { title, description: desc, imageUrl, link: { mobileWebUrl: url, webUrl: url } }, buttons: [{ title: btn, link: { mobileWebUrl: url, webUrl: url } }] });
+      return true;
+    } catch (e) { return false; }
+  }
 
   // ---------- 화면 전환 ----------
   function show(id) { $$('.screen').forEach(s => s.classList.toggle('on', s.id === id)); }
@@ -55,15 +69,17 @@
   $('#b-share').onclick = share;
   function share() {
     const url = location.href.split('#')[0].split('?')[0];
+    if (kakaoShare('은하수식당 - AI 카드게임', '링크를 누르면 바로 시작! 친구와 최대 4인 온라인 대전', url, '바로 플레이')) return;
     if (navigator.share) navigator.share({ title: '은하수식당', text: '은하수식당 카드게임 같이 해요! 링크 누르면 바로 시작돼요 🚀', url }).catch(() => { });
     else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => toast('링크를 복사했어요! 카카오톡에 붙여넣기 하세요'));
     else prompt('이 주소를 복사하세요', url);
   }
 
   // ---------- 게임 실행 ----------
-  function startRun(g) {
+  function startRun(g, online) {
+    if (!online) { leaveOnline(true); ME = 0; }
     G = g; RUN++; const my = RUN;
-    UI.sel = []; UI.targets = []; UI.joker = false; UI.req = null;
+    UI.sel = []; UI.targets = []; UI.joker = false; UI.req = null; UI.modalLock = false;
     closeModal(); show('scr-game'); render();
     const ask = (p, req) => {
       if (my !== RUN) return new Promise(() => { });
@@ -71,12 +87,13 @@
         const d = req.type === 'turn' ? 450 + Math.random() * 450 : 250;
         return wait(d).then(() => { if (my !== RUN) return new Promise(() => { }); return AI.aiAsk(G, p, req); });
       }
-      return humanAsk(req);
+      if (p === ME) return humanAsk(req);
+      return remoteAsk(p, req);
     };
     const H = {
-      save: g2 => { if (my === RUN) try { localStorage.setItem(SAVE, JSON.stringify(g2)); } catch (e) { } },
-      event: e => (my === RUN ? onEvent(e) : new Promise(() => { })),
-      invalid: (p, a, err) => { if (!G.players[p].ai) toast('규칙 위반: ' + esc(err), true); }
+      save: g2 => { if (my === RUN && !online) try { localStorage.setItem(SAVE, JSON.stringify(g2)); } catch (e) { } },
+      event: e => { if (my !== RUN) return new Promise(() => { }); if (online && ON) ON.net.broadcast({ t: 'ev', e, G }); return onEvent(e); },
+      invalid: (p, a, err) => { if (p === ME) toast('규칙 위반: ' + esc(err), true); }
     };
     if (G.over) { render(); showResult(); return; }
     E.run(G, ask, H).then(() => { if (my === RUN) showResult(); }).catch(err => { console.error(err); toast('오류: ' + esc(err.message), true); });
@@ -94,16 +111,16 @@
   // ---------- 렌더링 ----------
   function render() {
     if (!G) return;
-    const me = G.players[0];
+    const me = G.players[ME];
     $('#t-round').textContent = `${G.round}/4 라운드`;
     $('#t-turn').textContent = G.over ? '게임 종료' : G.phase === 'cleanup' ? '라운드 정리 중' : `${G.players[G.cur].name} 차례`;
-    $('#t-acts').innerHTML = '내 액션 ' + [0, 1, 2, 3].map(i => i < G.acts[0] ? '●' : '○').join('');
+    $('#t-acts').innerHTML = '내 액션 ' + [0, 1, 2, 3].map(i => i < G.acts[ME] ? '●' : '○').join('');
     renderPlayers(); renderGuests(); renderRows(); renderMarket(); renderHand(); renderPrompt(); renderActions();
   }
   function renderPlayers() {
     $('#g-players').innerHTML = G.players.map((P, i) => `
       <div class="pchip ${i === G.cur && G.phase === 'action' && !G.over ? 'cur' : ''} ${UI.think === i ? 'think' : ''}" data-p="${i}">
-        <div class="pn"><span class="dot" style="background:${P.color}"></span>${esc(P.name)}</div>
+        <div class="pn"><span class="dot" style="background:${P.color}"></span>${esc(P.name)}${ON && i === ME ? ' (나)' : ''}${P.off ? ' 📵' : ''}</div>
         <div class="ps">${P.score}</div>
         <div class="pi">🃏${P.hand.length} 🎲${P.dice} ⬤${P.tokens}</div>
       </div>`).join('');
@@ -116,7 +133,7 @@
     const myTurn = UI.req && UI.req.type === 'turn';
     box.innerHTML = `<div class="sec-t"><span>✨ 특별한 손님 (카드 3장으로 대접 · +20)</span></div><div class="glist">` + G.guests.map((g, gi) => {
       let can = false;
-      if (myTurn && UI.sel.length === 3 && !g.done.includes(0)) can = E.evalGuest(g.id, UI.sel.map(card), G.players[0].hand.length - 3).ok;
+      if (myTurn && UI.sel.length === 3 && !g.done.includes(ME)) can = E.evalGuest(g.id, UI.sel.map(card), G.players[ME].hand.length - 3).ok;
       return `<div class="gcard ${can ? 'can' : ''}" data-gi="${gi}"><img src="${img.guest(g.id)}" alt="">
         <span class="life">${guestLife(g)}</span>${g.first !== null ? `<span class="crown">👑</span>` : ''}
         <div class="marks">${g.done.map(p => `<span class="mk" style="background:${G.players[p].color}"></span>`).join('')}</div></div>`;
@@ -167,7 +184,7 @@
   }
   function sortedHand(h) { return h.slice().sort((a, b) => FOOD_ORDER.indexOf(card(a).f) - FOOD_ORDER.indexOf(card(b).f) || a - b); }
   function renderHand() {
-    const me = G.players[0];
+    const me = G.players[ME];
     const box = $('#g-hand');
     if (!me.hand.length) { box.innerHTML = `<div class="empty-hand">손패가 없어요. ① 카드 얻기로 요리카드를 가져오세요!</div>`; return; }
     const selF = UI.sel.length ? card(UI.sel[0]).f : null;
@@ -208,7 +225,7 @@
     const cc = $('#p-cancel'); if (cc) cc.onclick = () => { UI.sel = []; UI.targets = []; UI.joker = false; render(); };
   }
   function renderActions() {
-    const t = myTurn(), me = G.players[0];
+    const t = myTurn(), me = G.players[ME];
     $('#a-draw').disabled = !t; $('#a-dice').disabled = !t || me.dice >= E.MAX_DICE;
     $('#a-serve').disabled = !t; $('#a-guest').disabled = !t || !G.guests.length;
     $('#a-dice').innerHTML = `<b>②</b>조커주사위<br>받기 🎲${me.dice}/${E.MAX_DICE}`;
@@ -241,7 +258,7 @@
     if (UI.joker && UI.targets.length === 1) submitServe();
   }
   function submit(a) {
-    const err = E.validate(G, 0, a);
+    const err = E.validate(G, ME, a);
     if (err) { toast('⚠ ' + esc(err), true); return false; }
     UI.resolve(a); return true;
   }
@@ -253,7 +270,7 @@
   $('#a-draw').onclick = () => { if (myTurn()) drawModal(); };
   $('#a-serve').onclick = () => {
     if (!myTurn()) return;
-    const me = G.players[0];
+    const me = G.players[ME];
     if (UI.sel.length && UI.targets.length === UI.sel.length && card(UI.sel[0]).f && UI.sel.every(id => card(id).f === card(UI.sel[0]).f)) { submitServe(); return; }
     modal(`<h3>③ 요리 제공</h3><div class="info">
       <p>• 손패에서 <b>같은 요리카드</b>를 1~3장 누른 뒤, 주문카드의 <b style="color:#7cff8a">초록 칸</b>을 눌러 제공하세요.</p>
@@ -267,7 +284,7 @@
   $('#a-guest').onclick = () => {
     if (!myTurn()) return;
     if (G.guests.length === 1) { guestModal(0); return; }
-    modal(`<h3>④ 특별한 손님 선택</h3><div class="grid">` + G.guests.map((g, gi) => `<div class="pick ${g.done.includes(0) ? 'no' : ''}" data-gi="${gi}"><img src="${img.guest(g.id)}"></div>`).join('') + `</div><p class="mini">이미 대접한 손님은 흐리게 보여요. 각 손님은 1인당 1회만 대접할 수 있어요.</p><div class="m-btns"><button class="btn ghost" id="x-c">닫기</button></div>`);
+    modal(`<h3>④ 특별한 손님 선택</h3><div class="grid">` + G.guests.map((g, gi) => `<div class="pick ${g.done.includes(ME) ? 'no' : ''}" data-gi="${gi}"><img src="${img.guest(g.id)}"></div>`).join('') + `</div><p class="mini">이미 대접한 손님은 흐리게 보여요. 각 손님은 1인당 1회만 대접할 수 있어요.</p><div class="m-btns"><button class="btn ghost" id="x-c">닫기</button></div>`);
     $$('#m-box .pick').forEach(el => el.onclick = () => guestModal(+el.dataset.gi));
     $('#x-c').onclick = closeModal;
   };
@@ -281,7 +298,7 @@
       <label class="row-set">효과음 <input type="checkbox" id="x-sfx" ${opt.sfx ? 'checked' : ''}></label>
       <label class="row-set">배경음악 <input type="checkbox" id="x-bgm" ${opt.bgm ? 'checked' : ''}></label>
       <label class="row-set">빠른 진행 <input type="checkbox" id="x-fast" ${opt.fast ? 'checked' : ''}></label>
-      <button class="btn ghost" id="x-home">🏠 메인 메뉴 (자동 저장됨)</button>
+      <button class="btn ghost" id="x-home">${ON ? '🚪 방 나가기' : '🏠 메인 메뉴 (자동 저장됨)'}</button>
       <button class="btn" id="x-c">계속하기</button>`);
     $('#x-c').onclick = closeModal;
     const ps = $('#x-pass'); if (ps) ps.onclick = () => { closeModal(); UI.resolve({ t: 'pass' }); };
@@ -291,7 +308,14 @@
     $('#x-sfx').onchange = e => { opt.sfx = e.target.checked; SND.set('sfx', opt.sfx); saveOpt(); };
     $('#x-bgm').onchange = e => { opt.bgm = e.target.checked; SND.set('bgm', opt.bgm); saveOpt(); };
     $('#x-fast').onchange = e => { opt.fast = e.target.checked; saveOpt(); };
-    $('#x-home').onclick = () => { closeModal(); RUN++; G = null; refreshMenu(); show('scr-menu'); };
+    $('#x-home').onclick = () => {
+      if (ON) {
+        modal(`<h3>방에서 나갈까요?</h3><p class="info" style="text-align:center">${ON.role === 'host' ? '방장이 나가면 모든 친구의 게임이 끝나요.' : '나가면 내 자리는 AI가 대신 플레이해요.'}</p><div class="m-btns"><button class="btn ghost" id="x-no">취소</button><button class="btn" id="x-yes">나가기</button></div>`);
+        $('#x-no').onclick = closeModal; $('#x-yes').onclick = () => { closeModal(); RUN++; G = null; leaveOnline(); refreshMenu(); show('scr-menu'); };
+        return;
+      }
+      closeModal(); RUN++; G = null; refreshMenu(); show('scr-menu');
+    };
   };
 
   // ---------- 모달들 ----------
@@ -319,8 +343,8 @@
   function guestModal(gi) {
     const g = G.guests[gi]; if (!g) return;
     const GG = D.GUESTS[g.id];
-    const me = G.players[0];
-    const can = myTurn() && !g.done.includes(0);
+    const me = G.players[ME];
+    const can = myTurn() && !g.done.includes(ME);
     let sel = UI.sel.filter(id => me.hand.includes(id)).slice(0, 3);
     let useJ = false;
     const draw = () => {
@@ -333,7 +357,7 @@
         1등 보상: <b>${esc(D.REWARD_TEXT[GG.r])}</b> ${g.first !== null ? `(이미 ${esc(G.players[g.first].name)}이(가) 1등)` : '(아직 아무도 대접 안 함!)'}<br>
         대접 완료: ${g.done.length ? g.done.map(p => esc(G.players[p].name)).join(', ') : '없음'} · ${guestLife(g)}</div>
         ${can ? `<p class="mini" style="margin-top:6px">내 손패에서 3장을 고르세요 (${sel.length}/3)</p><div class="grid">${sortedHand(me.hand).map(id => `<div class="pick ${sel.includes(id) ? 'sel' : ''}" data-id="${id}"><img src="${img.food(id)}"></div>`).join('')}</div>
-        ${me.dice > 0 ? `<label class="row-set" style="font-size:14px">🎲 조커 주사위 1개 사용 (주사위 1번 굴려 숫자 ±, 색상 1개 대체 시 카드 1장 비용, 실패하면 주사위만 버려짐) <input type="checkbox" id="x-j" ${useJ ? 'checked' : ''}></label><div class="mini">${jtxt}</div>` : ''}` : (g.done.includes(0) ? '<p class="mini">이미 이 손님을 대접했어요.</p>' : '')}
+        ${me.dice > 0 ? `<label class="row-set" style="font-size:14px">🎲 조커 주사위 1개 사용 (주사위 1번 굴려 숫자 ±, 색상 1개 대체 시 카드 1장 비용, 실패하면 주사위만 버려짐) <input type="checkbox" id="x-j" ${useJ ? 'checked' : ''}></label><div class="mini">${jtxt}</div>` : ''}` : (g.done.includes(ME) ? '<p class="mini">이미 이 손님을 대접했어요.</p>' : '')}
         <div class="m-btns"><button class="btn ghost" id="x-c">닫기</button>${can ? `<button class="btn" id="x-ok" ${sel.length === 3 && (ev.ok || useJ) ? '' : 'disabled'}>대접하기</button>` : ''}</div>`);
       $('#x-c').onclick = () => { UI.sel = sel.slice(); closeModal(); render(); };
       $$('#m-box .pick[data-id]').forEach(el => el.onclick = () => { const id = +el.dataset.id; if (sel.includes(id)) sel = sel.filter(x => x !== id); else if (sel.length < 3) sel.push(id); SND.play('tap'); draw(); });
@@ -358,7 +382,7 @@
     draw();
   }
   function expertModal() {
-    const me = G.players[0];
+    const me = G.players[ME];
     modal(`<h3>📋 내 전문가 요청 카드</h3><div class="info">라운드 정리 때 1장을 골라 확인해요. 달성하면 +5, 성공 여부와 관계없이 그 카드는 버려집니다.</div>
       <div class="grid" style="grid-template-columns:repeat(2,1fr)">${me.experts.map(e => { const ok = D.EXPERTS[e].fn(me.st); return `<div class="pick ${ok ? 'ok' : ''}"><img src="${img.expert(e)}"><div class="mini" style="text-align:center">${ok ? '<span style="color:#7cff8a">현재 달성 ✔</span>' : '아직 미달성'}</div></div>`; }).join('') || '<p>남은 카드 없음</p>'}</div>
       ${roundStatsHtml(me)}
@@ -383,7 +407,7 @@
 
   // 엔진 요청(사람)
   function openReqModal(req) {
-    const me = G.players[0];
+    const me = G.players[ME];
     UI.modalLock = true;
     const done = v => { UI.modalLock = false; UI.resolve(v); };
     const pickGrid = (ids, n, title, desc, faceSrc) => {
@@ -449,19 +473,19 @@
   async function onEvent(e) {
     switch (e.t) {
       case 'turn': {
-        UI.think = G.players[e.p].ai ? e.p : null; render();
-        if (!G.players[e.p].ai) SND.play('tap');
+        UI.think = e.p !== ME ? e.p : null; render();
+        if (e.p === ME) SND.play('tap');
         return;
       }
       case 'draw': {
         const fromEl = e.open ? $('#g-market .mlist') : $('#g-market .deck');
-        const to = e.p === 0 ? $('#g-hand') : chip(e.p);
-        e.ids.forEach((id, i) => setTimeout(() => fly(e.open || e.p === 0 ? img.food(id) : img.back('food'), fromEl, to), i * 120));
-        SND.play('card'); UI.think = null; render(); await wait(e.p === 0 ? 350 : 500); return;
+        const to = e.p === ME ? $('#g-hand') : chip(e.p);
+        e.ids.forEach((id, i) => setTimeout(() => fly(e.open || e.p === ME ? img.food(id) : img.back('food'), fromEl, to), i * 120));
+        SND.play('card'); UI.think = null; render(); await wait(e.p === ME ? 350 : 500); return;
       }
       case 'gain': {
         const fromEl = e.open ? $('#g-market .mlist') : $('#g-market .deck');
-        fly(e.p === 0 || e.open ? img.food(e.id) : img.back('food'), fromEl, e.p === 0 ? $('#g-hand') : chip(e.p));
+        fly(e.p === ME || e.open ? img.food(e.id) : img.back('food'), fromEl, e.p === ME ? $('#g-hand') : chip(e.p));
         SND.play('card'); render(); await wait(260); return;
       }
       case 'dice': UI.think = null; render(); floatText(e.d > 0 ? '🎲+1' : '🎲-1', chip(e.p)); SND.play('dice'); await wait(450); return;
@@ -476,7 +500,7 @@
       case 'roll': {
         const d = document.createElement('div'); d.className = 'die'; d.textContent = e.d; $('#fx').appendChild(d); SND.play('dice');
         await wait(1000); d.remove();
-        if (!e.ok) toast(`🎲 ${e.d} — ${esc(G.players[e.p].name)} 조커 실패! 주사위를 잃었어요`, e.p === 0);
+        if (!e.ok) toast(`🎲 ${e.d} — ${esc(G.players[e.p].name)} 조커 실패! 주사위를 잃었어요`, e.p === ME);
         else if (e.info) { const f = e.info; const parts = []; if (f.dn) parts.push(`${f.card} → ${f.card + f.dn}`); if (f.col) parts.push(`색상 → ${D.COLORS[f.col] || f.col} (카드 1장 비용)`); toast(`🎲 ${e.d} 성공! ${parts.join(' · ') || '그대로 성공'}`); }
         return;
       }
@@ -490,7 +514,7 @@
       case 'reward': toast(`🎁 ${esc(G.players[e.p].name)} — ${esc(e.why)}: ${esc(D.REWARD_TEXT[e.r])}`); render(); await wait(650); return;
       case 'steal': toast(`🫳 ${esc(G.players[e.p].name)}이(가) ${esc(G.players[e.from].name)}의 카드 1장을 뺏었어요`); SND.play('card'); render(); await wait(500); return;
       case 'exchange': toast(`🔄 ${esc(G.players[e.p].name)} ↔ ${esc(G.players[e.with].name)} 카드 ${e.n}장 교환`); SND.play('card'); render(); await wait(500); return;
-      case 'extraAction': if (G.players[e.p].ai) toast(`⚡ ${esc(G.players[e.p].name)} 추가 액션!`); await wait(300); return;
+      case 'extraAction': if (e.p !== ME) toast(`⚡ ${esc(G.players[e.p].name)} 추가 액션!`); await wait(300); return;
       case 'expert': toast(`📋 ${esc(G.players[e.p].name)} 전문가 요청 「${esc(D.EXPERTS[e.id].t)}」 ${e.ok ? '<b style="color:#7cff8a">성공 +5</b>' : '실패'}`); render(); await wait(600); return;
       case 'cleanupStart': UI.think = null; render(); banner(`${e.round}라운드 정리`, 1000); SND.play('round'); await wait(1000); return;
       case 'roundStart': {
@@ -514,21 +538,291 @@
   function roundSummary() {
     return new Promise(res => {
       UI.modalLock = true;
-      modal(`<h3>${G.lastSummary.round}라운드 결과</h3>${summaryHtml(G.lastSummary)}${scoreTable()}<div class="m-btns"><button class="btn" id="x-n">${G.round}라운드 시작 →</button></div>`);
-      $('#x-n').onclick = () => { UI.modalLock = false; closeModal(); res(); };
+      let fin = false, tm = null;
+      const go = () => { if (fin) return; fin = true; clearInterval(tm); UI.modalLock = false; closeModal(); res(); };
+      modal(`<h3>${G.lastSummary.round}라운드 결과</h3>${summaryHtml(G.lastSummary)}${scoreTable()}<div class="m-btns"><button class="btn" id="x-n">${G.round}라운드 시작 →${ON ? ' <span id="x-cd">6</span>' : ''}</button></div>`);
+      $('#x-n').onclick = go;
+      if (ON) { let left = 6; tm = setInterval(() => { left--; const c = $('#x-cd'); if (c) c.textContent = left; if (left <= 0) go(); }, 1000); }
     });
   }
   function showResult() {
     render();
-    const win = G.winners.includes(0);
+    const win = G.winners.includes(ME);
     UI.modalLock = true;
     if (win) { confetti(); SND.play('win'); } else SND.play('round');
     modal(`<h3 style="font-size:26px">${win ? '🏆 승리! 최고의 은하수식당!' : '게임 종료'}</h3>
       <p class="info" style="text-align:center">승리: ${G.winners.map(i => `<b style="color:${G.players[i].color}">${esc(G.players[i].name)}</b>`).join(', ')}</p>
-      ${summaryHtml(G.lastSummary)}${scoreTable()}<p class="mini">동점이면 손패가 적은 사람이 이겨요. 난이도: ${{ easy: '쉬움', normal: '보통', hard: '어려움' }[G.diff]}</p>
-      <div class="m-btns"><button class="btn ghost" id="x-home">메인 메뉴</button><button class="btn" id="x-again">다시 하기</button></div>`);
-    $('#x-home').onclick = () => { UI.modalLock = false; closeModal(); RUN++; refreshMenu(); show('scr-menu'); };
-    $('#x-again').onclick = () => { UI.modalLock = false; closeModal(); startRun(E.newGame(G.n, G.diff, (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0)); };
+      ${summaryHtml(G.lastSummary)}${scoreTable()}<p class="mini">동점이면 손패가 적은 사람이 이겨요.${G.players.some(P => P.ai) ? ` AI 난이도: ${{ easy: '쉬움', normal: '보통', hard: '어려움' }[G.diff]}` : ''}</p>
+      ${ON && ON.role === 'guest' ? '<p class="mini" style="text-align:center">방장이 [다시 하기]를 누르면 바로 다음 판이 시작돼요</p>' : ''}
+      <div class="m-btns"><button class="btn ghost" id="x-home">${ON ? '방 나가기' : '메인 메뉴'}</button>${ON && ON.role === 'guest' ? '' : `<button class="btn" id="x-again">${ON ? '같은 멤버로 다시 하기' : '다시 하기'}</button>`}</div>`);
+    $('#x-home').onclick = () => { UI.modalLock = false; closeModal(); RUN++; leaveOnline(); refreshMenu(); show('scr-menu'); };
+    const ag = $('#x-again');
+    if (ag) ag.onclick = () => { UI.modalLock = false; closeModal(); if (ON) hostStart(); else startRun(E.newGame(G.n, G.diff, (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0)); };
+  }
+
+  // ---------- 온라인 대전 (방장 폰이 게임 진행, 참가자는 자기 차례만 선택) ----------
+  const CID = (() => { let c = null; try { c = localStorage.getItem('gd_cid'); if (!c) { c = Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4); localStorage.setItem('gd_cid', c); } } catch (e) { c = Math.random().toString(36).slice(2, 12); } return c; })();
+  const AI_NAMES = ['AI 루나', 'AI 오릭스', 'AI 넥스'];
+  const SEAT_COLORS = ['#3fb6ff', '#ffd23f', '#ff6fa8', '#7cff8a'];
+  let wakeLock = null;
+  function keepAwake(on) {
+    try {
+      if (on && 'wakeLock' in navigator && !wakeLock && document.visibilityState === 'visible') navigator.wakeLock.request('screen').then(l => { wakeLock = l; l.addEventListener('release', () => { wakeLock = null; }); }).catch(() => { });
+      if (!on && wakeLock) { wakeLock.release().catch(() => { }); wakeLock = null; }
+    } catch (e) { }
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (!ON || document.visibilityState !== 'visible') return;
+    keepAwake(true);
+    if (ON.role === 'guest' && !ON.connected && !ON.joining && !ON.bye) guestConnect(true);
+  });
+  const cleanNick = v => String(v || '').replace(/[<>&"'`\\]/g, '').replace(/\s+/g, ' ').trim().slice(0, 8);
+  const roomLink = code => location.href.split('#')[0].split('?')[0] + '?room=' + code;
+  const randSeed = () => (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0;
+
+  function openOnline(code) {
+    try { $('#on-nick').value = localStorage.getItem('gd_nick') || ''; } catch (e) { }
+    $('#on-code').value = code || '';
+    $('#on-status').textContent = code ? `초대받은 방: ${code} — 닉네임을 확인하고 [참가하기]를 누르세요` : '';
+    show('scr-online');
+  }
+  function nickVal() {
+    const v = cleanNick($('#on-nick').value);
+    if (!v) { toast('닉네임을 입력하세요', true); $('#on-nick').focus(); return null; }
+    try { localStorage.setItem('gd_nick', v); } catch (e) { }
+    return v;
+  }
+  function onBusy(msg) { const b = !!msg; $('#on-host').disabled = b; $('#on-join').disabled = b; $('#on-status').textContent = msg || ''; }
+  $('#b-online').onclick = () => { SND.init(); SND.play('tap'); openOnline(''); };
+  $('#on-code').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5); });
+  $('#on-host').onclick = async () => {
+    const nick = nickVal(); if (!nick) return;
+    SND.init(); onBusy('방 만드는 중...');
+    try { await hostCreate(nick); onBusy(''); } catch (e) { leaveOnline(); onBusy(''); toast(esc(e.message), true); }
+  };
+  $('#on-join').onclick = () => {
+    const nick = nickVal(); if (!nick) return;
+    const code = $('#on-code').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (code.length !== 5) { toast('방 코드 5자리를 입력하세요', true); $('#on-code').focus(); return; }
+    SND.init(); joinRoom(nick, code);
+  };
+  async function joinRoom(nick, code) {
+    onBusy('방에 입장하는 중... 🚀');
+    leaveOnline();
+    ON = { role: 'guest', nick, code, connected: false, joining: false, joined: false, started: false, tries: 0, q: Promise.resolve() };
+    await guestConnect(false);
+    onBusy('');
+    if (!ON && IN_KAKAO) $('#on-ext').classList.remove('hidden');
+  }
+  // 카톡 링크 한 번 터치로 바로 입장: 닉네임이 없으면 자동으로 만들어 줌 (대기실에서 바꿀 수 있음)
+  const NICK_POOL = ['우주요리사', '별빛셰프', '은하손님', '행성미식가', '혜성주방장', '달토끼', '외계미식가', '토성셰프', '유성웨이터', '별사탕'];
+  function autoNick() { let n = ''; try { n = cleanNick(localStorage.getItem('gd_nick')); } catch (e) { } if (n) return n; n = (NICK_POOL[Math.floor(Math.random() * NICK_POOL.length)] + Math.floor(10 + Math.random() * 90)).slice(0, 8); try { localStorage.setItem('gd_nick', n); } catch (e) { } return n; }
+  const IN_KAKAO = /KAKAOTALK/i.test(navigator.userAgent);
+  $('#on-ext').onclick = () => { location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href); };
+  if (IN_KAKAO) $('#on-ext').classList.remove('hidden');
+  function renameModal() {
+    const st = ON; if (!st) return;
+    modal(`<h3>✏ 닉네임 바꾸기</h3><input id="x-nick" class="inp" maxlength="8" value="${esc(st.nick)}" autocomplete="off"><div class="m-btns"><button class="btn ghost" id="x-c">취소</button><button class="btn" id="x-ok">바꾸기</button></div>`);
+    const inp = $('#x-nick'); inp.focus(); inp.select();
+    $('#x-c').onclick = closeModal;
+    $('#x-ok').onclick = () => {
+      const v = cleanNick(inp.value); if (!v) { toast('닉네임을 입력하세요', true); return; }
+      closeModal(); if (ON !== st) return;
+      st.nick = v; try { localStorage.setItem('gd_nick', v); } catch (e) { }
+      if (st.role === 'host') { st.members[0].name = v; broadcastLobby(st); renderLobby(); }
+      else if (st.net) st.net.send({ t: 'hello', name: v, cid: CID });
+    };
+  }
+  function shareRoom(code) {
+    const url = roomLink(code);
+    const text = `🚀 은하수식당 온라인 대전 같이 해요!\n👇 링크 한 번만 누르면 바로 입장 (방 코드 ${code})`;
+    if (kakaoShare('은하수식당 온라인 대전 초대 🚀', `링크를 누르면 바로 입장! 방 코드 ${code} · 아이폰·안드로이드 OK`, url, '바로 입장하기')) return;
+    if (navigator.share) navigator.share({ title: '은하수식당 온라인 대전', text, url }).catch(() => { });
+    else if (navigator.clipboard) navigator.clipboard.writeText(text + '\n' + url).then(() => toast('초대 링크를 복사했어요! 카톡에 붙여넣기 하세요')).catch(() => prompt('이 주소를 친구에게 보내세요', url));
+    else prompt('이 주소를 친구에게 보내세요', url);
+  }
+  function leaveOnline() {
+    const st = ON; if (!st) return;
+    ON = null; keepAwake(false);
+    st.bye = true;
+    try { if (st.net) st.net.close(); } catch (e) { }
+    if (st.pending) st.pending.clear();
+    if (location.search) try { history.replaceState(null, '', location.pathname); } catch (e) { }
+  }
+
+  // ----- 방장 -----
+  async function hostCreate(nick) {
+    leaveOnline();
+    const st = { role: 'host', nick, members: [{ cid: CID, name: nick, W: null }], total: 2, diff: 'normal', started: false, qid: 0, pending: new Map() };
+    ON = st;
+    const net = await GNET.host({
+      onJoin: () => { },
+      onMsg: (W, m) => { if (ON === st) hostMsg(st, W, m); },
+      onLeave: W => { if (ON === st) hostLeave(st, W); },
+      onError: msg => { if (ON === st) toast(esc(msg), true); }
+    });
+    if (ON !== st) { net.close(); return; }
+    st.net = net; st.code = net.code;
+    if (location.search) try { history.replaceState(null, '', location.pathname); } catch (e) { }
+    keepAwake(true);
+    renderLobby(); show('scr-lobby');
+  }
+  function lobbyInfo(st) { return { t: 'lobby', code: st.code, names: st.members.map(m => m.name), cids: st.members.map(m => m.cid), total: Math.max(st.total, st.members.length), diff: st.diff }; }
+  function broadcastLobby(st) { if (st.net) st.net.broadcast(lobbyInfo(st)); }
+  function uniqName(st, name) { let n = name, k = 2; while (st.members.some(m => m.name === n)) n = name.slice(0, 7) + (k++); return n; }
+  function hostMsg(st, W, m) {
+    if (m.t === 'hello') {
+      let cid = String(m.cid || '').slice(0, 24) || Math.random().toString(36).slice(2);
+      if (cid === CID) cid += '_';
+      const name = cleanNick(m.name) || '손님';
+      const seat = st.members.findIndex(x => x.cid === cid);
+      if (st.started) {
+        if (seat < 0) { W.send({ t: 'reject', msg: '이미 게임이 시작된 방이에요. 다음 판에 참가해 주세요' }); setTimeout(() => W.close(), 600); return; }
+        const old = st.members[seat].W; st.members[seat].W = W; if (old && old !== W) old.close();
+        const P = G && G.players[seat];
+        if (P && !G.over) { P.ai = false; P.off = false; toast(`🔌 ${esc(P.name)} 다시 연결됨`); render(); st.net.broadcast({ t: 'state', G }); }
+        W.send({ t: 'start', seat, G });
+        for (const [qid, q] of st.pending) if (q.p === seat) W.send({ t: 'ask', qid, req: q.req, G }); // 기다리던 선택 다시 요청
+        return;
+      }
+      if (seat >= 0) { const M = st.members[seat], old = M.W; M.W = W; if (old && old !== W) old.close(); if (name !== M.name) { M.name = ''; M.name = uniqName(st, name); } }
+      else {
+        if (st.members.length >= 4) { W.send({ t: 'reject', msg: '방이 꽉 찼어요 (최대 4명)' }); setTimeout(() => W.close(), 600); return; }
+        st.members.push({ cid, name: uniqName(st, name), W });
+        SND.play('card'); toast(`👋 ${esc(st.members[st.members.length - 1].name)} 님이 들어왔어요`);
+      }
+      st.total = Math.max(st.total, st.members.length);
+      broadcastLobby(st); renderLobby();
+      return;
+    }
+    if (m.t === 'ans') {
+      const q = st.pending.get(m.qid); if (!q) return;
+      if (!st.members[q.p] || st.members[q.p].W !== W) return;
+      st.pending.delete(m.qid); q.res(m.v);
+    }
+  }
+  function hostLeave(st, W) {
+    const seat = st.members.findIndex(x => x.W === W); if (seat < 0) return;
+    if (!st.started) { st.members.splice(seat, 1); broadcastLobby(st); renderLobby(); return; }
+    st.members[seat].W = null;
+    const P = G && G.players[seat];
+    if (!P || G.over) return;
+    P.ai = true; P.off = true;
+    toast(`📵 ${esc(P.name)} 연결 끊김 — 돌아올 때까지 AI가 대신해요`);
+    render();
+    for (const [qid, q] of st.pending) if (q.p === seat) { st.pending.delete(qid); Promise.resolve(AI.aiAsk(G, seat, q.req)).then(q.res); }
+    st.net.broadcast({ t: 'state', G });
+  }
+  function remoteAsk(p, req) {
+    return new Promise(res => {
+      const st = ON, m = st && st.members[p];
+      if (!m || !m.W) { G.players[p].ai = true; G.players[p].off = true; res(AI.aiAsk(G, p, req)); return; }
+      const qid = ++st.qid; st.pending.set(qid, { p, req, res });
+      m.W.send({ t: 'ask', qid, req, G });
+    });
+  }
+  function hostStart() {
+    const st = ON; if (!st || st.role !== 'host') return;
+    st.members = st.members.filter((m, i) => i === 0 || m.W);
+    const n = Math.max(st.total, st.members.length);
+    if (n < 2) { toast('2인 이상이어야 시작할 수 있어요', true); return; }
+    const g = E.newGame(n, st.diff, randSeed());
+    let k = 0;
+    g.players.forEach((P, i) => { const m = st.members[i]; if (m) { P.name = m.name; P.ai = false; } else { P.name = AI_NAMES[k++]; P.ai = true; } });
+    g.online = true;
+    g.log = [`게임 시작! ${g.players[g.start].name}부터 시작합니다.`];
+    st.started = true; st.pending.clear(); ME = 0;
+    st.members.forEach((m, i) => { if (m.W) m.W.send({ t: 'start', seat: i, G: g }); });
+    SND.play('round');
+    startRun(g, true);
+  }
+
+  // ----- 참가자 -----
+  async function guestConnect(retry) {
+    const st = ON; if (!st || st.role !== 'guest' || st.joining || st.bye) return;
+    st.joining = true;
+    let net = null;
+    try {
+      net = await GNET.join(st.code, {
+        onMsg: m => { if (ON === st && st.net === net) guestMsg(st, m); },
+        onClose: () => { if (ON === st && st.net === net) guestLost(st); }
+      });
+      if (ON !== st) { net.close(); return; }
+      st.net = net; st.connected = true; st.tries = 0;
+      net.send({ t: 'hello', name: st.nick, cid: CID });
+      keepAwake(true);
+      if (!st.joined) { st.joined = true; renderLobby(); show('scr-lobby'); } else toast('🔌 다시 연결됐어요');
+    } catch (e) {
+      if (ON !== st) return;
+      if (st.joined && ++st.tries < 7) setTimeout(() => { if (ON === st && !st.connected) guestConnect(true); }, 2500);
+      else { const was = st.joined; leaveOnline(); toast(esc(e.message), true); if (was) { RUN++; G = null; UI.modalLock = false; closeModal(); refreshMenu(); show('scr-menu'); } }
+    } finally { st.joining = false; }
+  }
+  function guestLost(st) {
+    st.connected = false; st.net = null;
+    if (st.bye) return;
+    toast('연결이 끊겼어요. 다시 연결하는 중...', true);
+    setTimeout(() => { if (ON === st && !st.connected) guestConnect(true); }, 1000);
+  }
+  function guestToMenu(msg) { RUN++; G = null; leaveOnline(); UI.modalLock = false; closeModal(); refreshMenu(); show('scr-menu'); if (msg) toast(msg, true); }
+  function guestMsg(st, m) {
+    switch (m.t) {
+      case 'lobby': st.lobby = m; if (!G || G.over) { if ($('#scr-lobby').classList.contains('on')) renderLobby(); } break;
+      case 'reject': st.bye = true; leaveOnline(); toast(esc(m.msg), true); show('scr-online'); break;
+      case 'bye': st.bye = true; guestToMenu('방장이 방을 닫았어요'); break;
+      case 'start': st.started = true; guestStart(st, m.seat, m.G); break;
+      case 'ev': {
+        const my = RUN;
+        st.q = st.q.then(() => { if (my !== RUN || ON !== st) return; G = m.G; return onEvent(m.e).then(() => { if (m.e.t === 'gameOver' && my === RUN) showResult(); }); }).catch(e => console.error(e));
+        break;
+      }
+      case 'ask': {
+        const my = RUN;
+        st.q = st.q.then(() => { if (my !== RUN || ON !== st) return; G = m.G; humanAsk(m.req).then(v => { if (ON === st && st.net) st.net.send({ t: 'ans', qid: m.qid, v }); }); }).catch(e => console.error(e));
+        break;
+      }
+      case 'state': { const my = RUN; st.q = st.q.then(() => { if (my === RUN && ON === st) { G = m.G; render(); } }); break; }
+    }
+  }
+  function guestStart(st, seat, g) {
+    ME = seat; G = g; RUN++; st.q = Promise.resolve();
+    UI.sel = []; UI.targets = []; UI.joker = false; UI.req = null; UI.resolve = null; UI.modalLock = false;
+    closeModal(); show('scr-game'); render(); SND.play('round');
+    if (G.over) showResult();
+  }
+
+  // ----- 대기실 화면 -----
+  function renderLobby() {
+    const st = ON; if (!st) return;
+    const host = st.role === 'host';
+    const info = host ? lobbyInfo(st) : st.lobby;
+    const box = $('#lobby-body');
+    if (!info) { box.innerHTML = `<h2>온라인 대전 방</h2><p class="info" style="text-align:center">방에 연결됐어요. 정보를 받는 중...</p><button class="btn ghost" id="l-leave">← 방 나가기</button>`; $('#l-leave').onclick = () => { leaveOnline(); refreshMenu(); show('scr-menu'); }; return; }
+    const total = info.total, humans = info.names.length;
+    let seats = '';
+    for (let i = 0; i < Math.max(total, humans); i++) {
+      const nm = info.names[i];
+      const mine = host ? i === 0 : info.cids && info.cids[i] === CID;
+      seats += `<div class="lseat ${nm ? '' : 'ai'}"><span class="dot" style="background:${SEAT_COLORS[i]}"></span>${nm ? esc(nm) + (i === 0 ? ' 👑' : '') + (mine ? ' <small>(나)</small>' : '') : '🤖 AI (빈자리)'}</div>`;
+    }
+    box.innerHTML = `<h2>온라인 대전 방</h2>
+      <div class="lcode">방 코드<b>${esc(info.code)}</b></div>
+      ${host ? `<button class="btn" id="l-share">📨 친구 초대 링크 보내기 (카톡)</button>` : ''}
+      <h3>참가자 ${humans}/4</h3><div class="lseats">${seats}</div>
+      ${host ? `<h3>총 인원 (빈자리는 AI가 채워요)</h3><div class="seg" id="l-n">${[2, 3, 4].map(v => `<button data-v="${v}" class="${v === total ? 'on' : ''}" ${v < humans ? 'disabled' : ''}>${v}인</button>`).join('')}</div>
+        ${total > humans ? `<h3>AI 난이도</h3><div class="seg" id="l-d">${[['easy', '쉬움'], ['normal', '보통'], ['hard', '어려움']].map(([v, t]) => `<button data-v="${v}" class="${v === st.diff ? 'on' : ''}">${t}</button>`).join('')}</div>` : ''}
+        <button class="btn big" id="l-start" style="margin-top:18px">게임 시작! (${total}인${total > humans ? ` · AI ${total - humans}` : ''})</button>
+        ${humans < 2 ? '<p class="mini" style="text-align:center">친구가 들어오면 이름이 위에 나타나요</p>' : ''}`
+      : `<p class="info" style="text-align:center;margin-top:14px">⏳ 방장이 게임을 시작하기를 기다리는 중...<br><span class="mini">${total}인 게임${total > humans ? ` · 빈자리 ${total - humans}개는 AI` : ''}</span></p>`}
+      <p class="mini" style="margin-top:12px">💡 아이폰·안드로이드 섞여도 함께할 수 있어요. 게임 중에는 화면을 켜 두세요 — 특히 방장 폰이 꺼지거나 다른 앱으로 오래 나가 있으면 게임이 멈춰요.</p>
+      <button class="btn ghost" id="l-nick">✏ 내 닉네임 바꾸기</button>
+      <button class="btn ghost" id="l-leave">← 방 나가기</button>`;
+    $('#l-nick').onclick = renameModal;
+    const sh = $('#l-share'); if (sh) sh.onclick = () => shareRoom(info.code);
+    $$('#l-n button').forEach(b => b.onclick = () => { st.total = +b.dataset.v; SND.play('tap'); broadcastLobby(st); renderLobby(); });
+    $$('#l-d button').forEach(b => b.onclick = () => { st.diff = b.dataset.v; SND.play('tap'); broadcastLobby(st); renderLobby(); });
+    const sb = $('#l-start'); if (sb) sb.onclick = hostStart;
+    $('#l-leave').onclick = () => { leaveOnline(); refreshMenu(); show('scr-menu'); };
   }
 
   // ---------- 게임 방법 ----------
@@ -560,6 +854,7 @@
   // 첫 터치에 오디오 시작
   document.addEventListener('pointerdown', () => SND.init(), { once: true });
   refreshMenu();
+  try { const qr = new URLSearchParams(location.search).get('room'); if (qr && /^[A-Za-z0-9]{5}$/.test(qr)) { const code = qr.toUpperCase(); openOnline(code); const nick = autoNick(); $('#on-nick').value = nick; joinRoom(nick, code); } } catch (e) { }
   if ('serviceWorker' in navigator && location.protocol === 'https:') { const had = !!navigator.serviceWorker.controller; let done = false; navigator.serviceWorker.addEventListener('controllerchange', () => { if (had && !done) { done = true; location.reload(); } }); navigator.serviceWorker.register('sw.js').then(r => r.update()).catch(() => { }); }
   window.__G = () => G;
 })();
