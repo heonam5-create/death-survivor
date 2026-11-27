@@ -360,6 +360,15 @@ button.pri{background:linear-gradient(#e11d48,#9f1239);box-shadow:0 3px 0 #4c051
 .rgo{display:block;margin:10px auto 2px;padding:10px 28px;font-size:16px;font-weight:800;opacity:0;animation:rres .35s ease-out both;animation-delay:calc(var(--d0) + 1900ms)}
 .rwait{font-size:11px;margin-top:4px}
 @media (orientation:landscape){.rollpop.big.mine{align-items:center}}
+/* 미션 진행 HUD (지도 왼쪽 위, 작게) */
+.mhud{position:absolute;left:5px;top:5px;z-index:4;max-width:min(62%,260px);background:#0d0d0dcc;border:1px solid #4b3a2a;border-radius:9px;padding:3px 7px 4px;font-size:11px;line-height:1.3;color:#e7dccb;cursor:pointer;backdrop-filter:blur(2px);box-shadow:0 2px 6px #0008;opacity:.88}
+.mhud .mh1{display:flex;gap:7px;align-items:center;flex-wrap:wrap;font-weight:700}
+.mhud .mh1 span.ok{color:#86efac}
+.mhud i{font-style:normal;font-weight:900;margin-right:1px}.mhud .xr{color:#ef4444}.mhud .xb{color:#60a5fa}.mhud .xg{color:#4ade80}
+.mhud .mh2{font-size:10.5px;color:#c8b89a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mhud.done{border-color:#22c55e}.mhud.done .mh2{color:#86efac}
+.mhud.open{opacity:1;max-width:min(86%,320px)}.mhud .mh3{margin-top:4px;padding-top:4px;border-top:1px solid #4b3a2a;font-size:11px;white-space:normal}
+.mhud .mh3 .dim{font-size:10px}
 </style>
 <script>
 /* ===== 설정 (필요할 때만 바꾸세요) =====
@@ -2508,6 +2517,24 @@ function zSprite0(t, sub, id, cx, by, n) {
   if (n > 1) o += `<circle cx="${cx + 15}" cy="${by - H + 4}" r="8.5" fill="#7f1d1d" stroke="#fff" stroke-width="1.5"/><text x="${cx + 15}" y="${by - H + 8}" font-size="10.5" text-anchor="middle" fill="#fff" font-weight="800">${n}</text>`;
   return o;
 }
+
+function tgtRing(x, y, col, always) {
+  const on = always || (ui.ping && performance.now() - ui.ping < 4000);
+  return on ? `<circle cx="${x}" cy="${y}" r="16" fill="none" stroke="${col}" stroke-width="3"><animate attributeName="r" values="14;30;14" dur="1.3s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0;1" dur="1.3s" repeatCount="indefinite"/></circle>` : '';
+}
+/* ---------- 미션 진행 표시 (지도 왼쪽 위, 작게) ---------- */
+function missionHUD() {
+  const M = ZE.MISSIONS[S.mission], obs = S.objectives, red = obs.filter(o => o.c === 'red'), oth = obs.filter(o => o.c !== 'red');
+  const parts = [], next = [];
+  const rl = red.filter(o => !o.taken).length; parts.push(`<span class="${rl ? '' : 'ok'}"><i class="xr">✕</i>${red.length - rl}/${red.length}</span>`);
+  if (rl) next.push(`빨간 ✕ ${rl}개`);
+  if (oth.length) { const l = oth.filter(o => !o.taken).length, c = oth[0].c; parts.push(`<span class="${l ? '' : 'ok'}"><i class="x${c[0]}">✕</i>${oth.length - l}/${oth.length}</span>`); if (l) next.push(`${c === 'blue' ? '파란' : '초록'} ✕ ${l}개`); }
+  if (M.needEpics) { const l = S.epics.filter(e => !e.taken).length; parts.push(`<span class="${l ? '' : 'ok'}">🎁${S.epics.length - l}/${S.epics.length}</span>`); if (l) next.push(`무기 상자 ${l}개`); }
+  if (M.food) { let f = 0; S.survivors.forEach(x => { if (!x.dead) x.inv.forEach(c => { if (c && ZE.EQUIP[c.k].food) f++; }); }); parts.push(`<span class="${f >= M.food ? 'ok' : ''}">🍞${Math.min(f, M.food)}/${M.food}</span>`); if (f < M.food) next.push(`식량 ${M.food - f}장(수색)`); }
+  const done = ZE.objectivesDone(S);
+  const nx = done ? '🚪 모두 <b>EXIT</b>로 탈출!' : '다음: ' + next.join(' · ');
+  return `<div class="mhud ${ui.mhud ? 'open' : ''} ${done ? 'done' : ''}" data-a="mhud"><div class="mh1"><b>🎯</b>${parts.join('')}</div><div class="mh2">${nx}</div>${ui.mhud ? `<div class="mh3">${esc(M.goal)}<br><span class="dim">지도의 깜빡이는 표시가 목표 위치예요 · 탭하면 접혀요</span></div>` : ''}</div>`;
+}
 function boardSVG() {
   const map = ZE.getMap(S.mission);
   const W = map.W * CS, H = map.H * CS;
@@ -2560,18 +2587,18 @@ function boardSVG() {
   });
   {
     const c = map.cells[map.exit], x = c.x * CS, y = c.y * CS;
-    o += `<g filter="url(#ds)"><rect x="${x + 26}" y="${y + 3}" width="44" height="20" rx="3" fill="#1f4d2c" stroke="#7fa886" stroke-width="1.5"/><text x="${x + 48}" y="${y + 18}" font-size="12" fill="#e6efd9" text-anchor="middle" font-weight="900">EXIT 출구</text></g>`;
+    o += `<g filter="url(#ds)"><rect x="${x + 26}" y="${y + 3}" width="44" height="20" rx="3" fill="#1f4d2c" stroke="#7fa886" stroke-width="1.5"/><text x="${x + 48}" y="${y + 18}" font-size="12" fill="#e6efd9" text-anchor="middle" font-weight="900">EXIT 출구</text></g>${ZE.objectivesDone(S) ? tgtRing(x + 48, y + 13, '#22c55e', true) : ''}`;
   }
   S.objectives.forEach(ob => {
     if (ob.taken) return;
     const c = map.cells[ob.cell], x = c.x * CS + 18, y = c.y * CS + 18;
     const col = ob.c === 'red' ? '#b8322a' : ob.c === 'blue' ? '#3f6aa8' : '#4f8a4a';
-    o += `<g><circle cx="${x}" cy="${y}" r="15" fill="url(#glow)" opacity=".5"><animate attributeName="opacity" values=".2;.55;.2" dur="2.4s" repeatCount="indefinite"/></circle><g filter="url(#rough)" opacity=".92"><rect x="${x - 12}" y="${y - 12}" width="24" height="24" rx="2" fill="#2a2620" stroke="#5a5246" stroke-width="2" transform="rotate(8 ${x} ${y})"/><path d="M${x - 8} ${y - 8}L${x + 8} ${y + 8}M${x + 8} ${y - 8}L${x - 8} ${y + 8}" stroke="${col}" stroke-width="5.5" stroke-linecap="round"/></g></g>`;
+    o += `<g><circle cx="${x}" cy="${y}" r="15" fill="url(#glow)" opacity=".5"><animate attributeName="opacity" values=".2;.55;.2" dur="2.4s" repeatCount="indefinite"/></circle><g filter="url(#rough)" opacity=".92"><rect x="${x - 12}" y="${y - 12}" width="24" height="24" rx="2" fill="#2a2620" stroke="#5a5246" stroke-width="2" transform="rotate(8 ${x} ${y})"/><path d="M${x - 8} ${y - 8}L${x + 8} ${y + 8}M${x + 8} ${y - 8}L${x - 8} ${y + 8}" stroke="${col}" stroke-width="5.5" stroke-linecap="round"/></g>${tgtRing(x, y, col)}<text x="${x}" y="${y + 24}" font-size="8.5" text-anchor="middle" fill="#fecaca" font-weight="800" stroke="#000" stroke-width="2.5" paint-order="stroke">목표</text></g>`;
   });
   S.epics.forEach(e => {
     if (e.taken) return;
     const c = map.cells[e.cell], x = c.x * CS + 78, y = c.y * CS + 18;
-    o += `<circle cx="${x}" cy="${y}" r="19" fill="url(#glow)" opacity=".75"><animate attributeName="opacity" values=".35;.8;.35" dur="2s" repeatCount="indefinite"/></circle><ellipse cx="${x}" cy="${y + 10}" rx="14" ry="3.5" fill="#000" opacity=".55"/><image href="${EMB.chest}" x="${x - 14}" y="${y - 10}" width="28" height="21" ${px}/>`;
+    o += `<circle cx="${x}" cy="${y}" r="19" fill="url(#glow)" opacity=".75"><animate attributeName="opacity" values=".35;.8;.35" dur="2s" repeatCount="indefinite"/></circle><ellipse cx="${x}" cy="${y + 10}" rx="14" ry="3.5" fill="#000" opacity=".55"/><image href="${EMB.chest}" x="${x - 14}" y="${y - 10}" width="28" height="21" ${px}/>${ZE.MISSIONS[S.mission].needEpics ? tgtRing(x, y, '#f59e0b') + `<text x="${x}" y="${y + 24}" font-size="8.5" text-anchor="middle" fill="#fde68a" font-weight="800" stroke="#000" stroke-width="2.5" paint-order="stroke">상자</text>` : ''}`;
   });
   for (const k in S.noise) {
     if (!S.noise[k]) continue;
@@ -2677,7 +2704,7 @@ function renderGame() {
     <div class="main">
       <div class="boardwrap" style="height:${isLand() ? box.h : Math.min(box.h, Math.round((ZE.getMap(S.mission).H * CS + 8) * scaleBase()) + 2)}px">${boardSVG()}
         <div class="zoom"><button data-a="zoom" data-z="1">＋</button><button data-a="zoom" data-z="-1">－</button>${ui.zoom > 1.01 ? '<button data-a="zoom" data-z="0" style="font-size:12px">전체</button>' : ''}</div>
-        ${cellInfo()}
+        ${cellInfo()}${S.phase === 'players' || S.phase === 'zombies' ? missionHUD() : ''}
       </div>
       <div class="bottom">${bottom()}</div>
     </div>
@@ -3031,6 +3058,7 @@ document.addEventListener('click', e => {
     case 'cellclose': ui.cell = null; render(); break;
     case 'detail': ui.detail = D.sid; render(); break;
     case 'closedetail': if (e.target === t || t.tagName === 'BUTTON') { ui.detail = null; render(); } break;
+    case 'mhud': ui.mhud = !ui.mhud; ui.ping = performance.now(); render(); setTimeout(render, 4100); break;
     case 'closeroll': rollAnim = false; rollMine = false; clearTimeout(rollTO); render(); aiTick(); break;
     case 'select': ui.detail = null; ui.mode = 'move'; ui.sel = null; act('select', { sid: D.sid }); break;
     case 'mode': ui.mode = D.m; ui.wslot = null; render(); break;
