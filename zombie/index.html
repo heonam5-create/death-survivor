@@ -410,6 +410,11 @@ button.pri{background:linear-gradient(#e11d48,#9f1239);box-shadow:0 3px 0 #4c051
 .skr b{font-size:13px}.skr span{font-size:11.5px;color:#a8a29e;line-height:1.35}
 .skr.has{border-color:#22c55e;background:#15231a}
 .sksm{font-size:10px;color:#a8a29e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.boardwrap{touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.boardwrap svg{transform-origin:0 0}
+.boardwrap{touch-action:none}
+.boardwrap{justify-content:safe center;align-items:safe center}
+.boardwrap svg{margin:auto}
 </style>
 <script>
 /* ===== 설정 (필요할 때만 바꾸세요) =====
@@ -2300,7 +2305,9 @@ function cardIcon(c) {
 }
 
 /* ---------- 화면 분기 ---------- */
+let gestureOn = false, renderLater = false;
 function render() {
+  if (gestureOn) { renderLater = true; return; }
   if (!S || S.phase === 'lobby') rollLayer('', '');
   if (!S) return renderHome();
   if (S.phase === 'lobby') return renderLobby();
@@ -2718,6 +2725,88 @@ function centerOn(cellI) {
   bw.scrollTop = (c.y + .5) * CS * k - bw.clientHeight / 2;
 }
 
+
+/* ---------- 지도: 두 손가락 핀치 확대/축소 + 끌어서 이동 ---------- */
+(function mapGestures() {
+  let pz = null, drag = null, blockClickUntil = 0;
+  const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+  let tp = null;
+  document.addEventListener('touchstart', e => {
+    const bw = e.target.closest && e.target.closest('.boardwrap'); if (!bw) return;
+    gestureOn = true;
+    if (e.touches.length === 1) { const t = e.touches[0]; tp = { bw, x: t.clientX, y: t.clientY, sx: bw.scrollLeft, sy: bw.scrollTop, moved: false }; return; }
+    tp = null; if (e.touches.length !== 2) return;
+    const svg = bw.querySelector('svg'); if (!svg) return;
+    const r = bw.getBoundingClientRect(), t = e.touches;
+    const cx = (t[0].clientX + t[1].clientX) / 2 - r.left, cy = (t[0].clientY + t[1].clientY) / 2 - r.top;
+    pz = { d0: dist(t), z0: ui.zoom || 1, k: 1, bw, svg, cx, cy, sx: bw.scrollLeft, sy: bw.scrollTop };
+    const sr = svg.getBoundingClientRect();
+    pz.ox = sr.left - r.left + bw.scrollLeft; pz.oy = sr.top - r.top + bw.scrollTop;
+    svg.style.transformOrigin = `${cx + bw.scrollLeft - pz.ox}px ${cy + bw.scrollTop - pz.oy}px`;
+    svg.style.willChange = 'transform';
+  }, { passive: true });
+  document.addEventListener('touchmove', e => {
+    if (tp && e.touches.length === 1) {
+      const t = e.touches[0], dx = t.clientX - tp.x, dy = t.clientY - tp.y;
+      if (!tp.moved && Math.hypot(dx, dy) < 8) return;
+      tp.moved = true; e.preventDefault();
+      tp.bw.scrollLeft = tp.sx - dx; tp.bw.scrollTop = tp.sy - dy; return;
+    }
+    if (!pz || e.touches.length !== 2) return;
+    e.preventDefault();
+    const z = Math.max(1, Math.min(4, pz.z0 * dist(e.touches) / pz.d0));
+    pz.k = z / pz.z0; pz.svg.style.transform = `scale(${pz.k})`;
+  }, { passive: false });
+  const endPinch = () => {
+    if (!pz) return;
+    const P = pz; pz = null; blockClickUntil = performance.now() + 350;
+    P.svg.style.transform = ''; P.svg.style.willChange = '';
+    if (Math.abs(P.k - 1) < .02) return;
+    const z1 = P.z0 * P.k;
+    const px = (P.sx + P.cx - P.ox) / P.z0, py = (P.sy + P.cy - P.oy) / P.z0; // 손가락 가운데가 가리키던 지도 위치
+    ui.zoom = z1; render();
+    const bw = $('.boardwrap'); if (!bw) return; const svg = bw.querySelector('svg'); if (!svg) return;
+    const r = bw.getBoundingClientRect(), sr = svg.getBoundingClientRect();
+    const ox = sr.left - r.left + bw.scrollLeft, oy = sr.top - r.top + bw.scrollTop;
+    bw.scrollLeft = px * z1 + ox - P.cx;
+    bw.scrollTop = py * z1 + oy - P.cy;
+  };
+  const release = () => { gestureOn = false; if (renderLater) { renderLater = false; render(); } };
+  document.addEventListener('touchend', e => {
+    if (tp && !e.touches.length) { if (tp.moved) blockClickUntil = performance.now() + 300; tp = null; }
+    if (pz && e.touches.length < 2) { gestureOn = false; endPinch(); }
+    if (!e.touches.length) release();
+  }, { passive: true });
+  document.addEventListener('touchcancel', () => { tp = null; gestureOn = false; endPinch(); release(); }, { passive: true });
+  // 마우스(PC): 끌어서 이동, 휠로 확대/축소
+  document.addEventListener('mousedown', e => {
+    const bw = e.target.closest && e.target.closest('.boardwrap'); if (!bw || e.button !== 0) return;
+    drag = { bw, x: e.clientX, y: e.clientY, sx: bw.scrollLeft, sy: bw.scrollTop, moved: false };
+  });
+  document.addEventListener('mousemove', e => {
+    if (!drag) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.moved && Math.hypot(dx, dy) < 6) return;
+    drag.moved = true; drag.bw.scrollLeft = drag.sx - dx; drag.bw.scrollTop = drag.sy - dy;
+  });
+  document.addEventListener('mouseup', () => { if (drag && drag.moved) blockClickUntil = performance.now() + 200; drag = null; });
+  document.addEventListener('wheel', e => {
+    const bw = e.target.closest && e.target.closest('.boardwrap'); if (!bw || !e.ctrlKey && Math.abs(e.deltaY) < 1) return;
+    if (!e.ctrlKey && !e.altKey) return;
+    e.preventDefault();
+    ui.zoom = Math.max(1, Math.min(4, (ui.zoom || 1) * (e.deltaY < 0 ? 1.12 : 1 / 1.12))); render();
+  }, { passive: false });
+  // 핀치·드래그 직후 손가락을 뗄 때 칸이 눌리지 않게
+  document.addEventListener('click', e => { if (performance.now() < blockClickUntil && e.target.closest && e.target.closest('.boardwrap')) { e.stopPropagation(); e.preventDefault(); } }, true);
+})();
+
+
+// 확대 상태에서 지도를 움직여도 지도 위 버튼·미션 표시는 제자리에
+function pinOverlays(bw) {
+  bw = bw || $('.boardwrap'); if (!bw) return;
+  bw.querySelectorAll(':scope > :not(svg)').forEach(el => { el.style.translate = `${bw.scrollLeft}px ${bw.scrollTop}px`; });
+}
+document.addEventListener('scroll', e => { if (e.target && e.target.classList && e.target.classList.contains('boardwrap')) pinOverlays(e.target); }, true);
 /* ---------- 게임 화면 ---------- */
 function isLand() { return window.innerWidth > window.innerHeight && window.innerWidth >= 640; }
 // 지도 전체가 한 화면에 들어가는 배율
@@ -2753,7 +2842,7 @@ function renderGame() {
       <div class="bottom">${bottom()}</div>
     </div>
   </div>${modals()}`;
-  const nb = $('.boardwrap'); if (nb) { nb.scrollLeft = sx; nb.scrollTop = sy; }
+  const nb = $('.boardwrap'); if (nb) { nb.scrollLeft = sx; nb.scrollTop = sy; pinOverlays(nb); }
   const nbt = $('.bottom'); if (nbt) nbt.scrollTop = bs;
 }
 function cellInfo() {
