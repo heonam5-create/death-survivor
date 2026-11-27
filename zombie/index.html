@@ -194,6 +194,9 @@ button.pri{background:linear-gradient(#e11d48,#9f1239);box-shadow:0 3px 0 #4c051
 .banner.m{background:#1d4ed8e6;color:#fff}.banner.z{background:#7f1d1de6;color:#fff}.banner.w{background:#15803de6;color:#fff}
 @keyframes bn{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}12%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}20%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0}}
 .hd,.pick img,.scard img{filter:sepia(.22) saturate(.78) contrast(1.06) brightness(.95)}
+.cs .l1,.cs .l2{display:block;white-space:nowrap;overflow:hidden;text-overflow:clip;font-size:10px;letter-spacing:-.2px;line-height:1.3}
+@media (max-width:480px){.slot{min-height:58px;padding:4px 3px}.slot .cn{font-size:11px;white-space:nowrap;overflow:hidden}.acts button{min-height:50px}.chip b{font-size:13px}}
+@media (max-width:480px){.zoom{right:3px;bottom:auto;top:50%;transform:translateY(-50%);gap:4px}.zoom button{width:28px;height:28px;font-size:15px;opacity:.6;border-radius:8px}}
 </style>
 <script>
 /* ===== 설정 (필요할 때만 바꾸세요) =====
@@ -2177,7 +2180,11 @@ async function buildBG(mid) {
 const px = 'style="image-rendering:pixelated"';
 // 좀비 말: 모든 종류 같은 크기, 밑받침 색으로 종류 구분
 const ZBASE = { W: ['#6b7d5a', '워커'], R: ['#d4a017', '러너'], B: ['#8b5cf6', '브루트'], A: ['#dc2626', '괴수'] };
+function tokK() { const zp = CS * scaleBase() * (ui.zoom || 1); return Math.max(1, Math.min(1.4, 66 / zp)); }
 function zSprite(t, sub, id, cx, by, n) {
+  const kk = tokK(); return `<g transform="translate(${cx} ${by}) scale(${kk}) translate(${-cx} ${-by})">` + zSprite0(t, sub, id, cx, by, n) + '</g>';
+}
+function zSprite0(t, sub, id, cx, by, n) {
   const k = t === 'W' ? 'z_w' + (1 + (id % 5)) : t === 'R' ? 'z_r' : t === 'B' ? 'z_b' : 'z_a';
   const W = 32, H = 39, col = ZBASE[t][0];
   let o = '';
@@ -2278,8 +2285,9 @@ function boardSVG() {
   S.survivors.forEach(x => { if (!x.dead && !x.escaped) (sc[x.cell] = sc[x.cell] || []).push(x); });
   for (const k in sc) {
     const c = map.cells[k]; const arr = sc[k];
-    const per = Math.min(4, arr.length);
+    const per = Math.min(4, arr.length), kk = tokK();
     arr.forEach((x, i) => {
+      const o0 = o.length;
       const def = ZE.SURV[x.id];
       const col = i % per, row = Math.floor(i / 4);
       const cx = c.x * CS + (per === 1 ? 48 : 16 + col * (64 / (per - 1))), cy = c.y * CS + 82 - row * 26;
@@ -2289,6 +2297,7 @@ function boardSVG() {
       o += EMB['head_' + x.id] ? `<image href="${EMB['head_' + x.id]}" x="${cx - 13}" y="${cy - 13}" width="26" height="26" clip-path="url(#cp${x.id})" preserveAspectRatio="xMidYMid slice" filter="url(#grade)"/>` : `<circle cx="${cx}" cy="${cy}" r="13" fill="${def.color}"/>`;
       o += `<circle cx="${cx}" cy="${cy}" r="14.5" fill="none" stroke="#111" stroke-width="2"/><circle cx="${cx}" cy="${cy}" r="13.5" fill="none" stroke="${def.color}" stroke-width="2.5" opacity=".85"/>`;
       if (x.wounds) o += `<circle cx="${cx + 10}" cy="${cy - 10}" r="6" fill="#dc2626" stroke="#fff" stroke-width="1"/><text x="${cx + 10}" y="${cy - 7}" font-size="8" text-anchor="middle" fill="#fff" font-weight="900">${x.wounds}</text>`;
+      if (kk > 1) o = o.slice(0, o0) + `<g transform="translate(${cx} ${cy}) scale(${Math.min(kk, per > 2 ? 1.15 : 1.3)}) translate(${-cx} ${-cy})">` + o.slice(o0) + '</g>';
     });
   }
   // 하이라이트 + 탭 영역
@@ -2383,7 +2392,7 @@ function teamStrip() {
 function cardShort(c) {
   const d = ZE.EQUIP[c.k];
   if (d.molotov) return `${d.range[0]}-${d.range[1]} 🔥전멸`;
-  if (d.kind === 'melee' || d.kind === 'ranged') return `${d.kind === 'melee' ? '근접' : d.range[0] + '-' + d.range[1]} 🎲${d.dice} ${d.acc}+ 💥${d.dmg}${d.dual ? ' ✌' : ''}${d.noisy ? ' 📢' : ''}${d.door ? ' 🚪' : ''}`;
+  if (d.kind === 'melee' || d.kind === 'ranged') return `<span class="l1">${d.kind === 'melee' ? '근접' : '거리' + d.range[0] + '-' + d.range[1]}${d.dual ? ' ✌' : ''}${d.noisy ? ' 📢' : ''}${d.door ? ' 🚪' : ''}</span><span class="l2">🎲${d.dice} ${d.acc}+ 💥${d.dmg}</span>`;
   if (d.search2) return '수색 2장';
   if (d.reroll) return '재굴림';
   if (d.food) return '식량';
