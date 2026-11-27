@@ -267,6 +267,85 @@ button.pri{background:linear-gradient(#e11d48,#9f1239);box-shadow:0 3px 0 #4c051
 @keyframes blood{0%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0;transform:translate(calc(-50% + var(--tx)),calc(-50% + var(--ty) + 14px))}}
 .fx.stamp{font-size:22px;font-weight:900;color:#fde047;text-shadow:0 0 6px #000,2px 2px 0 #7f1d1d,-1px -1px 0 #000;animation:stamp 1s ease-out forwards;letter-spacing:1px}
 @keyframes stamp{0%{opacity:0;transform:translate(-50%,-50%) scale(2.6) rotate(-8deg)}18%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-4deg)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-70%) scale(1)}}
+/* ---- 3D 주사위: 낡은 뼈 주사위 + 나무 상자 트레이 ---- */
+.tray{--s:46px;margin:12px auto 10px;padding:7px;border-radius:12px;max-width:100%;
+  background:linear-gradient(135deg,#6b4b2e,#3a2717 45%,#5a3d24);box-shadow:0 6px 14px #000c,inset 0 0 0 1px #8a6a45,inset 0 0 0 3px #2a1a0e;position:relative}
+.tray::before,.tray::after{content:'';position:absolute;width:9px;height:9px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#b7a58a,#4a3b2a 60%,#1c140c);top:5px;left:5px;box-shadow:calc(100% + 0px) 0 0 transparent}
+.tray::after{left:auto;right:5px}
+.tray-in{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;align-items:center;padding:16px 14px 20px;border-radius:7px;min-height:calc(var(--s) + 26px);
+  background:radial-gradient(ellipse at 50% 40%,#3b1f18 0%,#22120e 60%,#140a08 100%),#1c0f0b;
+  box-shadow:inset 0 4px 12px #000e,inset 0 -2px 6px #0008;position:relative;overflow:hidden;perspective:520px}
+.tray-in::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.35;
+  background:repeating-linear-gradient(97deg,#0000 0 9px,#0003 9px 10px,#0000 10px 23px),radial-gradient(circle at 78% 70%,#5b0f0f66,#0000 22%),radial-gradient(circle at 18% 28%,#4a0d0d55,#0000 14%)}
+.tray.sm{--s:30px;margin:6px auto;padding:5px}.tray.sm .tray-in{gap:9px;padding:10px 10px 14px;min-height:calc(var(--s) + 18px)}
+.tray.sm::before,.tray.sm::after{display:none}
+.dw{position:relative;width:var(--s);height:var(--s);animation:dthrow 1.05s cubic-bezier(.3,.7,.4,1) both;transform-style:preserve-3d}
+.cube{position:absolute;inset:0;transform-style:preserve-3d;animation:droll 1.05s cubic-bezier(.2,.75,.3,1) both;
+  transform:rotateZ(var(--tz)) rotateX(-16deg) rotateY(20deg) rotateX(var(--rx)) rotateY(var(--ry))}
+.df{position:absolute;inset:0;border-radius:20%;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:14%;box-sizing:border-box;backface-visibility:hidden;
+  background:radial-gradient(circle at 30% 25%,#f4ecd6 0%,#ddd0ae 45%,#b3a07a 85%,#8a7653 100%);
+  box-shadow:inset 0 0 calc(var(--s)*.12) #5a462a99,inset 0 0 0 1px #6b5636}
+.df::after{content:'';position:absolute;inset:0;border-radius:20%;pointer-events:none;background:radial-gradient(circle at 72% 80%,#5a3a1a33,#0000 30%),radial-gradient(circle at 20% 75%,#3a221122,#0000 20%)}
+.df i{display:block;margin:12%;border-radius:50%}
+.df i.p{background:radial-gradient(circle at 40% 35%,#3a2a1c,#120b06 70%);box-shadow:inset 0 1px 1px #000c,0 1px 0 #fff6}
+.dw.hit .df i.p{background:radial-gradient(circle at 40% 35%,#ef4444,#7f1d1d 75%);box-shadow:inset 0 1px 1px #450a0a,0 0 4px #dc2626aa}
+.f1{transform:translateZ(calc(var(--s)/2))}.f6{transform:rotateY(180deg) translateZ(calc(var(--s)/2))}
+.f2{transform:rotateY(90deg) translateZ(calc(var(--s)/2))}.f5{transform:rotateY(-90deg) translateZ(calc(var(--s)/2))}
+.f3{transform:rotateX(90deg) translateZ(calc(var(--s)/2))}.f4{transform:rotateX(-90deg) translateZ(calc(var(--s)/2))}
+.dsh{position:absolute;left:8%;right:8%;bottom:-12%;height:22%;border-radius:50%;background:radial-gradient(#000d,#0000 70%);animation:dshad 1.05s ease-out both}
+.dw.hit::after{content:'';position:absolute;inset:-25%;border-radius:50%;background:radial-gradient(#dc262655,#0000 65%);opacity:0;animation:dglow 1.6s .95s ease-out both;pointer-events:none;z-index:-1}
+
+.dw.miss .df{animation:ddim .4s .95s both}
+.dmark{position:absolute;left:50%;bottom:-17px;transform:translateX(-50%);font-size:10px;font-weight:800;letter-spacing:.5px;white-space:nowrap;opacity:0;animation:dmk .3s .95s both}
+.dw.hit .dmark{color:#fca5a5;text-shadow:0 0 6px #dc2626}.dw.miss .dmark{color:#8b7d6b}
+.tray.sm .dmark{display:none}
+@keyframes dthrow{0%{transform:translate(-150px,-70px) scale(1.25);opacity:0}12%{opacity:1}45%{transform:translate(0,0) scale(1)}58%{transform:translate(6px,-16px)}70%{transform:translate(3px,0)}80%{transform:translate(4px,-5px)}88%,100%{transform:translate(4px,0)}}
+@keyframes droll{0%{transform:rotateZ(calc(var(--tz) - 200deg)) rotateX(-16deg) rotateY(20deg) rotateX(calc(var(--rx) + var(--sx))) rotateY(calc(var(--ry) + var(--sy)))}
+  70%{transform:rotateZ(calc(var(--tz) + 8deg)) rotateX(-16deg) rotateY(20deg) rotateX(calc(var(--rx) + 12deg)) rotateY(calc(var(--ry) - 10deg))}
+  100%{transform:rotateZ(var(--tz)) rotateX(-16deg) rotateY(20deg) rotateX(var(--rx)) rotateY(var(--ry))}}
+@keyframes dshad{0%{opacity:0;transform:translate(-130px,10px) scale(.5)}45%{opacity:1;transform:none}58%{transform:scale(.7);opacity:.6}70%,100%{transform:none;opacity:1}}
+@keyframes dglow{0%{opacity:0;transform:scale(.6)}30%{opacity:1}100%{opacity:.55;transform:scale(1)}}
+@keyframes ddim{to{filter:grayscale(.5) brightness(.72)}}
+@keyframes dmk{from{opacity:0;transform:translate(-50%,4px)}to{opacity:1;transform:translate(-50%,0)}}
+
+.dw,.dw .cube,.dw .dsh{animation-delay:var(--d)}
+.dw.hit::after,.dw.miss .df,.dw .dmark{animation-delay:calc(var(--d) + 950ms)}
+.tray::before,.tray::after{box-shadow:none}
+.tray-in{row-gap:28px}.tray.sm .tray-in{row-gap:12px}
+/* 전투 주사위 팝업 (크게, 지도 위 중앙) */
+.rollpop.big{top:auto;bottom:calc(150px + env(safe-area-inset-bottom));top:22%;bottom:auto;padding:0 10px;animation:rpIn .25s ease-out both}
+.rollpop.big .box{background:linear-gradient(#1d1512f2,#120c0bf2);border:1px solid #6b4b2e;border-radius:16px;padding:10px 12px 12px;box-shadow:0 12px 30px #000d,0 0 0 1px #000;min-width:260px;max-width:94vw}
+.rhd{display:flex;align-items:center;gap:8px;text-align:left;font-size:14px}
+.rhd img{width:38px;height:38px;border-radius:50%;border:2px solid #a16207;object-fit:cover}
+.rhd small{display:block;color:#c8b89a;font-size:11px}
+.rollpop.big .tray{margin:8px auto 6px}
+.rres{font-family:'Black Han Sans','Noto Sans KR';font-size:20px;letter-spacing:.5px;opacity:0;animation:rres .45s cubic-bezier(.2,1.6,.4,1) both;animation-delay:calc(var(--d0) + 1050ms)}
+.rres.kill{color:#fecaca;text-shadow:0 0 10px #dc2626,0 2px 0 #000}.rres.miss{color:#a8a29e}
+.tray .tray-in{animation:tjolt .5s ease-out both;animation-delay:calc(var(--d0,0ms) + 420ms)}
+@keyframes tjolt{0%{transform:none}20%{transform:translate(2px,3px)}45%{transform:translate(-2px,-1px)}70%{transform:translate(1px,1px)}100%{transform:none}}
+@keyframes rres{from{opacity:0;transform:scale(2.2)}to{opacity:1;transform:none}}
+@keyframes rpIn{from{opacity:0;transform:translateY(-14px) scale(.92)}to{opacity:1;transform:none}}
+.rollpop.big{top:auto!important;bottom:calc(10px + env(safe-area-inset-bottom))!important}
+@media (orientation:landscape){.rollpop.big{justify-content:flex-end;padding-right:12px}}
+/* 크리티컬 · 완벽 · 연속 처치 임팩트 */
+.fx.stamp.big{font-family:'Black Han Sans','Noto Sans KR';font-size:30px;white-space:nowrap;animation:stampB 1.3s cubic-bezier(.2,1.4,.4,1) forwards;z-index:3}
+.fx.stamp.t-crit{color:#fff1c2;text-shadow:0 0 12px #f97316,0 0 26px #dc2626,3px 3px 0 #450a0a,-1px -1px 0 #000}
+.fx.stamp.t-perf{color:#fde68a;text-shadow:0 0 10px #f59e0b,3px 3px 0 #451a03,-1px -1px 0 #000}
+.fx.stamp.t-multi{color:#fecaca;text-shadow:0 0 10px #dc2626,3px 3px 0 #450a0a,-1px -1px 0 #000}
+.fx.stamp.block{color:#cbd5e1;font-size:17px;text-shadow:0 0 5px #000,2px 2px 0 #1e293b}
+@keyframes stampB{0%{opacity:0;transform:translate(-50%,-50%) scale(3.4) rotate(-10deg)}14%{opacity:1;transform:translate(-50%,-50%) scale(.92) rotate(-5deg)}22%{transform:translate(-50%,-50%) scale(1.08) rotate(-5deg)}30%{transform:translate(-50%,-50%) scale(1) rotate(-5deg)}82%{opacity:1}100%{opacity:0;transform:translate(-50%,-80%) scale(1.05) rotate(-5deg)}}
+.fx.spark{width:22px;height:3px;border-radius:2px;background:linear-gradient(90deg,#0000,#fde047,#fff);animation:spark .6s ease-out forwards;margin:-1px 0 0 -11px}
+@keyframes spark{0%{opacity:1;translate:0 0}100%{opacity:0;translate:var(--tx) var(--ty)}}
+.critflash{position:fixed;inset:0;z-index:60;pointer-events:none;animation:cflash .55s ease-out forwards;background:radial-gradient(circle at 50% 45%,#fff7 0%,#f9731655 35%,#7f1d1d66 70%,#0000 100%)}
+.critflash.t-perf{background:radial-gradient(circle at 50% 45%,#fff6,#f59e0b44 40%,#0000 75%)}
+.critflash.t-multi{background:radial-gradient(circle at 50% 45%,#fff3,#dc262655 45%,#0000 80%)}
+@keyframes cflash{0%{opacity:0}15%{opacity:1}100%{opacity:0}}
+.rres small{display:block;font-family:'Noto Sans KR';font-size:11px;color:#c8b89a;letter-spacing:0;text-shadow:none;margin-top:2px}
+.rres.t-crit{font-size:26px;color:#fff1c2;text-shadow:0 0 12px #f97316,0 0 22px #dc2626,0 2px 0 #000}
+.rres.t-perf{font-size:24px;color:#fde68a;text-shadow:0 0 10px #f59e0b,0 2px 0 #000}
+.rres.t-multi,.rres.t-kill{color:#fecaca;text-shadow:0 0 10px #dc2626,0 2px 0 #000}.rres.t-multi{font-size:24px}
+.rres.t-block{color:#cbd5e1;font-size:18px}.rres.t-miss{color:#a8a29e}
+
 </style>
 <script>
 /* ===== 설정 (필요할 때만 바꾸세요) =====
@@ -633,7 +712,7 @@ function hasFreeLeft(s) { const p = freePool(s); for (const k in p) if (p[k] - (
 const PCOLORS = ['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7', '#06b6d4'];
 function createLobby(hostPid, hostName) {
   return {
-    v: 0, phase: 'lobby', host: hostPid, mission: 'm0', diff: 'normal',
+    v: 0, phase: 'lobby', host: hostPid, mission: 'm0', diff: 'normal', hc: 0,
     players: [{ id: hostPid, name: hostName || '방장', on: true, color: PCOLORS[0] }],
     picks: {}, // survId -> pid
     log: [], uid: 1, round: 0,
@@ -651,6 +730,7 @@ function addPlayer(st, pid, name) {
 function setOnline(st, pid, on) { const p = st.players.find(p => p.id === pid); if (p) p.on = on; }
 
 /* ---------------- 게임 시작 ---------------- */
+const HCS = { 0: '룰북 그대로 (6명 기준, 보정 없음)', 1: '1명 · 스폰 약 1/6', 2: '2명 · 스폰 약 1/3', 3: '3명 · 스폰 약 1/2', 4: '4명 · 스폰 약 2/3', 5: '5명 · 스폰 약 5/6', 6: '6명 · 룰북과 같음' };
 const DIFFS = {
   intro: { n: '입문', d: '좀비 적게 · 명중 기준 -1 · 체력 +1', acc: 1, hp: 1 },
   easy: { n: '쉬움', d: '좀비 적게 · 명중 기준 -1', acc: 1, hp: 0 },
@@ -847,7 +927,15 @@ function spawnCard(st, cell, where) {
     activate(st, st.zombies.filter(z => z.t === card.t).map(z => z.id));
     return;
   }
-  const n = card.n[lvl];
+  let n = card.n[lvl];
+  const hc = st.hc || 0;
+  if (n && hc && hc < 6 && card.t !== 'A') {
+    // 인원 보정 (팬 옵션): 룰북은 6명 기준 → 마릿수 × 인원/6, 남는 소수는 확률로 반올림
+    const raw = n * hc / 6, k = Math.floor(raw) + (Math.random() < raw - Math.floor(raw) ? 1 : 0);
+    log(st, `👥 인원 보정 (${hc}명): 카드의 ${ZT[card.t].n} ${n}마리 → ${k}마리 (×${hc}/6)`, 'z');
+    if (!k) { log(st, `🃏 좀비 카드 #${card.no} (${where}): 인원 보정으로 이번엔 아무것도 안 나와요`, 'z'); return; }
+    n = k;
+  }
   if (!n) { log(st, `🃏 좀비 카드 #${card.no} (${where}): ${LEVELS[lvl].name} 레벨 줄이 0이라 이번엔 아무것도 안 나와요`, 'z'); return; }
   if (card.t === 'A') { spawnAbom(st, cell, where); return; }
   const avail = ZT[card.t].limit - countType(st, card.t);
@@ -1057,6 +1145,7 @@ function applyInner(st, pid, op, a) {
       return;
     }
     if (op === 'mission') { if (!isHost) return { err: '방장만 바꿀 수 있어요.' }; if (MISSIONS[a.m]) st.mission = a.m; return; }
+    if (op === 'hc') { if (!isHost) return { err: '방장만 바꿀 수 있어요.' }; const v = +a.n; if (v >= 0 && v <= 6) st.hc = v; return; }
     if (op === 'diff') { if (!isHost) return { err: '방장만 바꿀 수 있어요.' }; if (DIFFS[a.d]) st.diff = a.d; return; }
     if (op === 'kick') { if (!isHost || a.pid === st.host) return { err: '불가' }; st.players = st.players.filter(p => p.id !== a.pid); for (const k in st.picks) if (st.picks[k] === a.pid) delete st.picks[k]; return; }
     if (op === 'start') { if (!isHost) return { err: '방장만 시작할 수 있어요.' }; return startGame(st); }
@@ -1328,7 +1417,7 @@ function resolveRoll(st, s) {
   killed.forEach(z => { names[zLabel(z.t, z.sub)] = (names[zLabel(z.t, z.sub)] || 0) + 1; killZ(st, s, z); });
   const txt = Object.keys(names).map(k => `${k} ${names[k]}`).join(', ');
   log(st, `→ 명중 ${hits} / ${vals.length}${killed.length ? ` · 처치: ${txt}` : ' · 처치 없음'}`, killed.length ? 'good' : '');
-  fx(st, { k: 'atk', cell: R.cell, from: s.cell, melee: !!R.melee, w: R.wname, kills: killed.map(z => z.t), kid: killed.map(z => z.id), hits, sid: s.id });
+  fx(st, { k: 'atk', cell: R.cell, from: s.cell, melee: !!R.melee, w: R.wname, kills: killed.map(z => z.t), kid: killed.map(z => z.id), hits, sid: s.id, vals, acc: R.acc });
   st.lastRoll = { sid: s.id, dice: R.dice, vals, acc: R.acc, hits, kills: killed.length, w: R.wname, t: Date.now() };
   if (left > 0) {
     const tough = zomAt(st, R.cell).filter(z => !can(z));
@@ -1421,7 +1510,7 @@ function zombiePhase(st) {
 }
 
 const API = {
-  DIFFS, LEVELS, SKILLS, EQUIP, ZT, ABOMS, SURVIVORS, SURV, MISSIONS, ZCARDS,
+  HCS, DIFFS, LEVELS, SKILLS, EQUIP, ZT, ABOMS, SURVIVORS, SURV, MISSIONS, ZCARDS,
   levelOf, getMap, visible, edgeOpen, neighbors, createLobby, addPlayer, setOnline, apply,
   curPlayer, survAt, zomAt, noiseAt, hasSkill, maxActions, actionsLeft, freePool, freeAvail, canSpend, healthMax, hpLeft,
   weaponInfo, rangedTargets, moveTargets, chargeTargets, adjDoors, doorTool, doorLocked, canSearch, hoboBlock,
@@ -1761,7 +1850,7 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&a
 function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k)); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
 const app = $('#app');
 const EMBED_ = k => (window.EMBED || {})[k] || '';
-let S = null, netStatus = '', lastRollT = 0, rollAnim = false;
+let S = null, netStatus = '', lastRollT = -1, rollAnim = false, hadRoll = false, rollTO = 0;
 const ui = { mode: 'move', wslot: null, sel: null, zoom: 1, view: 'act', cell: null, help: false, detail: null };
 let me = { pid: store('zsv-pid'), name: store('zsv-name') || '' };
 if (!me.pid) { me.pid = 'p' + Math.random().toString(36).slice(2, 10); store('zsv-pid', me.pid); }
@@ -1979,15 +2068,14 @@ function sfxLines(neu) {
     if (/스킬 \[/.test(m)) { Y('chime', .2); return; }
     if (/근접:/.test(m)) {
       lastMelee = /전기톱/.test(m) ? 'saw' : /배트|쇠지렛대/.test(m) ? 'bonk' : 'blade';
-      P('shake', .25, .08); if (lastMelee === 'saw') Y('saw', .35); else Y('swing', .16); return;
+      if (lastMelee === 'saw') Y('saw', .35); else Y('swing', .16); return;
     }
     if (/사격:/.test(m)) {
-      lastMelee = null; P('shake', .25, .08);
+      lastMelee = null;
       const n = /샷건|엽총/.test(m) ? 'shotgun' : /저격|소총/.test(m) ? 'rifle' : /기관단총/.test(m) ? 'smg' : 'pistol';
       P(n, null, .18); if (n !== 'rifle') P('shell', .3, .05); return;
     }
     if (/^→ 명중/.test(m)) {
-      P('dice', .45, .12);
       if (/처치:/.test(m)) { if (lastMelee) Y(lastMelee === 'saw' ? 'splat' : lastMelee, .05); Y('splat', .08); }
       else if (/명중 0/.test(m)) { lastMelee ? Y('swing') : P('empty', .5); }
       else if (lastMelee) Y(lastMelee === 'saw' ? 'splat' : lastMelee);
@@ -2139,6 +2227,9 @@ function renderLobby() {
     <div class="card"><h3>미션 ${host ? '' : '<span class="dim">(방장이 선택)</span>'}</h3>
       <div class="mgrid">${Object.keys(ZE.MISSIONS).map(k => { const m = ZE.MISSIONS[k]; return `<button class="mcard ${S.mission === k ? 'on' : ''}" data-a="mission" data-m="${k}" ${host ? '' : 'disabled style="opacity:1"'}>
         <b>${m.n}</b> <span class="dim">${m.diff}</span><div class="dim" style="margin-top:4px">${m.goal}</div></button>`; }).join('')}</div>
+      <h3 style="margin-top:12px">👥 인원 보정 <span class="dim" style="font-size:12px">몇 명이 하나요?</span></h3>
+      <div class="hcgrid">${[0, 1, 2, 3, 4, 5, 6].map(k => `<button class="${(S.hc || 0) === k ? 'pri' : ''}" data-a="hc" data-n="${k}" ${host ? '' : 'disabled'}>${k ? k + '명' : '끄기'}</button>`).join('')}</div>
+      <div class="dim" style="font-size:12px;margin-top:4px">${ZE.HCS[S.hc || 0]}${S.hc ? ' — 스폰·건물 좀비 카드 마릿수를 인원에 맞게 줄여요 (괴수 제외)' : ' — 룰북은 생존자 6명을 기준으로 만들어졌어요'}</div>
       <h3 style="margin-top:12px">난이도</h3>
       <div class="dgrid">${Object.keys(ZE.DIFFS).map(k => `<button class="${S.diff === k ? 'pri' : ''}" data-a="diff" data-d="${k}" ${host ? '' : 'disabled'}><b>${ZE.DIFFS[k].n}</b><small>${ZE.DIFFS[k].d}</small></button>`).join('')}</div>
     </div>
@@ -2294,7 +2385,7 @@ function zSprite(t, sub, id, cx, by, n) {
 }
 function zSprite0(t, sub, id, cx, by, n) {
   const k = t === 'W' ? 'z_w' + (1 + (id % 5)) : t === 'R' ? 'z_r' : t === 'B' ? 'z_b' : 'z_a';
-  const W = 32, H = 39, col = ZBASE[t][0];
+  const RS = t === 'R' ? .86 : 1, W = 32 * RS, H = 39 * RS, col = ZBASE[t][0];
   let o = '';
   if (t === 'A') o += `<ellipse cx="${cx}" cy="${by - 2}" rx="21" ry="8" fill="${{ hobo: '#65a30d', cop: '#2563eb', wild: '#dc2626', p0: '#a21caf' }[sub] || '#dc2626'}" opacity=".45"><animate attributeName="opacity" values=".25;.6;.25" dur="1.6s" repeatCount="indefinite"/></ellipse>`;
   o += `<ellipse cx="${cx}" cy="${by}" rx="14" ry="5" fill="#0d0d0d" opacity=".85" stroke="${col}" stroke-width="2.2"/>`;
@@ -2640,7 +2731,7 @@ function briefModal() {
     `<div class="logo" style="font-size:24px">🧟 작전 브리핑</div>
      <h3 style="margin-top:8px">${esc(M.n)}</h3><p class="dim">${esc(M.story)}</p>
      <div class="goal">🎯 <b>목표</b> — ${esc(M.goal)}</div>
-     <div style="margin:8px 0">난이도: <b>${DF.n}</b> <span class="dim">(${DF.d})</span></div>
+     <div style="margin:8px 0">난이도: <b>${DF.n}</b> <span class="dim">(${DF.d})</span><br>인원 보정: <b>${S.hc ? S.hc + '명' : '끄기'}</b> <span class="dim">(${ZE.HCS[S.hc || 0]})</span></div>
      ${mine.length ? `<div class="bsv">${mine.map(x => `<div><img src="${EMBED_('head_' + x.id)}"><b>${ZE.SURV[x.id].n}</b><small>${ZE.SURV[x.id].role}</small></div>`).join('')}</div>` : ''}`,
     `<h3>① 라운드 진행 순서</h3>
      <ol><li><b>플레이어 단계</b>: 차례대로 생존자를 골라 <b>행동 3번</b> — 이동, 수색(건물 안), 문 열기, 공격, 목표 획득, 교환, 소음 내기.</li>
@@ -2679,6 +2770,30 @@ function waitModal() {
   </div></div>`;
 }
 
+
+/* ---------- 3D 주사위 (낡은 뼈 주사위 + 나무 상자 트레이) ---------- */
+const PIPS = { 1: [5], 2: [3, 7], 3: [3, 5, 7], 4: [1, 3, 7, 9], 5: [1, 3, 5, 7, 9], 6: [1, 3, 4, 6, 7, 9] };
+const FACE = { 1: [0, 0], 6: [0, 180], 2: [0, -90], 5: [0, 90], 3: [-90, 0], 4: [90, 0] };
+const diceSeen = {};
+function dieFace(v, cls) { return `<div class="df ${cls}">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => `<i class="${PIPS[v].includes(i) ? 'p' : ''}"></i>`).join('')}</div>`; }
+function diceHTML(vals, acc, key, small) {
+  if (!diceSeen[key]) {
+    diceSeen[key] = performance.now();
+    SND.play('shake', .45); SND.play('dice', .5, .42); SND.play('dice', .28, .62); SND.play('dice', .16, .8);
+    if (vals.some(v => v >= acc)) SND.play('melee', .22, 1.0);
+    setTimeout(() => { try { if (navigator.vibrate) navigator.vibrate(vals.some(v => v >= acc) ? [18, 40, 30] : 12); } catch (e) {} }, 450);
+  }
+  const el = performance.now() - diceSeen[key];
+  return `<div class="tray ${small ? 'sm' : ''}" style="--d0:${-el}ms"><div class="tray-in">${vals.map((v, i) => {
+    const [rx, ry] = FACE[v], hit = v >= acc, sp = 1 + ((v * 7 + i * 3) % 3), tilt = ((i * 37 + v * 11) % 30) - 15;
+    const d = -(el - i * 110);
+    return `<div class="dw ${hit ? 'hit' : 'miss'}" style="--i:${i};--rx:${rx}deg;--ry:${ry}deg;--sx:${sp * 360 + 180}deg;--sy:${(4 - sp) * 360}deg;--tz:${tilt}deg;--d:${d}ms">
+      <div class="dsh"></div>
+      <div class="cube">${dieFace(1, 'f1')}${dieFace(6, 'f6')}${dieFace(2, 'f2')}${dieFace(5, 'f5')}${dieFace(3, 'f3')}${dieFace(4, 'f4')}</div>
+      <span class="dmark">${hit ? '명중' : '실패'}</span></div>`;
+  }).join('')}</div></div>`;
+}
+
 /* ---------- 모달 ---------- */
 function modals() {
   let m = '';
@@ -2688,7 +2803,7 @@ function modals() {
     const vals = R.dice.map(v => Math.min(6, v + R.plus));
     m += `<div class="modal"><div class="box" style="text-align:center">
       <b>${esc(ZE.SURV[R.sid].n)} · ${esc(R.wname)}${R.dual ? ' 쌍수' : ''}</b><div class="dim">${R.acc}+ 이상 명중 ${R.plus ? `(눈금 +${R.plus})` : ''} · 피해 ${R.dmg}</div>
-      <div class="dice">${vals.map(v => `<div class="die roll ${v >= R.acc ? 'hit' : ''}">${v}</div>`).join('')}</div>
+      ${diceHTML(vals, R.acc, 'r' + R.sid + R.wname + R.dice.join('') + (R.rr || 0) + (R.re ? JSON.stringify(R.re) : ''), false)}
       <div>명중 <b>${vals.filter(v => v >= R.acc).length}</b> / ${vals.length}</div>
       ${ctl ? `<div class="row" style="margin-top:12px;justify-content:center;flex-wrap:wrap">
         ${R.re.lucky ? '<button data-a="reroll" data-src="lucky">🍀 행운: 다시 굴리기</button>' : ''}
@@ -2697,10 +2812,11 @@ function modals() {
     </div></div>`;
   } else if (rollAnim && S.lastRoll) {
     const L = S.lastRoll;
-    m += `<div class="rollpop"><div class="box" style="text-align:center">
-      <b>${esc(ZE.SURV[L.sid].n)} · ${esc(L.w)}</b>
-      <div class="dice">${L.vals.map(v => `<div class="die roll ${v >= L.acc ? 'hit' : ''}">${v}</div>`).join('')}</div>
-      <div>명중 <b>${L.hits}</b> · 처치 <b>${L.kills}</b></div></div></div>`;
+    const el0 = -(performance.now() - (diceSeen['l' + L.t] || performance.now()));
+    m += `<div class="rollpop big"><div class="box" style="text-align:center">
+      <div class="rhd"><img src="${EMBED_('head_' + L.sid)}"><div><b>${esc(ZE.SURV[L.sid].n)}</b> <span class="dim">· ${esc(L.w)}</span><small>🎯 ${L.acc}+ 이상이면 명중</small></div></div>
+      ${diceHTML(L.vals, L.acc, 'l' + L.t, L.vals.length > 5)}
+      ${(() => { const T = atkTier(L.kills, L.hits, L.vals, L.acc, false); return `<div class="rres t-${T.k}" style="--d0:${el0}ms">${T.t}${T.s ? `<small>${T.s}</small>` : ''}</div>`; })()}</div></div>`;
   }
   // 스킬 선택
   const ps = S.survivors && S.survivors.find(s => s.pendSkill.length && (s.owner === me.pid || (isHost() && !pl(s.owner).on)));
@@ -2786,6 +2902,7 @@ document.addEventListener('click', e => {
     case 'aitake': aiFor[D.pid] = !aiFor[D.pid]; toast(aiFor[D.pid] ? '🤖 AI가 대신 플레이해요' : 'AI 대신하기 해제'); render(); aiTick(); break;
     case 'mission': act('mission', { m: D.m }); break;
     case 'diff': act('diff', { d: D.d }); break;
+    case 'hc': act('hc', { n: +D.n }); break;
     case 'kick': act('kick', { pid: D.pid }); break;
     case 'start': act('start'); break;
     case 'restart': act('restart'); break;
@@ -2898,6 +3015,15 @@ function cellPt(cell, dx, dy) {
   return { x: r.left + (c.x * CS + (dx == null ? 48 : dx) + 4) * k, y: r.top + (c.y * CS + (dy == null ? 48 : dy) + 4) * k, k };
 }
 function fxLayer() { let l = document.getElementById('fxl'); if (!l) { l = document.createElement('div'); l.id = 'fxl'; document.body.appendChild(l); } return l; }
+function atkTier(kills, hits, vals, acc, big) {
+  const n6 = (vals || []).filter(v => v === 6).length, all = vals && vals.length > 1 && vals.every(v => v >= acc);
+  if (kills && (n6 || big || kills >= 3)) return { k: 'crit', t: '💥 크리티컬!', s: n6 ? `6이 ${n6}개! 급소를 정확히 노렸어요` : big ? '거대한 놈을 쓰러뜨렸어요' : `${kills}마리를 한꺼번에 쓸어버렸어요` };
+  if (kills && all) return { k: 'perf', t: '🎯 완벽한 공격!', s: '주사위가 전부 명중했어요' };
+  if (kills >= 2) return { k: 'multi', t: `🔥 ${kills}연속 처치!`, s: '' };
+  if (kills) return { k: 'kill', t: '💀 처치!', s: '' };
+  if (hits) return { k: 'block', t: '🛡 명중! 하지만 버텼다', s: '피해가 모자라요 (브루트 2, 괴수 3 필요)' };
+  return { k: 'miss', t: '💨 빗나감…', s: '' };
+}
 function fxEl(html, x, y, cls, ms) {
   const e = document.createElement('div'); e.className = 'fx ' + cls; e.innerHTML = html; e.style.left = x + 'px'; e.style.top = y + 'px';
   fxLayer().appendChild(e); setTimeout(() => e.remove(), ms || 1600); return e;
@@ -2918,7 +3044,16 @@ function playFx(e) {
       const nb = e.kills.length ? 10 + e.kills.length * 4 : 5;
       for (let i = 0; i < nb; i++) { const a = Math.random() * 6.283, d = 25 + Math.random() * 45; const b = fxEl('', p.x, p.y, 'blood', 650); b.style.setProperty('--tx', Math.cos(a) * d + 'px'); b.style.setProperty('--ty', Math.sin(a) * d * .7 + 'px'); b.style.width = b.style.height = (3 + Math.random() * 5) + 'px'; }
       if (e.kills.length) { app.animate([{ transform: 'translate(0,0)' }, { transform: 'translate(-5px,3px)' }, { transform: 'translate(4px,-3px)' }, { transform: 'translate(-2px,2px)' }, { transform: 'translate(0,0)' }], { duration: 260, easing: 'ease-out' }); try { navigator.vibrate && navigator.vibrate([30, 30, 50]); } catch (x) {} }
-      if (e.kills.length) fxEl(e.kills.length > 1 ? `${e.kills.length}마리 처치!` : '처치!', p.x, p.y + 26, 'stamp', 1000);
+      const T = atkTier(e.kills.length, e.hits, e.vals, e.acc, e.kills.some(z => z === 'B' || z === 'A'));
+      if (T.k === 'crit' || T.k === 'perf' || T.k === 'multi') {
+        fxEl(T.t, p.x, p.y + 26, 'stamp big t-' + T.k, 1300);
+        const fl = document.createElement('div'); fl.className = 'critflash t-' + T.k; document.body.appendChild(fl); setTimeout(() => fl.remove(), 600);
+        for (let i = 0; i < 8; i++) { const a = i * .785, sp = fxEl('', p.x, p.y, 'spark', 600); sp.style.setProperty('--tx', Math.cos(a) * 70 + 'px'); sp.style.setProperty('--ty', Math.sin(a) * 55 + 'px'); sp.style.transform = `rotate(${a * 57.3}deg)`; }
+        app.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.025) translate(-6px,4px)' }, { transform: 'scale(1.01) translate(5px,-4px)' }, { transform: 'translate(-3px,2px)' }, { transform: 'none' }], { duration: 380, easing: 'ease-out' });
+        try { navigator.vibrate && navigator.vibrate([40, 30, 70]); } catch (x) {}
+        SND.play('brute', .5, .05); setTimeout(() => SND.synth('drum'), 120);
+      } else if (e.kills.length) fxEl('처치!', p.x, p.y + 26, 'stamp', 1000);
+      else fxEl('🛡 버텼다!', p.x, p.y + 26, 'stamp block', 1000);
       SND.synth(e.melee ? 'bonk' : 'splat'); setTimeout(() => SND.synth('drum'), 40);
     }
     fxEl(`<small>${who} · ${e.w}</small>${txt}`, p.x, p.y - 20 * p.k * 1.2, 'pop ' + (e.kills.length ? 'kill' : 'miss'), 1900);
@@ -2933,7 +3068,7 @@ function playFx(e) {
     if (sv && sv.owner === me.pid) { const v = document.createElement('div'); v.className = 'redvig'; document.body.appendChild(v); setTimeout(() => v.remove(), 700); }
   }
 }
-window.ZFX = e => playFx(e);
+window.ZFX = e => playFx(e); window.ZDICE = diceHTML;
 /* ---------- 보드게임식 순차 재생: 로그 한 줄·효과 하나씩 ---------- */
 const RP = { q: [], dispZ: null, busy: false, anim: {}, lunge: {}, lastZ: null, seenN: -1, seenFx: -1, after: [], feed: [] };
 const clone = o => JSON.parse(JSON.stringify(o));
@@ -3036,7 +3171,9 @@ Net.on('state', st => {
   const newRound = prev && prev.round && S.round > prev.round && S.phase !== 'over';
   if (newRound) setTimeout(() => showBanner('🧟 좀비가 몰려왔어요!', 'z'), 0);
   if (prev && S.phase === 'over' && prev.phase !== 'over') setTimeout(() => showBanner(S.result.win ? '🏆 승리!' : '☠️ 패배…', S.result.win ? 'w' : 'z'), 0);
-  if (S.lastRoll && S.lastRoll.t !== lastRollT) { if (lastRollT) { rollAnim = true; setTimeout(() => { rollAnim = false; render(); }, 2600); } lastRollT = S.lastRoll.t; }
+  if (lastRollT < 0) lastRollT = S.lastRoll ? S.lastRoll.t : 0;
+  else if (S.lastRoll && S.lastRoll.t !== lastRollT) { if (!hadRoll) { rollAnim = true; clearTimeout(rollTO); rollTO = setTimeout(() => { rollAnim = false; render(); }, 3000); } lastRollT = S.lastRoll.t; }
+  hadRoll = !!S.roll;
   if (prev && S.phase === 'players' && prev.active !== S.active) { ui.sel = null; ui.mode = 'move'; }
   if (prev && prev.phase !== S.phase) ui.view = 'act';
   // 내 차례 알림 (진동)
