@@ -369,6 +369,22 @@ button.pri{background:linear-gradient(#e11d48,#9f1239);box-shadow:0 3px 0 #4c051
 .mhud.done{border-color:#22c55e}.mhud.done .mh2{color:#86efac}
 .mhud.open{opacity:1;max-width:min(86%,320px)}.mhud .mh3{margin-top:4px;padding-top:4px;border-top:1px solid #4b3a2a;font-size:11px;white-space:normal}
 .mhud .mh3 .dim{font-size:10px}
+/* 공격 모션 강화: 뒤로 젖혔다가 좀비 쪽으로 내리찍기 */
+.a-lunge{animation:a-lunge .5s cubic-bezier(.3,.1,.3,1) both}
+@keyframes a-lunge{0%{transform:none}25%{transform:translate(calc(var(--dx) * -.25),calc(var(--dy) * -.25)) rotate(-8deg) scale(.95)}50%{transform:translate(var(--dx),var(--dy)) rotate(6deg) scale(1.2);filter:drop-shadow(0 0 6px #fff)}70%{transform:translate(calc(var(--dx) * .8),calc(var(--dy) * .8)) scale(1.1)}100%{transform:none}}
+.a-recoil{animation:a-rec2 .4s ease-out both}
+@keyframes a-rec2{0%{transform:none}12%{transform:translate(calc(var(--dx) * .4),calc(var(--dy) * .4)) scale(1.08);filter:drop-shadow(0 0 8px #fde047) brightness(1.4)}35%{transform:translate(calc(var(--dx) * -.7),calc(var(--dy) * -.7))}100%{transform:none}}
+/* 좀비 죽음: 맞고 부풀었다가 피 터지며 바닥에 무너짐 */
+.a-die{animation:a-die2 .95s ease-out both}
+@keyframes a-die2{0%{transform:none;opacity:1;filter:none}12%{transform:scale(1.18,1.08) translateY(-3px);filter:brightness(2.2) sepia(1) hue-rotate(-40deg) saturate(6)}30%{transform:scale(1.3,.75) translateY(2px);filter:brightness(.9) sepia(1) hue-rotate(-40deg) saturate(5);opacity:1}60%{transform:scale(1.45,.25) translateY(6px);opacity:.8;filter:brightness(.5) sepia(1) hue-rotate(-40deg) saturate(6)}100%{transform:scale(1.5,.12) translateY(7px);opacity:0}}
+.fx.gore{border-radius:50%;background:radial-gradient(circle at 35% 35%,#ef4444,#7f1d1d 70%);box-shadow:0 0 2px #450a0a;animation:gore .9s cubic-bezier(.15,.6,.4,1) forwards}
+@keyframes gore{0%{translate:0 0;opacity:1}55%{translate:var(--tx) var(--ty);opacity:1}100%{translate:var(--tx) calc(var(--ty) + var(--fy));opacity:0}}
+.fx.gorepop{width:16px;height:16px;border-radius:50%;background:radial-gradient(#fecaca,#dc2626 45%,#7f1d1d00 72%);animation:gpop .5s ease-out forwards}
+@keyframes gpop{0%{transform:translate(-50%,-50%) scale(.3);opacity:1}100%{transform:translate(-50%,-50%) scale(5);opacity:0}}
+.fx.gorepool{width:40px;height:16px;border-radius:50%;background:radial-gradient(ellipse,#7f1d1dee 0%,#991b1bcc 45%,#450a0a00 75%);animation:gpool 2.6s ease-out forwards;z-index:0}
+@keyframes gpool{0%{transform:translate(-50%,-50%) scale(.2);opacity:0}15%{transform:translate(-50%,-50%) scale(1.2);opacity:1}75%{opacity:.85}100%{transform:translate(-50%,-50%) scale(1.3);opacity:0}}
+.rollpop.big.mine{background:transparent}
+#rollLayer .rollpop{z-index:45}
 </style>
 <script>
 /* ===== 설정 (필요할 때만 바꾸세요) =====
@@ -2000,7 +2016,7 @@ const SND = (() => {
     try {
       const src = ctx.createBufferSource(); src.buffer = b;
       const g = ctx.createGain(); g.gain.value = (vol != null ? vol : (VOL[n] || (n[0] === 'z' ? .4 : .5))) * (/^(z|howl|bite|gameover)/.test(n) ? .7 : 1);
-      src.playbackRate.value = n[0] === 'z' ? .9 + Math.random() * .08 : 1;
+      src.playbackRate.value = n[0] === 'z' ? .86 + Math.random() * .06 : 1;
       src.connect(g); g.connect(ctx.destination); src.start(ctx.currentTime + (delay || 0));
     } catch (e) {}
   }
@@ -2273,6 +2289,7 @@ function cardIcon(c) {
 
 /* ---------- 화면 분기 ---------- */
 function render() {
+  if (!S || S.phase === 'lobby') rollLayer('', '');
   if (!S) return renderHome();
   if (S.phase === 'lobby') return renderLobby();
   renderGame();
@@ -2936,13 +2953,22 @@ function diceHTML(vals, acc, key, small) {
 }
 
 /* ---------- 모달 ---------- */
+let rollKey = null;
+function rollLayer(html, key) {
+  let el = document.getElementById('rollLayer');
+  if (!el) { el = document.createElement('div'); el.id = 'rollLayer'; document.body.appendChild(el); }
+  if (key === rollKey) return;
+  rollKey = key; el.innerHTML = html;
+}
 function modals() {
   let m = '';
-  // 주사위
+  // 주사위 (따로 고정된 층에 그려서 다시 그리기 때 깜빡이지 않게)
+  let dm = '', dk = '';
   if (S.roll) {
     const R = S.roll; const ctl = canControl();
     const vals = R.dice.map(v => Math.min(6, v + R.plus));
-    m += `<div class="modal"><div class="box" style="text-align:center">
+    dk = 'R' + R.sid + R.dice.join('') + R.plus + ctl + JSON.stringify(R.re || {});
+    dm += `<div class="modal"><div class="box" style="text-align:center">
       <b>${esc(ZE.SURV[R.sid].n)} · ${esc(R.wname)}${R.dual ? ' 쌍수' : ''}</b><div class="dim">${R.acc}+ 이상 명중 ${R.plus ? `(눈금 +${R.plus})` : ''} · 피해 ${R.dmg}</div>
       ${diceHTML(vals, R.acc, 'r' + R.sid + R.wname + R.dice.join('') + (R.rr || 0) + (R.re ? JSON.stringify(R.re) : ''), false)}
       <div>명중 <b>${vals.filter(v => v >= R.acc).length}</b> / ${vals.length}</div>
@@ -2954,12 +2980,14 @@ function modals() {
   } else if (rollAnim && S.lastRoll) {
     const L = S.lastRoll;
     const el0 = -(performance.now() - (diceSeen['l' + L.t] || performance.now()));
-    m += `<div class="rollpop big ${rollMine ? 'mine' : ''}"><div class="box" style="text-align:center">
+    dk = 'L' + L.t + rollMine;
+    dm += `<div class="rollpop big ${rollMine ? 'mine' : ''}"><div class="box" style="text-align:center">
       <div class="rhd"><img src="${EMBED_('head_' + L.sid)}"><div><b>${esc(ZE.SURV[L.sid].n)}</b> <span class="dim">· ${esc(L.w)}</span><small>🎯 ${L.acc}+ 이상이면 명중</small></div></div>
       ${diceHTML(L.vals, L.acc, 'l' + L.t, L.vals.length > 5)}
       ${(() => { const T = atkTier(L.kills, L.hits, L.vals, L.acc, false); return `<div class="rres t-${T.k}" style="--d0:${el0}ms">${T.t}${T.s ? `<small>${T.s}</small>` : ''}</div>`; })()}
       ${rollMine ? `<button class="ok rgo" data-a="closeroll" style="--d0:${el0}ms">확인 ▶</button>` : `<div class="dim rwait">${esc(ZE.SURV[L.sid].n)}의 공격 결과</div>`}</div></div>`;
   }
+  rollLayer(dm, dk);
   // 스킬 선택
   const ps = S.survivors && S.survivors.find(s => s.pendSkill.length && (s.owner === me.pid || (isHost() && !pl(s.owner).on)));
   if (ps && !S.roll) {
@@ -3171,6 +3199,19 @@ function fxEl(html, x, y, cls, ms) {
   const e = document.createElement('div'); e.className = 'fx ' + cls; e.innerHTML = html; e.style.left = x + 'px'; e.style.top = y + 'px';
   fxLayer().appendChild(e); setTimeout(() => e.remove(), ms || 1600); return e;
 }
+// 좀비 죽음: 피가 터지며 쓰러짐 (파편 + 바닥 핏자국)
+function gore(cell, n) {
+  const p = cellPt(cell); if (!p) return;
+  fxEl('', p.x, p.y + 4, 'gorepool', 2600);
+  fxEl('', p.x, p.y - 6, 'gorepop', 500);
+  for (let i = 0; i < 14 + n * 6; i++) {
+    const a = -Math.PI * (0.05 + Math.random() * 0.9) + (Math.random() < .25 ? Math.PI : 0), d = 30 + Math.random() * 60;
+    const b = fxEl('', p.x, p.y - 8, 'gore', 900);
+    b.style.setProperty('--tx', Math.cos(a) * d + 'px'); b.style.setProperty('--ty', Math.sin(a) * d * .8 + 'px'); b.style.setProperty('--fy', (20 + Math.random() * 30) + 'px');
+    const sz = 3 + Math.random() * 7; b.style.width = sz + 'px'; b.style.height = sz * (0.7 + Math.random() * .6) + 'px';
+  }
+  SND.synth('splat'); setTimeout(() => SND.synth('splat'), 70);
+}
 function playFx(e) {
   if (!S) return;
   if (e.k === 'atk') {
@@ -3276,12 +3317,12 @@ function rpRun() {
       const pre = rollAnim && !e.fire ? 2000 : 0;
       setTimeout(() => {
         const A = map.cells[e.from], B = map.cells[e.cell];
-        let dx = 0, dy = -22; if (e.from !== e.cell) { const L = Math.hypot(B.x - A.x, B.y - A.y) || 1; dx = (B.x - A.x) / L * (e.melee ? 22 : 10); dy = (B.y - A.y) / L * (e.melee ? 22 : 10); }
+        let dx = 0, dy = -26; if (e.from !== e.cell) { const L = Math.hypot(B.x - A.x, B.y - A.y) || 1; dx = (B.x - A.x) / L * (e.melee ? 34 : 12); dy = (B.y - A.y) / L * (e.melee ? 34 : 12); }
         RP.lunge[e.sid] = { k: e.melee ? 'lunge' : 'recoil', t0: performance.now(), dx, dy };
         const D2 = RP.dispZ || D;
         (e.kid || []).forEach(id => { const z = D2.find(q => q.id === id); if (z) { RP.anim[id] = { k: 'hit', t0: performance.now() }; } });
-        setTimeout(() => { (e.kid || []).forEach(id => { const z = (RP.dispZ || D2).find(q => q.id === id); if (z) { z.dead = true; RP.anim[id] = { k: 'die', t0: performance.now() }; } }); render(); }, 230);
-        setTimeout(() => { if (RP.dispZ) RP.dispZ = RP.dispZ.filter(z => !z.dead); render(); }, 1100);
+        setTimeout(() => { (e.kid || []).forEach(id => { const z = (RP.dispZ || D2).find(q => q.id === id); if (z) { z.dead = true; RP.anim[id] = { k: 'die', t0: performance.now() }; } }); if ((e.kid || []).length) gore(e.cell, e.kid.length); render(); }, 230);
+        setTimeout(() => { if (RP.dispZ) RP.dispZ = RP.dispZ.filter(z => !z.dead); render(); }, 1250);
         playFx(e); render();
       }, pre);
       wait = pre + 1150;
