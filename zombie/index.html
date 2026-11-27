@@ -123,6 +123,76 @@ button.pri{background:linear-gradient(#e11d48,#9f1239);box-shadow:0 3px 0 #4c051
 .pend .slot{min-width:96px;min-height:92px}
 .acts button{background:linear-gradient(#2b3038,#20242b);box-shadow:0 2px 0 #0008}
 .die{background:#f5efe0;box-shadow:0 3px 0 #a8a29e}
+/* ---- 레이아웃 v3: 지도 한눈에 ---- */
+#game{display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+.top{flex:0 0 auto;height:46px;gap:5px;padding:4px 6px;padding-top:max(4px,env(safe-area-inset-top))}
+.top .rnd{font-size:15px}.top .who{font-size:13px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.top .net{font-size:12px}
+.ib{width:34px;height:34px;padding:0;font-size:16px;border-radius:9px;background:#0005}
+.ib s{opacity:.45}
+.main{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
+#game.land .main{flex-direction:row}
+.boardwrap{flex:0 0 auto;max-height:none;overflow:auto;position:relative;display:flex;align-items:center;justify-content:center}
+#game.land .boardwrap{width:60%;height:auto!important}
+.boardwrap svg{margin:auto;flex:0 0 auto}
+.zoom{position:absolute;right:6px;bottom:6px;margin:0;float:none}
+.zoom button{width:34px;height:34px;font-size:18px;background:#000b;border:1px solid #fff2}
+.bottom{flex:1 1 auto;min-height:0;overflow:auto;padding:6px 8px;padding-bottom:max(8px,env(safe-area-inset-bottom))}
+.team{display:flex;gap:5px;overflow-x:auto;padding-bottom:5px;scrollbar-width:none}
+.chip{flex:0 0 auto;display:grid;grid-template-columns:30px auto;grid-template-rows:auto auto;column-gap:5px;align-items:center;padding:3px 7px 3px 3px;border-radius:20px;border:2px solid transparent;background:#20242b;min-height:0;position:relative;font-size:11px;text-align:left}
+.chip .hd{grid-row:1/3;width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--c);position:static;transform:none}
+.chip .nm{font-weight:700;font-size:11px;line-height:1.1}
+.chip .hp{font-size:9px;line-height:1}
+.chip .ap{grid-column:2;font-size:9px;font-weight:800;display:none}
+.chip .st{position:absolute;left:0;top:-3px;font-style:normal;font-size:11px}
+.chip.act{border-color:#fff;background:#2b3240}
+.chip.done{opacity:.45}
+.ticker{font-size:12px;padding:4px 8px;margin:4px 0;background:#0006;border-radius:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.ticker div{border:0;padding:0}
+.wait{font-size:14px;font-weight:700;margin:6px 0;color:#cbd5e1}
+.wait.mineturn{color:#fde68a}
+.mine{display:flex;align-items:center;gap:6px;margin-top:6px}
+.mine .hd{width:24px;height:24px;border-radius:50%;object-fit:cover}
+.pickrow{display:flex;gap:8px;flex-wrap:wrap}
+.pick{display:flex;align-items:center;gap:8px;padding:6px 12px 6px 6px;border-radius:30px;border:2px solid var(--c);background:#20242b}
+.pick img{width:40px;height:40px;border-radius:50%;object-fit:cover}
+.actor{display:flex;align-items:center;gap:8px;background:#0005;border-radius:12px;padding:5px 8px;margin-bottom:5px}
+.actor .hd{width:40px;height:40px;border-radius:50%;object-fit:cover;border:3px solid}
+.actor .bar{height:5px;margin-top:4px}
+.tag.free{background:#14532d}
+.dots{text-align:center;font-size:10px;color:var(--dim)}
+.dots div{display:flex;gap:3px;margin-top:2px}
+.dots i{width:13px;height:13px;border-radius:50%;background:#374151;display:block}
+.dots i.on{background:#22c55e;box-shadow:0 0 6px #22c55e}
+.inv{gap:4px;margin:4px 0}
+.slot{min-height:64px;padding:3px 2px;border-radius:8px}
+.slot .wi{height:24px}
+.slot .wi.em{font-size:18px;line-height:24px;height:24px}
+.slot .cn{font-size:10.5px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.slot .cs{font-size:9px;line-height:1.15}
+.slot .em0{font-size:20px;opacity:.25;margin:auto}
+.slot .lb{display:none}
+.selrow{font-size:12px;margin:2px 0 4px}
+.acts{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.acts button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:5px 2px;min-height:52px;font-size:10.5px;line-height:1.1;border-radius:10px}
+.acts button i{font-style:normal;font-size:19px;line-height:22px;height:22px;display:flex;align-items:center}
+.acts button i img{height:20px;max-width:44px;image-rendering:pixelated}
+.acts button span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.acts button.on{outline:2px solid #facc15;background:#3b3415}
+.acts button.atk:not(:disabled){background:linear-gradient(#4a1d1d,#2a1414)}
+.acts button.hot:not(:disabled){background:linear-gradient(#14532d,#0f2e1c);outline:1px solid #4ade80}
+.acts button.end{background:#334155}
+.acts button.end.pri{background:linear-gradient(#e11d48,#9f1239)}
+.log.full{max-height:none}
+.cellinfo{left:6px;bottom:6px}
+@media (min-width:640px){.acts{grid-template-columns:repeat(6,1fr)}}
+.coach{font-size:12.5px;line-height:1.35;background:linear-gradient(90deg,#1e3a5f,#172033);border-left:3px solid #60a5fa;border-radius:8px;padding:6px 9px;margin:4px 0 5px;color:#dbeafe}
+.brief ol{padding-left:18px;font-size:13.5px;line-height:1.5;margin:8px 0}
+.brief ol li{margin-bottom:4px}
+.brief .goal{background:#3b0d0d;border:1px solid #7f1d1d;border-radius:10px;padding:8px 10px;font-size:13.5px}
+.banner{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:70;font-family:'Black Han Sans','Noto Sans KR';font-size:38px;padding:14px 28px;border-radius:16px;pointer-events:none;white-space:nowrap;animation:bn 1.8s ease-out forwards;text-shadow:0 3px 0 #000}
+.banner.m{background:#1d4ed8e6;color:#fff}.banner.z{background:#7f1d1de6;color:#fff}.banner.w{background:#15803de6;color:#fff}
+@keyframes bn{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}12%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}20%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0}}
 </style>
 <script>
 /* ===== 설정 (필요할 때만 바꾸세요) =====
@@ -1596,7 +1666,7 @@ const roomParam = (params.get('room') || '').toUpperCase().replace(/[^A-Z0-9]/g,
 const SND = (() => {
   let ctx = null, muted = store('zsv-mute') === true, unlocked = false;
   const buf = {}, base = (CFG.sndBase || 'snd/');
-  const VOL = { pistol: .5, smg: .45, shotgun: .55, rifle: .5, boom: .6, melee: .6, door: .6, dice: .55, shake: .5, card: .5, slide: .45, reload: .5, click: .3, bell: .5, brute: .5 };
+  const VOL = { zatk1: .5, zatk2: .5, bite: .5, howl: .55, ready: .5, shell: .3, empty: .5, reload2: .5, pistol: .5, smg: .45, shotgun: .55, rifle: .5, boom: .6, melee: .6, door: .6, dice: .55, shake: .5, card: .5, slide: .45, reload: .5, click: .3, bell: .5, brute: .5 };
   function unlock() {
     if (unlocked) return; unlocked = true;
     try { ctx = new (window.AudioContext || window.webkitAudioContext)(); if (ctx.state === 'suspended') ctx.resume(); } catch (e) {}
@@ -1616,45 +1686,198 @@ const SND = (() => {
       src.connect(g); g.connect(ctx.destination); src.start(ctx.currentTime + (delay || 0));
     } catch (e) {}
   }
+  // 직접 만드는 효과음 (발소리·휘두르기·부스럭·레벨업 등)
+  function noiseBuf(sec) { const b = ctx.createBuffer(1, ctx.sampleRate * sec, ctx.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; return b; }
+  let NB = null;
+  function nz(t, dur, f0, f1, q, vol, type) {
+    NB = NB || noiseBuf(2);
+    const s = ctx.createBufferSource(); s.buffer = NB;
+    const f = ctx.createBiquadFilter(); f.type = type || 'bandpass'; f.Q.value = q;
+    f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + Math.min(.02, dur / 4)); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    s.connect(f); f.connect(g); g.connect(ctx.destination); s.start(t, Math.random()); s.stop(t + dur + .05);
+  }
+  function tone(t, fr, dur, vol, type, f2) {
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = type || 'sine';
+    o.frequency.setValueAtTime(fr, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + dur + .05);
+  }
+  const SY = {
+    steps(t) { for (let i = 0; i < 3; i++) { nz(t + i * .24, .09, 900, 250, 1.2, .5, 'lowpass'); tone(t + i * .24, 90, .08, .25, 'sine', 50); } },
+    run(t) { for (let i = 0; i < 5; i++) { nz(t + i * .13, .07, 1000, 300, 1.2, .5, 'lowpass'); tone(t + i * .13, 95, .06, .22, 'sine', 55); } },
+    whoosh(t) { nz(t, .22, 600, 3200, 2.5, .45); },
+    rustle(t) { for (let i = 0; i < 4; i++) nz(t + i * .07 + Math.random() * .03, .08, 3000, 1500, 1, .22, 'highpass'); },
+    shout(t) { tone(t, 220, .5, .18, 'sawtooth', 160); tone(t, 330, .5, .1, 'square', 250); nz(t, .5, 800, 600, 3, .15); },
+    chime(t) { [784, 1047, 1319].forEach((f, i) => tone(t + i * .08, f, .6, .14, 'triangle')); },
+    level(t) { [523, 659, 784, 1047, 1319].forEach((f, i) => tone(t + i * .09, f, .7, .15, 'triangle')); tone(t + .45, 2093, .9, .06, 'sine'); },
+    toll(t) { tone(t, 98, 2.6, .4, 'sine'); tone(t, 196, 2, .15, 'triangle'); tone(t, 147, 2.2, .12, 'sine'); },
+    win(t) { [392, 523, 659, 784].forEach((f, i) => { tone(t + i * .16, f, .5, .18, 'triangle'); tone(t + i * .16, f / 2, .5, .1, 'square'); }); tone(t + .7, 1047, 1.4, .2, 'triangle'); },
+    lose(t) { [330, 311, 294, 262].forEach((f, i) => tone(t + i * .35, f, .6, .2, 'sawtooth', f * .97)); tone(t + 1.4, 65, 2.5, .4, 'sine'); },
+    fire(t) { nz(t, 1.2, 400, 1500, .7, .35); for (let i = 0; i < 6; i++) nz(t + .1 + i * .15, .05, 3000, 2000, 2, .2); },
+    ouch(t) { // 사람 신음 (포먼트 합성)
+      const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(150 + Math.random() * 40, t); o.frequency.exponentialRampToValueAtTime(95, t + .45);
+      const vb = ctx.createOscillator(), vg = ctx.createGain(); vb.frequency.value = 7; vg.gain.value = 6; vb.connect(vg); vg.connect(o.frequency);
+      const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.5, t + .04); g.gain.exponentialRampToValueAtTime(.0001, t + .5);
+      [[650, 6, 1], [1100, 8, .5], [2500, 10, .2]].forEach(([fr, q, v]) => { const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = fr; f.Q.value = q; const fg = ctx.createGain(); fg.gain.value = v; o.connect(f); f.connect(fg); fg.connect(g); });
+      g.connect(ctx.destination); o.start(t); vb.start(t); o.stop(t + .55); vb.stop(t + .55);
+    },
+    slash(t) { nz(t, .12, 4000, 1200, 3, .4); nz(t + .06, .1, 3000, 900, 3, .3); },
+    splat(t) { nz(t, .25, 700, 120, 1, .6, 'lowpass'); tone(t, 120, .15, .3, 'sine', 50); },
+    drum(t) { tone(t, 60, .5, .5, 'sine', 35); nz(t, .3, 300, 100, 1, .3, 'lowpass'); },
+  };
+  function synth(n, delay) { if (muted || !ctx || !SY[n]) return; try { SY[n](ctx.currentTime + (delay || 0)); } catch (e) {} }
   ['pointerdown', 'touchstart', 'keydown'].forEach(ev => window.addEventListener(ev, () => { unlock(); if (ctx && ctx.state === 'suspended') ctx.resume(); }, { passive: true }));
   return {
-    play, get muted() { return muted; },
+    play, synth, get muted() { return muted; },
     toggle() { muted = !muted; store('zsv-mute', muted); if (!muted) { unlock(); play('click'); } },
     preload() { if (ctx) ['dice', 'shake', 'pistol', 'melee', 'door', 'card', 'z1', 'bell', 'click'].forEach(get); },
   };
 })();
+/* ---------- 배경음악 (브라우저에서 직접 만드는 공포 앰비언트) ---------- */
+const BGM = (() => {
+  let ctx = null, on = store('zsv-bgm') !== false, started = false, master = null, timer = null, tense = 0;
+  let dronF = null, beatG = null, delayIn = null, nextChord = 0, nextNote = 0, nextBeat = 0, chordI = 0;
+  const CH = [[57, 60, 64], [53, 57, 60], [50, 53, 57], [52, 56, 59], [57, 60, 64], [55, 58, 62], [53, 57, 60], [52, 55, 59]];
+  const SCALE = [69, 72, 74, 76, 79, 81, 84];
+  const f = m => 440 * Math.pow(2, (m - 69) / 12);
+  function init() {
+    if (ctx) return;
+    try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
+    master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+    // 공간감: 피드백 딜레이
+    delayIn = ctx.createGain(); delayIn.gain.value = .5;
+    const dl = ctx.createDelay(1.5); dl.delayTime.value = .42; const fb = ctx.createGain(); fb.gain.value = .45; const dlp = ctx.createBiquadFilter(); dlp.frequency.value = 1800;
+    delayIn.connect(dl); dl.connect(dlp); dlp.connect(fb); fb.connect(dl); dlp.connect(master);
+    // 저음 드론
+    dronF = ctx.createBiquadFilter(); dronF.type = 'lowpass'; dronF.frequency.value = 220; dronF.Q.value = 4;
+    const dg = ctx.createGain(); dg.gain.value = .22; dronF.connect(dg); dg.connect(master);
+    [[45, 0], [45, 7], [52, -5]].forEach(([m, det]) => { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f(m); o.detune.value = det; o.connect(dronF); o.start(); });
+    const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = .07; lg.gain.value = 120; lfo.connect(lg); lg.connect(dronF.frequency); lfo.start();
+    // 바람 소리
+    const nb = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate), nd = nb.getChannelData(0);
+    for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+    const ns = ctx.createBufferSource(); ns.buffer = nb; ns.loop = true;
+    const nf = ctx.createBiquadFilter(); nf.type = 'bandpass'; nf.frequency.value = 500; nf.Q.value = .8;
+    const ng = ctx.createGain(); ng.gain.value = .035; ns.connect(nf); nf.connect(ng); ng.connect(master); ns.start();
+    const wl = ctx.createOscillator(), wg = ctx.createGain(); wl.frequency.value = .05; wg.gain.value = 300; wl.connect(wg); wg.connect(nf.frequency); wl.start();
+    beatG = ctx.createGain(); beatG.gain.value = 0; beatG.connect(master);
+  }
+  function pad(t, notes, dur) {
+    notes.forEach((m, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain(), lp = ctx.createBiquadFilter();
+      o.type = 'triangle'; o.frequency.value = f(m - 12); o.detune.value = (i - 1) * 6;
+      lp.frequency.value = 900;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.05, t + dur * .35); g.gain.linearRampToValueAtTime(0, t + dur);
+      o.connect(lp); lp.connect(g); g.connect(master); g.connect(delayIn); o.start(t); o.stop(t + dur + .1);
+    });
+  }
+  function bell(t, m, v) {
+    const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.value = f(m); o2.type = 'sine'; o2.frequency.value = f(m) * 2.76;
+    const g2 = ctx.createGain(); g2.gain.value = .25; o2.connect(g2); g2.connect(g);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + 2.6);
+    o.connect(g); g.connect(master); g.connect(delayIn); o.start(t); o2.start(t); o.stop(t + 2.8); o2.stop(t + 2.8);
+  }
+  function thump(t, v) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(70, t); o.frequency.exponentialRampToValueAtTime(38, t + .25);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + .35);
+    o.connect(g); g.connect(beatG); o.start(t); o.stop(t + .4);
+  }
+  function tick() {
+    if (!ctx || !on) return;
+    const now = ctx.currentTime, ahead = now + .6;
+    if (nextChord < ahead) { const t = Math.max(nextChord, now); pad(t, CH[chordI++ % CH.length], 9); nextChord = t + 8; }
+    if (nextNote < ahead) {
+      const t = Math.max(nextNote, now);
+      if (Math.random() < .7) bell(t, SCALE[Math.random() * SCALE.length | 0] - (Math.random() < .3 ? 12 : 0), .05 + Math.random() * .04);
+      nextNote = t + (tense ? .7 + Math.random() * 1.2 : 1.6 + Math.random() * 3);
+    }
+    if (nextBeat < ahead) {
+      const t = Math.max(nextBeat, now);
+      thump(t, .5); thump(t + .28, .35);
+      nextBeat = t + (tense ? .9 : 1.7);
+    }
+    beatG.gain.setTargetAtTime(tense ? .55 : .18, now, 1.5);
+    dronF.frequency.setTargetAtTime(tense ? 420 : 220, now, 2);
+  }
+  function start() {
+    if (!on) return;
+    init(); if (!ctx) return;
+    if (ctx.state === 'suspended') ctx.resume();
+    if (!started) { started = true; nextChord = nextNote = nextBeat = ctx.currentTime + .1; }
+    master.gain.setTargetAtTime(.5, ctx.currentTime, 1.5);
+    clearInterval(timer); timer = setInterval(tick, 200);
+  }
+  function stop() { if (ctx && master) master.gain.setTargetAtTime(0, ctx.currentTime, .4); clearInterval(timer); }
+  ['pointerdown', 'touchend', 'keydown'].forEach(ev => window.addEventListener(ev, () => { if (on && S && S.phase && S.phase !== 'lobby') start(); }, { passive: true }));
+  document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else if (on && started) start(); });
+  return {
+    get on() { return on; },
+    toggle() { on = !on; store('zsv-bgm', on); if (on) start(); else stop(); },
+    mood(t) { tense = t ? 1 : 0; },
+    start,
+  };
+})();
+
 const ZGROAN = ['z1', 'z2', 'z3', 'z4', 'z7', 'zn1', 'zn2', 'zlong'];
-// 상태 변화(로그)를 보고 소리 내기 — 모든 폰에서 똑같이 들림
-let sndLogLen = -1, sndMission = null;
+// 로그(모든 폰에 똑같이 전달됨)를 보고 행동마다 효과음
+let sndLogLen = -1;
+const pickR = a => a[Math.random() * a.length | 0];
 function soundsFor(st) {
   if (!st || !st.log) return;
-  if (sndLogLen < 0 || sndMission !== st.mission + st.round * 0 || st.log.length < sndLogLen) { sndLogLen = st.log.length; sndMission = st.mission; return; }
+  if (sndLogLen < 0 || st.log.length < sndLogLen) { sndLogLen = st.log.length; return; }
   const neu = st.log.slice(sndLogLen); sndLogLen = st.log.length;
-  if (neu.length > 30) return;
-  let t = 0, groans = 0;
+  if (neu.length > 40) return;
+  let t = 0, zq = 0, lastMelee = false;
+  const P = (n, v, gap) => { SND.play(n, v, t); t += gap != null ? gap : .14; };
+  const Y = (n, gap) => { SND.synth(n, t); t += gap != null ? gap : .12; };
   neu.forEach(l => {
     const m = l.m;
-    const at = (n, v) => { SND.play(n, v, t); t += .12; };
-    if (/사격:|근접:/.test(m)) {
-      if (/근접/.test(m)) { at('shake', .35); at(/전기톱/.test(m) ? 'smg' : 'melee'); }
-      else {
-        at('shake', .35);
-        const n = /샷건|엽총/.test(m) ? 'shotgun' : /저격|소총/.test(m) ? 'rifle' : /기관단총/.test(m) ? 'smg' : 'pistol';
-        at(n);
-      }
-      at('dice', .5);
-    } else if (/화염병|불바다|소각/.test(m)) at('boom');
-    else if (/문을 열었/.test(m)) at('door');
-    else if (/재장전/.test(m)) at('reload');
-    else if (/수색:|획득|에픽|발견/.test(m)) at('card');
-    else if (/교환|정리|버림/.test(m)) at('slide', .35);
-    else if (/으아악/.test(m)) { at('zfast', .6); }
-    else if (/좀비 단계/.test(m)) { at(ZGROAN[Math.random() * ZGROAN.length | 0], .45); }
-    else if (/브루트|괴수/.test(m) && /스폰|등장|깨어/.test(m)) { at('brute', .45); }
-    else if (/좀비 카드/.test(m) && !/아무것도/.test(m) && groans++ < 2) { at(ZGROAN[Math.random() * ZGROAN.length | 0], .35); }
-    else if (/부상|쓰러/.test(m)) { at('zlong', .5); }
-    else if (/러너/.test(m) && /스폰|등장/.test(m)) at('zfast', .4);
-    else if (/라운드 시작|차례/.test(m)) at('bell', .35);
+    if (/승리|미션 성공/.test(m) && l.k !== 'z') { Y('win', .5); return; }
+    if (/^☠️ 패배/.test(m)) { Y('lose', .5); return; }
+    if (/쓰러졌|화염에 휩싸/.test(m)) { Y('ouch', .15); P('bite', .7, .2); Y('toll', .4); return; }
+    if (/부상 \d/.test(m)) { P(pickR(['zatk1', 'zatk2']), .6, .08); Y('slash', .12); Y('ouch', .1); P('bite', .4, .4); try { navigator.vibrate && navigator.vibrate(120); } catch (e) {} return; }
+    if (/탈출 성공/.test(m)) { Y('steps', .3); Y('chime', .3); return; }
+    if (/⬆️/.test(m)) { Y('level', .4); return; }
+    if (/스킬 \[/.test(m)) { Y('chime', .2); return; }
+    if (/근접:/.test(m)) { lastMelee = true; P('shake', .3, .1); Y('whoosh', .12); return; }
+    if (/사격:/.test(m)) {
+      lastMelee = false; P('shake', .25, .08);
+      const n = /샷건|엽총/.test(m) ? 'shotgun' : /저격|소총/.test(m) ? 'rifle' : /기관단총/.test(m) ? 'smg' : 'pistol';
+      P(n, null, .18); if (n !== 'rifle') P('shell', .3, .05); return;
+    }
+    if (/^→ 명중/.test(m)) {
+      P('dice', .45, .12);
+      if (/처치:/.test(m)) { P(lastMelee ? 'melee' : 'door', lastMelee ? .7 : .35, .06); Y('splat', .08); P(pickR(['zm1', 'zm2', 'zid1']), .55, .2); }
+      else if (/명중 0/.test(m)) { lastMelee ? Y('whoosh') : P('empty', .5); }
+      return;
+    }
+    if (/다시 굴림/.test(m)) { P('shake', .4, .15); P('dice', .45); return; }
+    if (/화염병/.test(m)) { P('boom', .7, .3); Y('fire', .2); return; }
+    if (/재장전/.test(m)) { P('reload2', .55); return; }
+    if (/문을 열었/.test(m)) { P('door', .65, .25); if (/쾅/.test(m)) P('door', .4); return; }
+    if (/건물이 열렸/.test(m)) { P(pickR(['zid2', 'zid3']), .5, .2); return; }
+    if (/으아악/.test(m)) { P('howl', .6, .2); return; }
+    if (/수색:/.test(m)) { Y('rustle', .25); P('card', .5); return; }
+    if (/에픽 무기|무기 상자|상자 속/.test(m)) { P('ready', .6, .2); Y('chime', .2); return; }
+    if (/목표 획득/.test(m)) { P('card', .5, .1); Y('chime', .25); return; }
+    if (/잠금 해제/.test(m)) { P('door', .5, .2); return; }
+    if (/소음을 냈/.test(m)) { Y('shout', .3); return; }
+    if (/돌격/.test(m)) { Y('run', .3); return; }
+    if (/ 이동/.test(m)) { Y(/구역\)/.test(m) ? 'run' : 'steps', .25); return; }
+    if (/교환|정리|버림/.test(m)) { P('slide', .4); return; }
+    if (/좀비 단계/.test(m)) { Y('drum', .2); P(pickR(['zid2', 'zid3', 'z1', 'z2']), .45, .3); return; }
+    if (/좀비 카드|괴수 카드|돌진|추가 활성화/.test(m)) {
+      if (zq++ > 3 || /아무것도|효과 없음/.test(m)) return;
+      if (/괴수/.test(m)) P('howl', .55, .3);
+      else if (/브루트/.test(m)) P('brute', .45, .25);
+      else if (/러너/.test(m)) P('zfast', .45, .2);
+      else P(pickR(['zid1', 'zid2', 'zid3', 'z3', 'z4', 'zn1']), .4, .2);
+      return;
+    }
+    if (/라운드 시작/.test(m)) { P('bell', .35); return; }
   });
 }
 
@@ -2042,19 +2265,18 @@ function boardSVG() {
   return o;
 }
 function scaleBase() {
-  const map = ZE.getMap(S.mission);
-  const w = Math.min(window.innerWidth, 900);
-  return Math.max(0.3, (w - 4) / (map.W * CS + 8));
+  const map = ZE.getMap(S.mission), box = boardBox();
+  return Math.max(0.2, Math.min((box.w - 4) / (map.W * CS + 8), (box.h - 4) / (map.H * CS + 8)));
 }
 // 첫 확대: 한 구역이 화면에서 최소 ~74px
 function autoZoom() {
   const map = ZE.getMap(S.mission);
   const cell = CS * scaleBase();
-  ui.zoom = Math.min(3, Math.max(1, 74 / cell));
+  ui.zoom = 1;
   ui.zoomFor = S.mission;
 }
 function centerOn(cellI) {
-  const bw = $('.boardwrap'); if (!bw) return;
+  const bw = $('.boardwrap'); if (!bw || ui.zoom <= 1.01) return;
   const map = ZE.getMap(S.mission), c = map.cells[cellI]; if (!c) return;
   const k = ui.zoom * scaleBase();
   bw.scrollLeft = (c.x + .5) * CS * k - bw.clientWidth / 2;
@@ -2062,27 +2284,39 @@ function centerOn(cellI) {
 }
 
 /* ---------- 게임 화면 ---------- */
+function isLand() { return window.innerWidth > window.innerHeight && window.innerWidth >= 640; }
+// 지도 전체가 한 화면에 들어가는 배율
+function boardBox() {
+  const map = ZE.getMap(S.mission);
+  const vw = window.innerWidth, vh = window.innerHeight;
+  if (isLand()) return { w: Math.floor(vw * .6), h: vh - 46 };
+  const minPanel = Math.max(300, Math.round(vh * .4));
+  return { w: vw, h: Math.max(240, vh - 46 - minPanel) };
+}
 function renderGame() {
-  // 스크롤 위치 보존
   const bw = $('.boardwrap'), sx = bw ? bw.scrollLeft : 0, sy = bw ? bw.scrollTop : 0;
   const bt = $('.bottom'), bs = bt ? bt.scrollTop : 0;
   const lvl = ZE.dangerLevel(S);
   const cp = S.phase === 'players' ? ZE.curPlayer(S) : null;
-  app.innerHTML = `<div id="game">
+  const box = boardBox();
+  app.innerHTML = `<div id="game" class="${isLand() ? 'land' : ''}">
     <div class="top">
-      <b>R${S.round}</b>
-      <span class="pill" style="background:${ZE.LEVELS[lvl].color}">위험 ${ZE.LEVELS[lvl].name}</span>
-      <span class="grow" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${S.phase === 'over' ? '게임 종료' : cp ? `<b style="color:${pl(cp).color}">${esc(pl(cp).name)}</b> 차례${pl(cp).on ? '' : ' (오프라인)'}` : '좀비 차례…'}</span>
-      <span class="status">${esc(statusText())}</span>
-      <button class="sm" data-a="mute">${SND.muted ? '🔇' : '🔊'}</button>
-      <button class="sm" data-a="view" data-v="log">기록</button>
-      <button class="sm" data-a="help">?</button>
+      <b class="rnd">R${S.round}</b>
+      <span class="pill" style="background:${ZE.LEVELS[lvl].color}">${ZE.LEVELS[lvl].name}</span>
+      <span class="grow who">${S.phase === 'over' ? '게임 종료' : cp ? `${pl(cp).ai ? '🤖 ' : ''}<b style="color:${pl(cp).color}">${esc(pl(cp).name)}</b> 차례${pl(cp).on ? '' : ' (오프라인)'}` : '<b style="color:#f87171">🧟 좀비 차례</b>'}</span>
+      <span class="net" title="${esc(statusText())}">${statusText().slice(0, 2)}</span>
+      <button class="ib" data-a="music">${BGM.on ? '🎵' : '<s>🎵</s>'}</button>
+      <button class="ib" data-a="mute">${SND.muted ? '🔇' : '🔊'}</button>
+      <button class="ib" data-a="view" data-v="${ui.view === 'log' ? 'act' : 'log'}">📜</button>
+      <button class="ib" data-a="help">?</button>
     </div>
-    <div class="boardwrap">${boardSVG()}
-      <div class="zoom"><button data-a="zoom" data-z="1">+</button><button data-a="zoom" data-z="-1">−</button></div>
-      ${cellInfo()}
+    <div class="main">
+      <div class="boardwrap" style="height:${isLand() ? box.h : Math.min(box.h, Math.round((ZE.getMap(S.mission).H * CS + 8) * scaleBase()) + 2)}px">${boardSVG()}
+        <div class="zoom"><button data-a="zoom" data-z="1">＋</button><button data-a="zoom" data-z="-1">－</button>${ui.zoom > 1.01 ? '<button data-a="zoom" data-z="0" style="font-size:12px">전체</button>' : ''}</div>
+        ${cellInfo()}
+      </div>
+      <div class="bottom">${bottom()}</div>
     </div>
-    <div class="bottom">${bottom()}</div>
   </div>${modals()}`;
   const nb = $('.boardwrap'); if (nb) { nb.scrollLeft = sx; nb.scrollTop = sy; }
   const nbt = $('.bottom'); if (nbt) nbt.scrollTop = bs;
@@ -2104,106 +2338,159 @@ function hearts(s) { const m = ZE.healthMax(s); return '❤'.repeat(Math.max(0, 
 function teamStrip() {
   return `<div class="team">${S.survivors.map(s => {
     const def = ZE.SURV[s.id]; const p = pl(s.owner);
-    return `<button class="chip ${s.id === S.active ? 'act' : ''} ${s.done || s.dead || s.escaped ? 'done' : ''}" data-a="detail" data-sid="${s.id}" style="border-left:5px solid ${def.color}">
-      <img class="hd" src="${EMBED_('head_' + s.id)}"><b>${def.n}</b> <span class="hp">${s.dead ? '💀' : s.escaped ? '🚪' : hearts(s)}</span><br>
-      <span style="color:${lvlColor(s.ap)}">AP ${s.ap}</span> <span class="dim">${p.ai ? '🤖' : ''}${esc(p.name)}</span>${s.pendSkill.length ? ' ⭐' : ''}</button>`;
+    return `<button class="chip ${s.id === S.active ? 'act' : ''} ${s.done || s.dead || s.escaped ? 'done' : ''}" data-a="detail" data-sid="${s.id}" style="--c:${def.color}">
+      <img class="hd" src="${EMBED_('head_' + s.id)}">${s.dead ? '<i class="st">💀</i>' : s.escaped ? '<i class="st">🚪</i>' : ''}${s.pendSkill.length ? '<i class="st">⭐</i>' : ''}
+      <span class="nm">${def.n}</span><span class="hp">${s.dead ? '' : hearts(s)}</span><span class="ap" style="color:${lvlColor(s.ap)}">${p.ai ? '🤖' : ''}${s.ap}</span></button>`;
   }).join('')}</div>`;
 }
-function invHTML(s, editable, other) {
+function cardShort(c) {
+  const d = ZE.EQUIP[c.k];
+  if (d.molotov) return `${d.range[0]}-${d.range[1]} 🔥전멸`;
+  if (d.kind === 'melee' || d.kind === 'ranged') return `${d.kind === 'melee' ? '근접' : d.range[0] + '-' + d.range[1]} 🎲${d.dice} ${d.acc}+ 💥${d.dmg}${d.dual ? ' ✌' : ''}${d.noisy ? ' 📢' : ''}${d.door ? ' 🚪' : ''}`;
+  if (d.search2) return '수색 2장';
+  if (d.reroll) return '재굴림';
+  if (d.food) return '식량';
+  return '';
+}
+function invHTML(s, editable) {
   const sel = ui.sel;
   let h = '';
   if (s.pending.length) {
-    h += `<div class="hint">🆕 새 카드! 탭한 뒤 넣을 칸을 탭하세요 (손 2칸 / 가방 3칸). 필요 없으면 버리기.</div><div class="pend">${s.pending.map((c, i) => {
+    h += `<div class="hint">🆕 새 카드 → 탭한 뒤 넣을 칸을 탭 (필요 없으면 버리기)</div><div class="pend">${s.pending.map((c, i) => {
       const on = sel && sel.sid === s.id && sel.pend === i;
-      return `<button class="slot ${on ? 'sel' : ''} ${ZE.EQUIP[c.k].epic ? 'epic' : ''}" data-a="pend" data-sid="${s.id}" data-i="${i}">${cardIcon(c)}<span class="cn">${ZE.EQUIP[c.k].n}</span><span class="cs">${cardStat(c)}</span></button>`;
+      return `<button class="slot ${on ? 'sel' : ''} ${ZE.EQUIP[c.k].epic ? 'epic' : ''}" data-a="pend" data-sid="${s.id}" data-i="${i}">${cardIcon(c)}<span class="cn">${ZE.EQUIP[c.k].n}</span><span class="cs">${cardShort(c)}</span></button>`;
     }).join('')}</div>`;
   }
   h += `<div class="inv">${s.inv.map((c, i) => {
     const on = sel && sel.sid === s.id && sel.slot === i;
     const d = c && ZE.EQUIP[c.k];
     return `<button class="slot ${i < 2 ? 'hand' : ''} ${on ? 'sel' : ''} ${d && d.epic ? 'epic' : ''} ${c && !c.l ? 'unl' : ''}" data-a="slot" data-sid="${s.id}" data-i="${i}" ${editable ? '' : 'data-ro="1"'}>
-      ${c ? `${cardIcon(c)}<span class="cn">${d.n}${!c.l ? ' (빈)' : ''}</span><span class="cs">${cardStat(c)}</span>` : '<span class="dim">비어 있음</span>'}<span class="lb">${i < 2 ? '손' : '가방'}</span></button>`;
+      ${c ? `${cardIcon(c)}<span class="cn">${d.n}${!c.l ? '(빈)' : ''}</span><span class="cs">${cardShort(c)}</span>` : `<span class="em0">${i < 2 ? '✋' : '🎒'}</span>`}</button>`;
   }).join('')}</div>`;
   if (sel && sel.sid === s.id && editable) {
     const c = sel.pend != null ? s.pending[sel.pend] : s.inv[sel.slot];
-    if (c) h += `<div class="row"><span class="dim grow">선택: ${ZE.EQUIP[c.k].n} → 옮길 칸을 탭</span><button class="sm" data-a="discard">버리기</button><button class="sm" data-a="desel">취소</button></div>`;
+    if (c) h += `<div class="row selrow"><span class="dim grow">${ZE.EQUIP[c.k].n}: ${cardStat(c)} → 옮길 칸 탭</span><button class="sm" data-a="discard">버리기</button><button class="sm" data-a="desel">취소</button></div>`;
   }
   return h;
 }
 function bottom() {
   if (ui.view === 'log') {
-    return `<div class="row"><b class="grow">게임 기록</b><button class="sm" data-a="view" data-v="act">닫기</button></div>
-    <div class="log">${S.log.slice().reverse().map(l => `<div class="${l.k}">${esc(l.m)}</div>`).join('')}</div>`;
+    return `<div class="row"><b class="grow">📜 게임 기록</b><button class="sm" data-a="view" data-v="act">닫기</button></div>
+    <div class="log full">${S.log.slice().reverse().map(l => `<div class="${l.k}">${esc(l.m)}</div>`).join('')}</div>`;
   }
   let h = teamStrip();
-  const last = S.log.slice(-2).map(l => `<div class="${l.k}">${esc(l.m)}</div>`).join('');
-  h += `<div class="log" style="max-height:44px;overflow:hidden;margin-bottom:6px">${last}</div>`;
+  const last = S.log.slice(-1).map(l => `<div class="${l.k}">${esc(l.m)}</div>`).join('');
+  const ticker = `<div class="ticker" data-a="view" data-v="log">${last}</div>`;
   if (S.phase === 'over') {
-    return h + `<div class="card" style="text-align:center"><div style="font-size:22px;font-weight:800">${S.result.win ? '🏆 승리!' : '☠️ 패배'}</div><div class="dim">${esc(S.result.why)}</div>
+    return h + `<div class="card" style="text-align:center"><div style="font-size:24px;font-weight:900">${S.result.win ? '🏆 승리!' : '☠️ 패배'}</div><div class="dim">${esc(S.result.why)}</div>
       ${isHost() ? '<button class="pri" style="margin-top:10px" data-a="restart">대기실로 (다시 하기)</button>' : '<div class="dim" style="margin-top:8px">방장이 새 게임을 열 수 있어요.</div>'}</div>`;
   }
   const ctl = canControl();
   const s = activeS();
-
   if (!ctl) {
-    const mine = S.survivors.filter(x => x.owner === me.pid && !x.dead);
     const cpp = S.phase === 'players' ? ZE.curPlayer(S) : null;
-    h += `<div class="turnbar dim">${cpp ? (pl(cpp).ai ? '🤖 AI 동료가 플레이 중이에요…' : `${esc(pl(cpp).name)}님이 플레이 중이에요.`) : '좀비가 움직이는 중…'}</div>`;
-    mine.forEach(x => { h += `<div style="margin-top:6px"><b style="color:${ZE.SURV[x.id].color}">${ZE.SURV[x.id].n}</b> <span class="dim">내 소지품</span>${invHTML(x, false)}</div>`; });
+    h += ticker;
+    h += `<div class="wait">${cpp ? (pl(cpp).ai ? '🤖 AI 동료가 플레이 중…' : `⏳ ${esc(pl(cpp).name)}님이 플레이 중…`) : '🧟 좀비가 움직이는 중…'}</div>`;
+    h += `<div class="coach">${cpp ? '기다리는 동안 지도를 보며 작전을 세워 보세요. 내 차례가 되면 알림이 와요. 레벨업 스킬 선택은 언제든 할 수 있어요.' : '좀비가 같은 칸 생존자를 공격하고, 가장 시끄러운 곳으로 움직여요.'}</div>`;
+    S.survivors.filter(x => x.owner === me.pid && !x.dead).forEach(x => { h += `<div class="mine"><img class="hd" src="${EMBED_('head_' + x.id)}"><b style="color:${ZE.SURV[x.id].color}">${ZE.SURV[x.id].n}</b> <span class="dim">소지품</span></div>${invHTML(x, false)}`; });
     return h;
   }
-  if (!s && ZE.curPlayer(S) !== me.pid && isHost()) { const cpo = ZE.curPlayer(S); h += `<div class="hint">📴 ${esc(pl(cpo).name)}님 오프라인 <button class="sm" data-a="aitake" data-pid="${esc(cpo)}">${aiFor[cpo] ? '직접 하기' : '🤖 AI에게 맡기기'}</button></div>`; }
   if (!s) {
-    const mine = S.survivors.filter(x => x.owner === ZE.curPlayer(S) && !x.done && !x.dead && !x.escaped);
-    h += `<div class="turnbar"><b>내 차례!</b> 행동할 생존자를 고르세요.</div><div class="row wrap">${mine.map(x => `<button class="pri" data-a="select" data-sid="${x.id}">${ZE.SURV[x.id].n}</button>`).join('')}</div>`;
+    const cpo = ZE.curPlayer(S);
+    if (cpo !== me.pid && isHost()) h += `<div class="hint">📴 ${esc(pl(cpo).name)}님 오프라인 <button class="sm" data-a="aitake" data-pid="${esc(cpo)}">${aiFor[cpo] ? '직접 하기' : '🤖 AI에게 맡기기'}</button></div>`;
+    const mine = S.survivors.filter(x => x.owner === cpo && !x.done && !x.dead && !x.escaped);
+    h += ticker + `<div class="wait mineturn">🔔 내 차례! 행동할 생존자를 고르세요</div><div class="coach">한 생존자의 행동(3번)을 끝내고 [턴 종료]를 누른 뒤 다음 생존자를 골라요.</div><div class="pickrow">${mine.map(x => `<button class="pick" data-a="select" data-sid="${x.id}" style="--c:${ZE.SURV[x.id].color}"><img src="${EMBED_('head_' + x.id)}"><b>${ZE.SURV[x.id].n}</b><span>${hearts(x)}</span></button>`).join('')}</div>`;
     return h;
   }
   const def = ZE.SURV[s.id];
-  const left = ZE.actionsLeft(s);
+  const left = ZE.actionsLeft(s), max = ZE.maxActions(s);
   const cpo = ZE.curPlayer(S);
-  if (cpo !== me.pid && isHost()) h += `<div class="hint">📴 ${esc(pl(cpo).name)}님이 오프라인이라 방장이 대신 조작 중 <button class="sm" data-a="aitake" data-pid="${esc(cpo)}">${aiFor[cpo] ? '직접 하기' : '🤖 AI에게 맡기기'}</button></div>`;
+  if (cpo !== me.pid && isHost()) h += `<div class="hint">📴 ${esc(pl(cpo).name)}님 오프라인 — 방장이 대신 조작 <button class="sm" data-a="aitake" data-pid="${esc(cpo)}">${aiFor[cpo] ? '직접 하기' : '🤖 AI에게 맡기기'}</button></div>`;
   const fp = ZE.freePool(s); const freeTxt = Object.keys(fp).filter(k => fp[k] - (s.freeUsed[k] || 0) > 0).map(k => ({ move: '이동', melee: '근접', ranged: '원거리', combat: '전투', search: '수색', door: '문' }[k])).join('·');
   const lv = ZE.levelOf(s.ap), next = ZE.LEVELS[lv + 1];
-  h += `<div class="turnbar"><b style="color:${def.color};font-size:16px">${def.n}</b> <span class="hp">${hearts(s)}</span>
-    · 행동 <b style="font-size:16px">${left}</b>/${ZE.maxActions(s)}${freeTxt ? ` <span class="tag" style="background:#14532d">무료: ${freeTxt}</span>` : ''}${s.hitRun ? ' <span class="tag" style="background:#7c2d12">치고 빠지기 이동</span>' : ''}
-    <div class="bar"><i style="width:${next ? Math.min(100, (s.ap - ZE.LEVELS[lv].ap) / (next.ap - ZE.LEVELS[lv].ap) * 100) : 100}%;background:${lvlColor(s.ap)}"></i></div>
-    <span class="dim">AP ${s.ap}${next ? ` (다음 ${next.name} ${next.ap})` : ' (최고 레벨)'} · 스킬: ${s.skills.map(k => ZE.SKILLS[k].n).join(', ')}</span></div>`;
+  let dots = ''; for (let i = 0; i < Math.max(max, left); i++) dots += `<i class="${i < left ? 'on' : ''}"></i>`;
+  h += `<div class="actor" data-a="detail" data-sid="${s.id}">
+    <img class="hd" src="${EMBED_('head_' + s.id)}" style="border-color:${def.color}">
+    <div class="grow"><b style="color:${def.color}">${def.n}</b> <span class="hp">${hearts(s)}</span>${freeTxt ? ` <span class="tag free">무료 ${freeTxt}</span>` : ''}
+      <div class="bar"><i style="width:${next ? Math.min(100, (s.ap - ZE.LEVELS[lv].ap) / (next.ap - ZE.LEVELS[lv].ap) * 100) : 100}%;background:${lvlColor(s.ap)}"></i></div></div>
+    <div class="dots"><span>행동</span><div>${dots}</div></div></div>`;
+  h += `<div class="coach">${coach(s)}</div>`;
   h += invHTML(s, true);
   if (s.pending.length || s.pendSkill.length) return h;
-  // 행동 버튼
   const map = ZE.getMap(S.mission);
   const zHere = ZE.zomAt(S, s.cell).length;
-  const btn = (a, label, en, extra, on) => `<button data-a="${a}" ${extra || ''} ${en ? '' : 'disabled'} class="${on ? 'on' : ''}">${label}</button>`;
+  const btn = (a, ic, label, en, extra, cls) => `<button data-a="${a}" ${extra || ''} ${en ? '' : 'disabled'} class="${cls || ''}"><i>${ic}</i><span>${label}</span></button>`;
   let b = '';
-  b += btn('mode', `🚶 이동${zHere && !ZE.hasSkill(s, 'slippery') ? `<br><small>+${zHere}행동</small>` : ''}`, true, 'data-m="move"', ui.mode === 'move');
+  b += btn('mode', '🚶', `이동${zHere && !ZE.hasSkill(s, 'slippery') ? ` +${zHere}` : ''}`, true, 'data-m="move"', ui.mode === 'move' ? 'on' : '');
   [0, 1].forEach(sl => {
     const w = ZE.weaponInfo(S, s, sl);
     if (!w) return;
-    const icon = w.d.molotov ? '🔥' : w.melee ? '🗡️' : '🔫';
     const ok = !ZE.hoboBlock(S, s) && (w.melee ? zHere > 0 : (w.loaded && ZE.rangedTargets(S, s, w).some(c => w.d.molotov || ZE.zomAt(S, c).length))) && ZE.canSpend(s, w.melee ? 'melee' : 'ranged');
-    b += btn('atk', `${icon} ${w.d.n}${w.dual ? '×2' : ''}<br><small>🎲${w.dice} ${w.acc}+ 💥${w.dmg}</small>`, ok, `data-s="${sl}"`, ui.mode === 'attack' && ui.wslot === sl);
-    if (w.d.reload && !w.loaded) b += btn('op', `🔄 재장전`, ZE.canSpend(s, 'other'), `data-op="reload" data-s="${sl}"`);
+    const icon = EMBED_('w_' + w.c.k) ? `<img src="${EMBED_('w_' + w.c.k)}">` : (w.d.molotov ? '🔥' : w.melee ? '🗡️' : '🔫');
+    b += btn('atk', icon, `${w.d.n}${w.dual ? '×2' : ''}`, ok, `data-s="${sl}"`, 'atk' + (ui.mode === 'attack' && ui.wslot === sl ? ' on' : ''));
+    if (w.d.reload && !w.loaded) b += btn('op', '🔄', '재장전', ZE.canSpend(s, 'other'), `data-op="reload" data-s="${sl}"`);
   });
-  b += btn('op', '🔍 수색', !ZE.canSearch(S, s), 'data-op="search"');
+  const se = ZE.canSearch(S, s);
+  if (map.cells[s.cell].type === 'building') b += btn('op', '🔍', '수색', !se, 'data-op="search"');
   ZE.adjDoors(S, s).forEach(d => {
     const other = d.a === s.cell ? d.b : d.a; const A = map.cells[s.cell], B = map.cells[other];
-    const dir = B.x > A.x ? '동' : B.x < A.x ? '서' : B.y > A.y ? '남' : '북';
+    const dir = B.x > A.x ? '→' : B.x < A.x ? '←' : B.y > A.y ? '↓' : '↑';
     const locked = ZE.doorLocked(S, d);
-    b += btn('door', `🚪 ${dir}쪽 문${locked ? '<br><small>🔒잠김</small>' : !ZE.doorTool(s) ? '<br><small>도구 필요</small>' : ''}`, !locked && ZE.doorTool(s) && ZE.canSpend(s, 'door'), `data-k="${d.k}"`);
+    b += btn('door', '🚪', `문${dir}${locked ? '🔒' : !ZE.doorTool(s) ? '(도구)' : ''}`, !locked && ZE.doorTool(s) && ZE.canSpend(s, 'door'), `data-k="${d.k}"`);
   });
-  if (S.objectives.some(o => o.cell === s.cell && !o.taken)) b += btn('op', '🎯 목표 획득', ZE.canSpend(s, 'other'), 'data-op="objective"');
-  if (S.epics.some(e => e.cell === s.cell && !e.taken)) b += btn('op', '🎁 무기 상자', ZE.canSpend(s, 'other'), 'data-op="epic"');
-  if (ZE.chargeTargets(S, s).length) b += btn('mode', '💨 돌격<br><small>무료</small>', true, 'data-m="charge"', ui.mode === 'charge');
-  const others = ZE.survAt(S, s.cell).filter(x => x !== s);
-  others.forEach(x => { b += btn('trade', `🤝 ${ZE.SURV[x.id].n}와 교환`, ZE.canSpend(s, 'other'), `data-w="${x.id}"`); });
-  b += btn('op', s.reorg ? '🎒 정리 중<br><small>카드 탭해 이동</small>' : '🎒 정리', ZE.canSpend(s, 'other') && !s.reorg, 'data-op="reorg"');
-  b += btn('op', '📢 소음', ZE.canSpend(s, 'other'), 'data-op="noise"');
+  if (S.objectives.some(o => o.cell === s.cell && !o.taken)) b += btn('op', '🎯', '목표 획득', ZE.canSpend(s, 'other'), 'data-op="objective"', 'hot');
+  if (S.epics.some(e => e.cell === s.cell && !e.taken)) b += btn('op', '🎁', '무기 상자', ZE.canSpend(s, 'other'), 'data-op="epic"', 'hot');
+  if (ZE.chargeTargets(S, s).length) b += btn('mode', '💨', '돌격', true, 'data-m="charge"', ui.mode === 'charge' ? 'on' : '');
+  ZE.survAt(S, s.cell).filter(x => x !== s).forEach(x => { b += btn('trade', '🤝', `${ZE.SURV[x.id].n} 교환`, ZE.canSpend(s, 'other'), `data-w="${x.id}"`); });
+  b += btn('op', '🎒', s.reorg ? '정리 중' : '정리', ZE.canSpend(s, 'other') && !s.reorg, 'data-op="reorg"');
+  b += btn('op', '📢', '소음', ZE.canSpend(s, 'other'), 'data-op="noise"');
   const canEsc = s.cell === map.exit && !zHere && ZE.objectivesDone(S);
-  b += `<button data-a="end" class="${left <= 0 && !ZE.hasFreeLeft(s) ? 'pri' : ''}">${canEsc ? '🚪 탈출하고<br>턴 종료' : '⏭ 턴 종료'}</button>`;
+  b += btn('end', canEsc ? '🏃' : '⏭', canEsc ? '탈출·종료' : '턴 종료', true, '', 'end' + (left <= 0 && !ZE.hasFreeLeft(s) ? ' pri' : ''));
   h += `<div class="acts">${b}</div>`;
-  if (ui.mode === 'attack' && ui.wslot != null) h += `<div class="hint">🎯 지도에서 빨간 칸(목표 구역)을 탭하세요.</div>`;
-  else if (ui.mode === 'move') h += `<div class="hint">초록 칸을 탭하면 이동해요. 칸을 길게 보려면 다른 칸을 탭하세요.</div>`;
+  h += ui.mode === 'attack' && ui.wslot != null ? `<div class="hint">🎯 지도에서 빨간 칸을 탭해 공격</div>` : ui.mode === 'charge' ? `<div class="hint">💨 주황 칸을 탭해 돌격</div>` : '';
+  h += ticker;
   return h;
+}
+
+/* ---------- 도우미: 지금 뭘 하면 좋을지 ---------- */
+function coach(s) {
+  const map = ZE.getMap(S.mission);
+  const left = ZE.actionsLeft(s), zh = ZE.zomAt(S, s.cell).length;
+  if (s.pending.length) return '🆕 새 카드를 손(✋) 또는 가방(🎒) 칸에 넣으세요. 무기는 손에 들어야 쓸 수 있어요.';
+  if (left <= 0 && !ZE.hasFreeLeft(s)) return '✅ 행동을 다 썼어요 → [턴 종료]를 누르세요.';
+  if (s.cell === map.exit && !zh && ZE.objectivesDone(S)) return '🏃 출구에 도착! [탈출·종료]로 빠져나가세요. 모두 탈출하면 승리!';
+  const mel = [0, 1].map(i => ZE.weaponInfo(S, s, i)).find(w => w && w.melee);
+  if (zh) return mel ? `🧟 같은 칸에 좀비 ${zh}마리! [${mel.d.n}]로 공격하세요. 여기서 나가려면 행동 +${zh}가 더 들어요.` : `🧟 같은 칸에 좀비 ${zh}마리! 근접 무기가 없으면 빨리 피하세요 (나갈 때 행동 +${zh}).`;
+  const rg = [0, 1].map(i => ZE.weaponInfo(S, s, i)).find(w => w && !w.melee && w.loaded && ZE.rangedTargets(S, s, w).some(c => ZE.zomAt(S, c).length));
+  if (rg) return `🎯 [${rg.d.n}] 사거리 안에 좀비가 있어요. 무기 버튼 → 빨간 칸 탭으로 사격 (빗나가면 그 칸 아군이 맞아요!)`;
+  if (S.objectives.some(o => o.cell === s.cell && !o.taken)) return '🎯 이 칸에 목표(✕)가 있어요! [목표 획득] (+5 AP)';
+  if (S.epics.some(e => e.cell === s.cell && !e.taken)) return '🎁 무기 상자가 있어요! [무기 상자]로 강력한 무기 획득';
+  if (map.cells[s.cell].type === 'building' && !ZE.canSearch(S, s)) return '🔍 건물 안이에요. [수색]으로 무기·장비를 찾아보세요 (턴에 1번).';
+  const d = ZE.adjDoors(S, s).find(d => !ZE.doorLocked(S, d));
+  if (d && ZE.doorTool(s)) return '🚪 옆에 닫힌 문이 있어요. 열면 안쪽 어두운 방에 좀비가 생겨요 — 준비하고 여세요!';
+  if (d) return '🚪 문을 열려면 도끼·쇠지렛대 같은 도구를 손에 들어야 해요.';
+  if (ZE.objectivesDone(S)) return '✅ 목표 완료! 초록 EXIT 출구로 모두 이동하세요.';
+  return '🚶 [이동]이 켜져 있어요. 초록 칸을 탭해 빨간 ✕ 목표나 ★ 상자 쪽으로 가세요.';
+}
+function briefModal() {
+  const M = ZE.MISSIONS[S.mission];
+  const mine = S.survivors.filter(x => x.owner === me.pid).map(x => ZE.SURV[x.id].n);
+  return `<div class="modal"><div class="box brief">
+    <div class="logo" style="font-size:26px">🧟 작전 브리핑</div>
+    <h3 style="margin-top:8px">${esc(M.n)}</h3>
+    <p class="dim">${esc(M.story)}</p>
+    <div class="goal">🎯 <b>목표</b> — ${esc(M.goal)}</div>
+    ${mine.length ? `<div style="margin:6px 0">내 생존자: <b>${mine.join(', ')}</b></div>` : ''}
+    <ol>
+      <li><b>차례대로</b> 플레이어가 생존자를 골라 <b>행동 3번</b> (이동·수색·문 열기·공격·목표 획득…).</li>
+      <li>모두 끝나면 <b>🧟 좀비 차례</b>: 같은 칸 생존자를 공격하고, 시끄러운 곳으로 다가와요. 그 뒤 ☠ 스폰에서 새 좀비 등장.</li>
+      <li><b>무기는 손(✋)</b>에 들어야 써요. 근접은 같은 칸, 원거리는 보이는 칸(빗나가면 아군 오사!).</li>
+      <li>좀비를 잡거나 목표를 먹으면 <b>AP</b>가 올라 레벨업(노랑 +1행동, 주황·빨강 스킬). 대신 좀비도 많아져요.</li>
+      <li>⚠ <b>한 명이라도 쓰러지면 모두 패배.</b> 같이 뭉쳐서 서로 지켜주세요!</li>
+    </ol>
+    <div class="dim">아래 도우미 줄이 매 순간 할 일을 알려줘요. ? 버튼으로 규칙을 다시 볼 수 있어요.</div>
+    <button class="pri" style="width:100%;margin-top:10px;padding:14px" data-a="brief">작전 시작!</button>
+  </div></div>`;
 }
 
 /* ---------- 모달 ---------- */
@@ -2261,8 +2548,13 @@ function modals() {
     }
   }
   if (ui.help) m += helpModal();
+  if (S.phase !== 'over' && store('zsv-brief') !== briefKey()) m += briefModal();
+  if (banner) m += `<div class="banner ${banner.c}">${banner.t}</div>`;
   return m;
 }
+function briefKey() { return (Net.code || '') + ':' + S.mission + ':' + (S.log[0] ? S.log[0].m : '') + ':' + (S.survivors || []).map(x => x.id).join(''); }
+let banner = null, bannerT = null;
+function showBanner(t, c) { banner = { t, c }; clearTimeout(bannerT); render(); bannerT = setTimeout(() => { banner = null; render(); }, 1800); }
 function helpModal() {
   const M = ZE.MISSIONS[S ? S.mission : 'm0'];
   return `<div class="modal"><div class="box"><div class="row"><h3 class="grow">게임 방법</h3><button class="sm" data-a="help">닫기</button></div>
@@ -2309,7 +2601,9 @@ document.addEventListener('click', e => {
     case 'kick': act('kick', { pid: D.pid }); break;
     case 'start': act('start'); break;
     case 'restart': act('restart'); break;
-    case 'zoom': ui.zoom = Math.max(0.5, Math.min(4, ui.zoom * (D.z === '1' ? 1.25 : 0.8))); render(); break;
+    case 'zoom': ui.zoom = D.z === '0' ? 1 : Math.max(1, Math.min(4, ui.zoom * (D.z === '1' ? 1.3 : 1 / 1.3))); render(); { const a = activeS(); if (a && ui.zoom > 1) centerOn(a.cell); } break;
+    case 'music': BGM.toggle(); render(); break;
+    case 'brief': store('zsv-brief', briefKey()); BGM.start(); render(); break;
     case 'view': ui.view = D.v; render(); break;
     case 'help': ui.help = !ui.help; render(); break;
     case 'cellclose': ui.cell = null; render(); break;
@@ -2409,14 +2703,18 @@ function aiTick() {
 Net.on('state', st => {
   const prev = S; S = st;
   soundsFor(st);
+  BGM.mood(st.phase === 'zombies' || (st.zombies && st.zombies.length > 12));
   if (S.phase !== 'lobby' && ui.zoomFor !== S.mission) { autoZoom(); setTimeout(() => S.active && centerOn(ZE.survAt ? (S.survivors.find(x => x.id === S.active) || {}).cell : 0), 50); }
   if (prev && S.active && prev.active !== S.active) { const a = S.survivors.find(x => x.id === S.active); if (a) setTimeout(() => centerOn(a.cell), 30); }
   if (prev && S.phase === 'players' && prev.phase === 'zombies') SND.play('bell', .35);
+  const newRound = prev && prev.round && S.round > prev.round && S.phase !== 'over';
+  if (newRound) setTimeout(() => showBanner('🧟 좀비가 몰려왔어요!', 'z'), 0);
+  if (prev && S.phase === 'over' && prev.phase !== 'over') setTimeout(() => showBanner(S.result.win ? '🏆 승리!' : '☠️ 패배…', S.result.win ? 'w' : 'z'), 0);
   if (S.lastRoll && S.lastRoll.t !== lastRollT) { if (lastRollT) { rollAnim = true; setTimeout(() => { rollAnim = false; render(); }, 2600); } lastRollT = S.lastRoll.t; }
   if (prev && S.phase === 'players' && prev.active !== S.active) { ui.sel = null; ui.mode = 'move'; }
   if (prev && prev.phase !== S.phase) ui.view = 'act';
   // 내 차례 알림 (진동)
-  if (prev && S.phase === 'players' && ZE.curPlayer(S) === me.pid && (prev.phase !== 'players' || ZE.curPlayer(prev) !== me.pid)) { toast('🔔 내 차례예요!'); try { navigator.vibrate && navigator.vibrate(150); } catch (e) {} }
+  if (prev && S.phase === 'players' && ZE.curPlayer(S) === me.pid && (prev.phase !== 'players' || ZE.curPlayer(prev) !== me.pid)) { setTimeout(() => showBanner('🔔 내 차례!', 'm'), newRound ? 1900 : 0); try { navigator.vibrate && navigator.vibrate(150); } catch (e) {} }
   render();
   aiTick();
 });
