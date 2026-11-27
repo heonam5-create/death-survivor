@@ -3212,7 +3212,7 @@ function playFx(e) {
     const p = cellPt(e.cell); if (!p) return;
     if (!e.fire) {
       const w = e.w || '';
-      if (e.melee) { if (/전기톱/.test(w)) SND.synth('saw'); else SND.synth('swing'); }
+      if (e.melee) { if (/전기톱/.test(w)) SND.play('chainsaw', .55); else SND.synth('swing'); }
       else { const n = /샷건|엽총/.test(w) ? 'shotgun' : /저격|소총/.test(w) ? 'rifle' : /기관단총/.test(w) ? 'smg' : 'pistol'; SND.play(n); if (n !== 'rifle') SND.play('shell', .3, .25); }
     }
     if (!e.melee && e.from !== e.cell) { const a = cellPt(e.from); if (a) { const L = Math.hypot(p.x - a.x, p.y - a.y), ang = Math.atan2(p.y - a.y, p.x - a.x) * 180 / Math.PI; const t = fxEl('', a.x, a.y, e.fire ? 'tracer fire' : 'tracer', 450); t.style.width = L + 'px'; t.style.transform = `rotate(${ang}deg)`; } }
