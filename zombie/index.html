@@ -279,8 +279,8 @@ button.pri{background:linear-gradient(#e11d48,#9f1239);box-shadow:0 3px 0 #4c051
   background:repeating-linear-gradient(97deg,#0000 0 9px,#0003 9px 10px,#0000 10px 23px),radial-gradient(circle at 78% 70%,#5b0f0f66,#0000 22%),radial-gradient(circle at 18% 28%,#4a0d0d55,#0000 14%)}
 .tray.sm{--s:30px;margin:6px auto;padding:5px}.tray.sm .tray-in{gap:9px;padding:10px 10px 14px;min-height:calc(var(--s) + 18px)}
 .tray.sm::before,.tray.sm::after{display:none}
-.dw{position:relative;width:var(--s);height:var(--s);animation:dthrow 1.05s cubic-bezier(.3,.7,.4,1) both;transform-style:preserve-3d}
-.cube{position:absolute;inset:0;transform-style:preserve-3d;animation:droll 1.05s cubic-bezier(.2,.75,.3,1) both;
+.dw{position:relative;width:var(--s);height:var(--s);animation:dthrow 1.65s cubic-bezier(.3,.7,.4,1) both;transform-style:preserve-3d}
+.cube{position:absolute;inset:0;transform-style:preserve-3d;animation:droll 1.65s cubic-bezier(.2,.75,.3,1) both;
   transform:rotateZ(var(--tz)) rotateX(-16deg) rotateY(20deg) rotateX(var(--rx)) rotateY(var(--ry))}
 .df{position:absolute;inset:0;border-radius:20%;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:14%;box-sizing:border-box;backface-visibility:hidden;
   background:radial-gradient(circle at 30% 25%,#f4ecd6 0%,#ddd0ae 45%,#b3a07a 85%,#8a7653 100%);
@@ -292,7 +292,7 @@ button.pri{background:linear-gradient(#e11d48,#9f1239);box-shadow:0 3px 0 #4c051
 .f1{transform:translateZ(calc(var(--s)/2))}.f6{transform:rotateY(180deg) translateZ(calc(var(--s)/2))}
 .f2{transform:rotateY(90deg) translateZ(calc(var(--s)/2))}.f5{transform:rotateY(-90deg) translateZ(calc(var(--s)/2))}
 .f3{transform:rotateX(90deg) translateZ(calc(var(--s)/2))}.f4{transform:rotateX(-90deg) translateZ(calc(var(--s)/2))}
-.dsh{position:absolute;left:8%;right:8%;bottom:-12%;height:22%;border-radius:50%;background:radial-gradient(#000d,#0000 70%);animation:dshad 1.05s ease-out both}
+.dsh{position:absolute;left:8%;right:8%;bottom:-12%;height:22%;border-radius:50%;background:radial-gradient(#000d,#0000 70%);animation:dshad 1.65s ease-out both}
 .dw.hit::after{content:'';position:absolute;inset:-25%;border-radius:50%;background:radial-gradient(#dc262655,#0000 65%);opacity:0;animation:dglow 1.6s .95s ease-out both;pointer-events:none;z-index:-1}
 
 .dw.miss .df{animation:ddim .4s .95s both}
@@ -309,7 +309,7 @@ button.pri{background:linear-gradient(#e11d48,#9f1239);box-shadow:0 3px 0 #4c051
 @keyframes dmk{from{opacity:0;transform:translate(-50%,4px)}to{opacity:1;transform:translate(-50%,0)}}
 
 .dw,.dw .cube,.dw .dsh{animation-delay:var(--d)}
-.dw.hit::after,.dw.miss .df,.dw .dmark{animation-delay:calc(var(--d) + 950ms)}
+.dw.hit::after,.dw.miss .df,.dw .dmark{animation-delay:calc(var(--d) + 1550ms)}
 .tray::before,.tray::after{box-shadow:none}
 .tray-in{row-gap:28px}.tray.sm .tray-in{row-gap:12px}
 /* 전투 주사위 팝업 (크게, 지도 위 중앙) */
@@ -319,9 +319,9 @@ button.pri{background:linear-gradient(#e11d48,#9f1239);box-shadow:0 3px 0 #4c051
 .rhd img{width:38px;height:38px;border-radius:50%;border:2px solid #a16207;object-fit:cover}
 .rhd small{display:block;color:#c8b89a;font-size:11px}
 .rollpop.big .tray{margin:8px auto 6px}
-.rres{font-family:'Black Han Sans','Noto Sans KR';font-size:20px;letter-spacing:.5px;opacity:0;animation:rres .45s cubic-bezier(.2,1.6,.4,1) both;animation-delay:calc(var(--d0) + 1050ms)}
+.rres{font-family:'Black Han Sans','Noto Sans KR';font-size:20px;letter-spacing:.5px;opacity:0;animation:rres .45s cubic-bezier(.2,1.6,.4,1) both;animation-delay:calc(var(--d0) + 1750ms)}
 .rres.kill{color:#fecaca;text-shadow:0 0 10px #dc2626,0 2px 0 #000}.rres.miss{color:#a8a29e}
-.tray .tray-in{animation:tjolt .5s ease-out both;animation-delay:calc(var(--d0,0ms) + 420ms)}
+.tray .tray-in{animation:tjolt .5s ease-out both;animation-delay:calc(var(--d0,0ms) + 700ms)}
 @keyframes tjolt{0%{transform:none}20%{transform:translate(2px,3px)}45%{transform:translate(-2px,-1px)}70%{transform:translate(1px,1px)}100%{transform:none}}
 @keyframes rres{from{opacity:0;transform:scale(2.2)}to{opacity:1;transform:none}}
 @keyframes rpIn{from{opacity:0;transform:translateY(-14px) scale(.92)}to{opacity:1;transform:none}}
@@ -346,6 +346,20 @@ button.pri{background:linear-gradient(#e11d48,#9f1239);box-shadow:0 3px 0 #4c051
 .rres.t-multi,.rres.t-kill{color:#fecaca;text-shadow:0 0 10px #dc2626,0 2px 0 #000}.rres.t-multi{font-size:24px}
 .rres.t-block{color:#cbd5e1;font-size:18px}.rres.t-miss{color:#a8a29e}
 
+
+/* 주사위 크기·비율 정리 + 공격자 확인 버튼 */
+.tray{--s:38px}.tray.sm{--s:28px}
+.tray-in{gap:16px;row-gap:34px;padding:14px 14px 30px}
+.tray.sm .tray-in{gap:12px;row-gap:28px;padding:10px 10px 26px}
+.tray.sm .dmark{display:block;font-size:9px;bottom:-15px}
+.dmark{bottom:-19px;font-size:11px}
+.rollpop.big .box{min-width:240px;max-width:min(92vw,380px)}
+.rres{line-height:1.25;padding:2px 4px}
+.rres small{white-space:normal}
+.rollpop.big.mine{pointer-events:auto;inset:0;top:0!important;bottom:0!important;align-items:flex-end;padding-bottom:calc(14px + env(safe-area-inset-bottom));background:#0006}
+.rgo{display:block;margin:10px auto 2px;padding:10px 28px;font-size:16px;font-weight:800;opacity:0;animation:rres .35s ease-out both;animation-delay:calc(var(--d0) + 1900ms)}
+.rwait{font-size:11px;margin-top:4px}
+@media (orientation:landscape){.rollpop.big.mine{align-items:center}}
 </style>
 <script>
 /* ===== 설정 (필요할 때만 바꾸세요) =====
@@ -1719,10 +1733,108 @@ function canHit(st, w, c) {
   return g.some(can);
 }
 function hasMelee(st, s) { return [0, 1].some(sl => { const w = ZE.weaponInfo(st, s, sl); return w && w.melee; }); }
+
+// 열린 길(닫힌 문 제외)만으로 센 칸 거리
+function openDist(st, map, src) {
+  const dist = map.cells.map(() => 1e9), q = [src]; dist[src] = 0;
+  while (q.length) { const c = q.shift(); ZE.neighbors(map, c).forEach(n => { if (ZE.edgeOpen(st, map, c, n) && dist[n] > dist[c] + 1) { dist[n] = dist[c] + 1; q.push(n); } }); }
+  return dist;
+}
+// 따라다닐 주인공: 사람이 조종하는 생존자 중 가장 가까운 사람. 전부 AI면 맨 앞 생존자가 대장.
+function leaderOf(st, s, pid, map) {
+  const alive = st.survivors.filter(x => !x.dead && !x.escaped);
+  const hum = alive.filter(x => x !== s && x.owner !== pid && x.owner !== 'ai');
+  if (hum.length) { const d = openDist(st, map, s.cell); return hum.slice().sort((a, b) => d[a.cell] - d[b.cell])[0]; }
+  return alive[0] === s ? null : alive[0];
+}
+function meleeFor(st, s, cell) {
+  return [0, 1].map(sl => ZE.weaponInfo(st, s, sl)).filter(w => w && w.melee && canHit(st, w, cell)).sort((a, b) => b.dice * b.dmg - a.dice * a.dmg)[0];
+}
+// 호위 모드: 주인공 옆에 붙어서 지키고, 같이 싸우고, 다친 동료 곁에 있고, 혼자 돌아다니지 않는다
+function escort(st, s, L, map) {
+  const zHere = ZE.zomAt(st, s.cell);
+  const dS = openDist(st, map, s.cell), dL = openDist(st, map, L.cell);
+  const left = ZE.actionsLeft(s);
+  // 의무병이면 다친 동료 곁으로(가까울 때), 아니면 주인공 곁
+  let T = L.cell;
+  if (ZE.hasSkill(s, 'medic')) {
+    const hurt = st.survivors.filter(x => !x.dead && !x.escaped && x !== s && x.wounds > 0 && dS[x.cell] <= 3 && dL[x.cell] <= 2).sort((a, b) => b.wounds - a.wounds)[0];
+    if (hurt) T = hurt.cell;
+  }
+  const dT = openDist(st, map, T);
+  // 1) 내 칸 좀비 → 근접으로 지키기
+  if (zHere.length && !ZE.hoboBlock(st, s)) {
+    const mel = meleeFor(st, s, s.cell);
+    if (mel && ZE.canSpend(s, 'melee')) return ['attack', { slot: mel.slot }];
+    if (!ZE.survAt(st, s.cell).some(x => x !== s)) {
+      const rg = [0, 1].map(sl => ZE.weaponInfo(st, s, sl)).find(w => w && !w.melee && !w.d.molotov && w.loaded && w.range[0] === 0 && canHit(st, w, s.cell));
+      if (rg && ZE.canSpend(s, 'ranged')) return ['attack', { slot: rg.slot, cell: s.cell }];
+    }
+  }
+  // 2) 못 잡는 좀비와 같은 칸 → 주인공 쪽 빈 칸으로 물러나기
+  if (zHere.length && left > 0) {
+    const out = ZE.moveTargets(st, s).filter(o => !ZE.zomAt(st, o.cell).length && (o.extra || 0) < left).sort((a, b) => dT[a.cell] - dT[b.cell])[0];
+    if (out) return ['move', { cell: out.cell }];
+  }
+  // 3) 주인공 칸에 좀비 → 근접 무기가 있으면 달려가서 같이 싸우기
+  if (s.cell !== L.cell && ZE.zomAt(st, L.cell).length && left > 0 && meleeFor(st, s, L.cell)) {
+    const go = ZE.moveTargets(st, s).find(o => o.cell === L.cell && !(o.extra || 0));
+    if (go) return ['move', { cell: L.cell }];
+  }
+  // 4) 엄호 사격: 주인공·나 바로 근처(2칸 이내) 좀비만. 멀리 있는 좀비는 건드리지 않음(이목 끌지 않기)
+  if (!ZE.hoboBlock(st, s)) {
+    for (const sl of [0, 1]) {
+      const w = ZE.weaponInfo(st, s, sl);
+      if (!w || w.melee || !w.loaded || !ZE.canSpend(s, 'ranged')) continue;
+      const tg = ZE.rangedTargets(st, s, w)
+        .filter(c => ZE.zomAt(st, c).length && !ZE.survAt(st, c).length)
+        .filter(c => dL[c] <= 2 || dS[c] <= 1)
+        .filter(c => !w.d.molotov || ZE.zomAt(st, c).length >= 3)
+        .filter(c => canHit(st, w, c))
+        .sort((a, b) => dL[a] - dL[b] || ZE.zomAt(st, b).length - ZE.zomAt(st, a).length);
+      if (tg.length) return ['attack', { slot: sl, cell: tg[0] }];
+    }
+  }
+  // 5) 재장전
+  for (const sl of [0, 1]) { const c = s.inv[sl]; if (c && ZE.EQUIP[c.k].reload && !c.l && ZE.canSpend(s, 'other')) return ['reload', { slot: sl }]; }
+  // 6) 미션: 발밑의 목표·에픽만 챙김
+  if (ZE.canSpend(s, 'other') && !zHere.length) {
+    if (st.objectives.some(o => o.cell === s.cell && !o.taken)) return ['objective', {}];
+    if (st.epics.some(e => e.cell === s.cell && !e.taken)) return ['epic', {}];
+  }
+  // 7) 탈출: 목표 완료 + 주인공이 출구에 있으면 같이 출구로
+  if (ZE.objectivesDone(st) && L.cell === map.exit) T = map.exit;
+  if (s.cell === map.exit && ZE.objectivesDone(st) && !zHere.length && T === map.exit) return ['end', {}];
+  // 8) 붙어 다니기: 목표 칸(주인공/다친 동료)으로 이동. 문은 열지 않음(좀비를 깨우지 않기)
+  if (s.cell !== T && left > 0 && dT[s.cell] < 1e9) {
+    const mt = ZE.moveTargets(st, s).filter(o => !(o.extra || 0) || o.extra <= left - 1)
+      .filter(o => !ZE.zomAt(st, o.cell).length || (o.cell === T && meleeFor(st, s, o.cell)))
+      .sort((a, b) => dT[a.cell] - dT[b.cell]);
+    if (mt[0] && dT[mt[0].cell] < dT[s.cell]) return ['move', { cell: mt[0].cell }];
+  }
+  // 8.5) 닫힌 문 너머라 길이 없으면: 주인공에게 가는 문만 연다
+  if (s.cell !== T && dT[s.cell] >= 1e9 && ZE.doorTool(s) && ZE.canSpend(s, 'door')) {
+    const dd = distMap(st, map, [T]);
+    for (const n of ZE.neighbors(map, s.cell)) {
+      const dk = map.doorByEdge[s.cell < n ? s.cell + '|' + n : n + '|' + s.cell];
+      if (dk !== undefined && !st.doors[dk] && !ZE.doorLocked(st, map.doors[dk]) && dd[n] < dd[s.cell]) return ['door', { k: dk }];
+    }
+  }
+  // 9) 주인공 곁, 주변 조용하면 그 자리에서만 수색(소음 없음) — 무기 보강용
+  const near = ZE.neighbors(map, s.cell).some(n => ZE.edgeOpen(st, map, s.cell, n) && ZE.zomAt(st, n).length);
+  if (s.cell === T && !near && !ZE.canSearch(st, s)) return ['search', {}];
+  // 10) 나머지는 아끼고 턴 종료 (돌아다니거나 소음 내지 않기)
+  return ['end', {}];
+}
 function next(st, pid) {
   if (st.phase !== 'players') return null;
   // 레벨업 스킬: 첫 번째
-  for (const s of st.survivors) if (s.owner === pid && s.pendSkill.length) return ['skill', { sid: s.id, i: Math.floor(Math.random() * s.pendSkill[0].opts.length) }];
+  const PREF = ['medic', 'tough', 'regeneration', 'low_profile', 'lucky', 'steady_hand', 'die_combat', 'dmg_combat', 'die_melee', 'dmg_melee', 'roll_combat', 'free_combat', 'plus_action'];
+  for (const s of st.survivors) if (s.owner === pid && s.pendSkill.length) {
+    const o = s.pendSkill[0].opts; let i = -1;
+    PREF.some(p => { const j = o.indexOf(p); if (j >= 0) { i = j; return true; } return false; });
+    return ['skill', { sid: s.id, i: i >= 0 ? i : Math.floor(Math.random() * o.length) }];
+  }
   if (ZE.curPlayer(st) !== pid) return null;
   const map = ZE.getMap(st.mission);
   if (!st.active) {
@@ -1760,6 +1872,8 @@ function next(st, pid) {
     return ['discard', { sid: s.id, pend: 0 }];
   }
   if (ZE.actionsLeft(s) <= 0 && !ZE.hasFreeLeft(s)) return ['end', {}];
+  const L = leaderOf(st, s, pid, map);
+  if (L) return escort(st, s, L, map);
   const zHere = ZE.zomAt(st, s.cell);
   const others = ZE.survAt(st, s.cell).filter(x => x !== s);
   // 1) 같은 칸 좀비 → 근접
@@ -1850,7 +1964,7 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&a
 function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k)); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
 const app = $('#app');
 const EMBED_ = k => (window.EMBED || {})[k] || '';
-let S = null, netStatus = '', lastRollT = -1, rollAnim = false, hadRoll = false, rollTO = 0;
+let S = null, netStatus = '', lastRollT = -1, rollAnim = false, hadRoll = false, rollTO = 0, rollMine = false;
 const ui = { mode: 'move', wslot: null, sel: null, zoom: 1, view: 'act', cell: null, help: false, detail: null };
 let me = { pid: store('zsv-pid'), name: store('zsv-name') || '' };
 if (!me.pid) { me.pid = 'p' + Math.random().toString(36).slice(2, 10); store('zsv-pid', me.pid); }
@@ -2779,14 +2893,14 @@ function dieFace(v, cls) { return `<div class="df ${cls}">${[1, 2, 3, 4, 5, 6, 7
 function diceHTML(vals, acc, key, small) {
   if (!diceSeen[key]) {
     diceSeen[key] = performance.now();
-    SND.play('shake', .45); SND.play('dice', .5, .42); SND.play('dice', .28, .62); SND.play('dice', .16, .8);
-    if (vals.some(v => v >= acc)) SND.play('melee', .22, 1.0);
-    setTimeout(() => { try { if (navigator.vibrate) navigator.vibrate(vals.some(v => v >= acc) ? [18, 40, 30] : 12); } catch (e) {} }, 450);
+    SND.play('shake', .45); SND.play('shake', .3, .25); SND.play('dice', .5, .7); SND.play('dice', .3, 1.0); SND.play('dice', .16, 1.25);
+    if (vals.some(v => v >= acc)) SND.play('melee', .22, 1.6);
+    setTimeout(() => { try { if (navigator.vibrate) navigator.vibrate(vals.some(v => v >= acc) ? [18, 40, 30] : 12); } catch (e) {} }, 720);
   }
   const el = performance.now() - diceSeen[key];
   return `<div class="tray ${small ? 'sm' : ''}" style="--d0:${-el}ms"><div class="tray-in">${vals.map((v, i) => {
     const [rx, ry] = FACE[v], hit = v >= acc, sp = 1 + ((v * 7 + i * 3) % 3), tilt = ((i * 37 + v * 11) % 30) - 15;
-    const d = -(el - i * 110);
+    const d = -(el - i * 170);
     return `<div class="dw ${hit ? 'hit' : 'miss'}" style="--i:${i};--rx:${rx}deg;--ry:${ry}deg;--sx:${sp * 360 + 180}deg;--sy:${(4 - sp) * 360}deg;--tz:${tilt}deg;--d:${d}ms">
       <div class="dsh"></div>
       <div class="cube">${dieFace(1, 'f1')}${dieFace(6, 'f6')}${dieFace(2, 'f2')}${dieFace(5, 'f5')}${dieFace(3, 'f3')}${dieFace(4, 'f4')}</div>
@@ -2813,10 +2927,11 @@ function modals() {
   } else if (rollAnim && S.lastRoll) {
     const L = S.lastRoll;
     const el0 = -(performance.now() - (diceSeen['l' + L.t] || performance.now()));
-    m += `<div class="rollpop big"><div class="box" style="text-align:center">
+    m += `<div class="rollpop big ${rollMine ? 'mine' : ''}"><div class="box" style="text-align:center">
       <div class="rhd"><img src="${EMBED_('head_' + L.sid)}"><div><b>${esc(ZE.SURV[L.sid].n)}</b> <span class="dim">· ${esc(L.w)}</span><small>🎯 ${L.acc}+ 이상이면 명중</small></div></div>
       ${diceHTML(L.vals, L.acc, 'l' + L.t, L.vals.length > 5)}
-      ${(() => { const T = atkTier(L.kills, L.hits, L.vals, L.acc, false); return `<div class="rres t-${T.k}" style="--d0:${el0}ms">${T.t}${T.s ? `<small>${T.s}</small>` : ''}</div>`; })()}</div></div>`;
+      ${(() => { const T = atkTier(L.kills, L.hits, L.vals, L.acc, false); return `<div class="rres t-${T.k}" style="--d0:${el0}ms">${T.t}${T.s ? `<small>${T.s}</small>` : ''}</div>`; })()}
+      ${rollMine ? `<button class="ok rgo" data-a="closeroll" style="--d0:${el0}ms">확인 ▶</button>` : `<div class="dim rwait">${esc(ZE.SURV[L.sid].n)}의 공격 결과</div>`}</div></div>`;
   }
   // 스킬 선택
   const ps = S.survivors && S.survivors.find(s => s.pendSkill.length && (s.owner === me.pid || (isHost() && !pl(s.owner).on)));
@@ -2916,7 +3031,7 @@ document.addEventListener('click', e => {
     case 'cellclose': ui.cell = null; render(); break;
     case 'detail': ui.detail = D.sid; render(); break;
     case 'closedetail': if (e.target === t || t.tagName === 'BUTTON') { ui.detail = null; render(); } break;
-    case 'closeroll': rollAnim = false; render(); break;
+    case 'closeroll': rollAnim = false; rollMine = false; clearTimeout(rollTO); render(); aiTick(); break;
     case 'select': ui.detail = null; ui.mode = 'move'; ui.sel = null; act('select', { sid: D.sid }); break;
     case 'mode': ui.mode = D.m; ui.wslot = null; render(); break;
     case 'atk': {
@@ -2993,7 +3108,7 @@ function aiPids() { return ['ai'].concat(Object.keys(aiFor).filter(p => aiFor[p]
 function aiTick() {
   if (Net.role !== 'host' || !S || S.phase !== 'players' || !window.ZAI) return;
   clearTimeout(aiT);
-  if (RP.busy || (S.wait && S.wait.length)) { aiT = setTimeout(aiTick, 500); return; }
+  if (RP.busy || rollAnim || (S.wait && S.wait.length)) { aiT = setTimeout(aiTick, 500); return; }
   for (const pid of aiPids()) {
     const n = ZAI.next(S, pid); if (!n) continue;
     const delay = n[0] === 'accept' || n[0] === 'reroll' ? 1100 : n[0] === 'attack' ? 800 : n[0] === 'select' ? 500 : n[0] === 'swap' || n[0] === 'discard' ? 350 : 650;
@@ -3130,7 +3245,7 @@ function rpRun() {
       const sv = S.survivors.find(x => x.id === e.sid); if (sv) RP.lunge[e.sid] = { k: 'shake', t0: now(), dx: 4, dy: 0 };
       playFx(e); wait = 520;
     } else if (e.k === 'atk') {
-      const pre = rollAnim && !e.fire ? 1250 : 0;
+      const pre = rollAnim && !e.fire ? 2000 : 0;
       setTimeout(() => {
         const A = map.cells[e.from], B = map.cells[e.cell];
         let dx = 0, dy = -22; if (e.from !== e.cell) { const L = Math.hypot(B.x - A.x, B.y - A.y) || 1; dx = (B.x - A.x) / L * (e.melee ? 22 : 10); dy = (B.y - A.y) / L * (e.melee ? 22 : 10); }
@@ -3155,7 +3270,7 @@ function fxFor(st) {
   if (neu.length > 12) return;
   let d = 0, hd = 0;
   neu.forEach(e => {
-    if (e.k === 'atk') { const w = e.fire ? 150 : rollAnim ? 1300 : 150; setTimeout(() => playFx(e), w + d); d += 350; }
+    if (e.k === 'atk') { const w = e.fire ? 150 : rollAnim ? 2050 : 150; setTimeout(() => playFx(e), w + d); d += 350; }
     else { setTimeout(() => playFx(e), 150 + hd); hd += 380; }
   });
 }
@@ -3172,7 +3287,12 @@ Net.on('state', st => {
   if (newRound) setTimeout(() => showBanner('🧟 좀비가 몰려왔어요!', 'z'), 0);
   if (prev && S.phase === 'over' && prev.phase !== 'over') setTimeout(() => showBanner(S.result.win ? '🏆 승리!' : '☠️ 패배…', S.result.win ? 'w' : 'z'), 0);
   if (lastRollT < 0) lastRollT = S.lastRoll ? S.lastRoll.t : 0;
-  else if (S.lastRoll && S.lastRoll.t !== lastRollT) { if (!hadRoll) { rollAnim = true; clearTimeout(rollTO); rollTO = setTimeout(() => { rollAnim = false; render(); }, 3000); } lastRollT = S.lastRoll.t; }
+  else if (S.lastRoll && S.lastRoll.t !== lastRollT) { if (!hadRoll) {
+      rollAnim = true; clearTimeout(rollTO);
+      const sv = S.survivors.find(x => x.id === S.lastRoll.sid), mineR = sv && sv.owner === me.pid;
+      rollMine = !!mineR;
+      if (!mineR) rollTO = setTimeout(() => { rollAnim = false; render(); aiTick(); }, 4800);
+    } lastRollT = S.lastRoll.t; }
   hadRoll = !!S.roll;
   if (prev && S.phase === 'players' && prev.active !== S.active) { ui.sel = null; ui.mode = 'move'; }
   if (prev && prev.phase !== S.phase) ui.view = 'act';
