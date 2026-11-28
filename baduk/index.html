@@ -5,7 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1a1410">
 <meta name="description" content="한국기원 규칙으로 두는 바둑 — AI 대국(9급~9단), 카카오톡 초대 온라인 대국, 사활 문제">
-<meta property="og:title" content="바둑 한판">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="바둑 한판">
+<meta property="og:title" content="바둑 한판 — 한 판 두실래요?">
+<meta property="og:image" content="https://heonam5-create.github.io/death-survivor/baduk/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://heonam5-create.github.io/death-survivor/baduk/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://heonam5-create.github.io/death-survivor/baduk/og.jpg">
 <meta property="og:description" content="바둑 한 판 두실래요? 링크를 누르면 바로 대국이 시작돼요.">
 <title>바둑 한판</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -881,10 +889,12 @@ var IMG = {};
 /* ---------- 소리: 착수음(WebAudio) + 배경음 ---------- */
 var snd = {
   stoneOn: store.get('stoneOn', true), stoneVol: store.get('stoneVol', 100),
-  bgmOn: store.get('bgmOn', true), bgmVol: store.get('bgmVol', 25),
+  bgmOn: store.get('bgmOn2', true), bgmVol: store.get('bgmVol2', 20),
   ctx: null, buf: null, bgm: null, started: false
 };
 function audioInit() {
+  if (snd.ctx && snd.ctx.state === 'suspended') try { snd.ctx.resume(); } catch (e) { }
+  if (snd.bgm && snd.bgmOn && snd.bgm.paused && snd.bgmVol > 0) applyBgm();
   if (snd.started) return; snd.started = true;
   try {
     var AC = window.AudioContext || window.webkitAudioContext; snd.ctx = new AC();
@@ -897,7 +907,7 @@ function audioInit() {
 function applyBgm() {
   if (!snd.bgm) return;
   snd.bgm.volume = Math.max(0, Math.min(1, snd.bgmVol / 100));
-  if (snd.bgmOn && snd.bgmVol > 0) { var p = snd.bgm.play(); if (p && p.catch) p.catch(function () { }); } else snd.bgm.pause();
+  if (snd.bgmOn && snd.bgmVol > 0) { var p = snd.bgm.play(); if (p && p.then) p.then(function () { snd.bgmPlaying = true; unhook(); }, function () { snd.bgmPlaying = false; }); } else snd.bgm.pause();
 }
 function playStone(n) {
   if (!snd.stoneOn || snd.stoneVol <= 0) return;
@@ -949,8 +959,16 @@ function confetti() {
     if (t < 2200) requestAnimationFrame(step); else cv.remove();
   })(start);
 }
-document.addEventListener('pointerdown', audioInit, { once: true });
-document.addEventListener('keydown', audioInit, { once: true });
+// 휴대폰은 '손을 뗄 때(터치 끝)'와 '탭'만 사용자 조작으로 인정해 소리를 허용한다
+var GEST = ['pointerup', 'touchend', 'click', 'keydown'];
+function onGesture() { audioInit(); }
+function unhook() { GEST.forEach(function (ev) { document.removeEventListener(ev, onGesture, true); }); }
+GEST.forEach(function (ev) { document.addEventListener(ev, onGesture, true); });
+// 실행하자마자 재생 시도 (PC 등 허용되는 곳은 바로 나옴, 막히면 첫 터치에 시작)
+setTimeout(function () {
+  audioInit();
+  setTimeout(function () { if (snd.bgmOn && snd.bgmVol > 0 && !snd.bgmPlaying) toast('화면을 한 번 누르면 배경음악이 나와요', 2200); }, 700);
+}, 300);
 function renderSound() {
   $$('.sound').forEach(function (box) {
     box.innerHTML =
@@ -966,7 +984,7 @@ document.addEventListener('click', function (e) {
   var t = e.target.closest('[data-s]'); if (!t) return;
   audioInit();
   if (t.dataset.s === 'stone') { snd.stoneOn = !snd.stoneOn; store.set('stoneOn', snd.stoneOn); if (snd.stoneOn) playStone(); toast(snd.stoneOn ? '착수음 켬' : '착수음 끔', 1200); }
-  else { snd.bgmOn = !snd.bgmOn; store.set('bgmOn', snd.bgmOn); applyBgm(); toast(snd.bgmOn ? '배경음 켬' : '배경음 끔', 1200); }
+  else { snd.bgmOn = !snd.bgmOn; store.set('bgmOn2', snd.bgmOn); applyBgm(); toast(snd.bgmOn ? '배경음 켬' : '배경음 끔', 1200); }
   renderSound();
 });
 document.addEventListener('input', function (e) {
@@ -974,7 +992,7 @@ document.addEventListener('input', function (e) {
   audioInit();
   var v = +t.value; t.nextElementSibling.textContent = v;
   if (t.dataset.v === 'stone') { snd.stoneVol = v; snd.stoneOn = v > 0 ? true : snd.stoneOn; store.set('stoneVol', v); store.set('stoneOn', snd.stoneOn); }
-  else { snd.bgmVol = v; if (v > 0) snd.bgmOn = true; store.set('bgmVol', v); store.set('bgmOn', snd.bgmOn); applyBgm(); }
+  else { snd.bgmVol = v; if (v > 0) snd.bgmOn = true; store.set('bgmVol2', v); store.set('bgmOn2', snd.bgmOn); applyBgm(); }
   $$('[data-v="' + t.dataset.v + '"]').forEach(function (o) { if (o !== t) { o.value = v; o.nextElementSibling.textContent = v; } });
   var q = $(t.dataset.v === 'stone' ? '#qStone' : '#qBgm'); if (q) q.classList.toggle('off', !(t.dataset.v === 'stone' ? snd.stoneOn : snd.bgmOn));
 });
@@ -1693,7 +1711,7 @@ function init() {
     });
   }
 }
-window.__baduk = { get G() { return G; }, net: net };
+window.__baduk = { get G() { return G; }, net: net, snd: snd };
 init();
 })();
 </script>
