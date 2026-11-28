@@ -2475,7 +2475,34 @@ function staticEdge(map, a, b) {
   return 'wall';
 }
 function rng(seed) { let s = seed * 9301 + 49297; return () => { s = (s * 9301 + 49297) % 233280; return s / 233280; }; }
-const bgCache = {}, bgBusy = {};
+const bgCache = {}, bgBusy = {}, bgBase = {}, bgDoor = {};
+// 문을 배경 이미지에 직접 그려 넣기 (폰 다크모드가 작은 그림/벡터 색을 뒤집는 문제 방지)
+let doorImgs = null, doorImgsBusy = false;
+function bgUrl(mid) {
+  const base = bgBase[mid]; if (!base) return { url: bgCache[mid], baked: false };
+  if (!doorImgs) { if (!doorImgsBusy) { doorImgsBusy = true; Promise.all(['door_cls', 'door_brk_a', 'door_brk_b'].map(loadImg)).then(a => { if (a.every(Boolean)) { doorImgs = a; render(); } }); } return { url: bgCache[mid], baked: false }; }
+  const map = ZE.getMap(mid), key = map.doors.map(d => S.doors[d.k] ? 1 : 0).join('');
+  if (bgDoor[mid] && bgDoor[mid].key === key) return { url: bgDoor[mid].url, baked: true };
+  const P = 2, cv = document.createElement('canvas'); cv.width = base.width; cv.height = base.height;
+  const g = cv.getContext('2d'); g.drawImage(base, 0, 0); g.imageSmoothingEnabled = false;
+  map.doors.forEach(d => {
+    const A = map.cells[d.a], B = map.cells[d.b], vert = A.y === B.y, open = S.doors[d.k];
+    const cx = (vert ? Math.max(A.x, B.x) * CS : A.x * CS + 48) * P, cy = (vert ? A.y * CS + 48 : Math.max(A.y, B.y) * CS) * P;
+    const dir = (B.type === 'building' && A.type !== 'building') ? 1 : (A.type === 'building' && B.type !== 'building') ? -1 : (vert ? (B.x > A.x ? 1 : -1) : (B.y > A.y ? 1 : -1));
+    const im = open ? doorImgs[d.k % 2 ? 2 : 1] : doorImgs[0], w = 56 * P, h = (open ? 24 : 12) * P;
+    g.save(); g.translate(cx, cy); if (vert) g.rotate(Math.PI / 2); if (open && dir < 0) g.scale(1, -1);
+    g.shadowColor = 'rgba(0,0,0,.8)'; g.shadowBlur = 3 * P; g.shadowOffsetY = 2 * P;
+    g.drawImage(im, -w / 2, -h / 2, w, h); g.shadowColor = 'transparent';
+    if (d.color) {
+      const col = d.color === 'blue' ? '#3b82f6' : '#22c55e';
+      if (open) { g.fillStyle = col; g.fillRect(-w / 2 + 2 * P, -3 * P, 4 * P, 6 * P); g.fillRect(w / 2 - 6 * P, -3 * P, 4 * P, 6 * P); }
+      else { g.globalAlpha = .55; g.fillStyle = col; g.fillRect(-19 * P, -4 * P, 38 * P, 8 * P); g.globalAlpha = 1; if (vert) g.rotate(-Math.PI / 2); g.font = `${11 * P}px sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('🔒', 0, P); }
+    }
+    g.restore();
+  });
+  bgDoor[mid] = { key, url: cv.toDataURL('image/jpeg', .85) };
+  return { url: bgDoor[mid].url, baked: true };
+}
 async function buildBG(mid) {
   if (bgCache[mid] || bgBusy[mid]) return; bgBusy[mid] = true;
   const map = ZE.getMap(mid);
@@ -2593,7 +2620,7 @@ async function buildBG(mid) {
   // 비네트
   const vg = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .35, W / 2, H / 2, Math.max(W, H) * .75);
   vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.55)'); g.fillStyle = vg; g.fillRect(0, 0, W, H);
-  bgCache[mid] = cv.toDataURL('image/jpeg', .85);
+  bgCache[mid] = cv.toDataURL('image/jpeg', .85); bgBase[mid] = cv;
   bgBusy[mid] = false;
   if (S && S.mission === mid && S.phase !== 'lobby') render();
 }
@@ -2654,10 +2681,11 @@ function boardSVG() {
   <filter id="rough"><feTurbulence baseFrequency=".9" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.5"/></filter>
   <filter id="ds"><feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#000" flood-opacity=".8"/></filter></defs>
   <rect x="-4" y="-4" width="${W + 8}" height="${H + 8}" fill="#0b0b0b"/>`;
-  if (bgCache[S.mission]) o += `<image href="${bgCache[S.mission]}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none"/>`;
+  const BG = bgUrl(S.mission);
+  if (BG.url) o += `<image href="${BG.url}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none"/>`;
   else o += `<text x="${W / 2}" y="${H / 2}" fill="#888" text-anchor="middle" font-size="20">지도 그리는 중…</text>`;
   // 문
-  map.doors.forEach(d => {
+  if (!BG.baked) map.doors.forEach(d => {
     const A = map.cells[d.a], B = map.cells[d.b];
     const vert = A.y === B.y;
     const mx = Math.max(A.x, B.x) * CS, my = Math.max(A.y, B.y) * CS;
