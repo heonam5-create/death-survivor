@@ -474,6 +474,49 @@ button:disabled img.pxi{filter:grayscale(.7) brightness(.6)}
 .mhud.open::after{content:'▴'}
 .mhud.done{border-bottom-color:#3f6b38}.mhud.done .mh2{color:#8fae84}
 .mhud .mh3{position:absolute;left:0;right:0;top:100%;margin:0;padding:7px 10px;border:0;border-bottom:1px solid #3a2c20;background:#120f0cf2;color:#cbbd9f;font-size:11.5px;line-height:1.45;box-shadow:0 4px 8px #000a}
+/* 공격 안내: 확인 버튼 */
+#atkAnn.ask{pointer-events:auto;top:0;bottom:0;align-items:center;background:#0007}
+#atkAnn .aa-in{flex-direction:column;align-items:stretch}
+#atkAnn .aa-row{display:flex;align-items:center;gap:10px}
+#atkAnn .aa-btn{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+#atkAnn .aa-btn button{padding:8px 14px;font-size:14px;border-radius:10px;background:#2a211a;border:1px solid #5a4630;color:#d8c9a8}
+#atkAnn .aa-btn .aa-ok{background:linear-gradient(#8f2a20,#5a1a14);border-color:#c0473a;color:#fff;font-weight:900;box-shadow:0 2px 0 #000a}
+/* 좀비 사망 모션: 피격 → 휘청 → 무릎 꺾임 → 쓰러짐(바닥 튕김) → 잠시 누워 있다 사라짐 */
+.a-hit{animation:zhit .2s both}
+@keyframes zhit{0%,100%{transform:none;filter:none}40%{transform:translate(calc(var(--dx,0px) * .3),0) skewX(-6deg);filter:brightness(1.5) sepia(.7) hue-rotate(-35deg) saturate(3)}}
+.a-die{animation:zdm 1.65s cubic-bezier(.3,.55,.35,1) both}
+@keyframes zdm{
+0%{transform:none;filter:none;opacity:1}
+6%{transform:translate(calc(var(--dx,0px) * .5),calc(var(--dy,0px) * .3)) skewX(calc(var(--rot,1) * -9deg));filter:brightness(1.5) sepia(.7) hue-rotate(-35deg) saturate(3)}
+16%{transform:translate(var(--dx,0px),var(--dy,0px)) rotate(calc(var(--rot,1) * 12deg)) scale(1,.94);filter:brightness(.95)}
+27%{transform:translate(var(--dx,0px),calc(var(--dy,0px) + 1px)) rotate(calc(var(--rot,1) * 20deg)) scale(1,.8)}
+44%{transform:translate(calc(var(--dx,0px) * 1.15),calc(var(--dy,0px) + 3px)) rotate(calc(var(--rot,1) * 94deg)) scale(1,.8);filter:brightness(.8)}
+51%{transform:translate(calc(var(--dx,0px) * 1.2),calc(var(--dy,0px) + 1px)) rotate(calc(var(--rot,1) * 80deg)) scale(1,.8)}
+58%{transform:translate(calc(var(--dx,0px) * 1.2),calc(var(--dy,0px) + 3px)) rotate(calc(var(--rot,1) * 90deg)) scale(1,.8)}
+80%{transform:translate(calc(var(--dx,0px) * 1.2),calc(var(--dy,0px) + 3px)) rotate(calc(var(--rot,1) * 90deg)) scale(1,.8);opacity:1;filter:brightness(.55) saturate(.6)}
+100%{transform:translate(calc(var(--dx,0px) * 1.2),calc(var(--dy,0px) + 3px)) rotate(calc(var(--rot,1) * 90deg)) scale(1,.8);opacity:0;filter:brightness(.45) saturate(.5)}}
+/* 총에 맞음: 두 번 움찔 → 무릎 꿇고 → 앞으로 고꾸라짐 */
+.a-diec{animation:zdc 1.7s cubic-bezier(.3,.55,.35,1) both}
+@keyframes zdc{
+0%{transform:none;filter:none;opacity:1}
+5%{transform:translate(calc(var(--dx,0px) * .6),0) rotate(calc(var(--rot,1) * 8deg));filter:brightness(1.6) sepia(.7) hue-rotate(-35deg) saturate(3)}
+11%{transform:translate(calc(var(--dx,0px) * .3),0) rotate(calc(var(--rot,1) * 2deg));filter:none}
+17%{transform:translate(calc(var(--dx,0px) * .8),0) rotate(calc(var(--rot,1) * 12deg));filter:brightness(1.4) sepia(.6) hue-rotate(-35deg) saturate(3)}
+32%{transform:translate(calc(var(--dx,0px) * .8),2px) rotate(calc(var(--rot,1) * 6deg)) scale(1.02,.68);filter:brightness(.9)}
+50%{transform:translate(calc(var(--dx,0px) * .9),4px) rotate(calc(var(--rot,1) * -88deg)) scale(1,.75)}
+56%{transform:translate(calc(var(--dx,0px) * .9),2px) rotate(calc(var(--rot,1) * -78deg)) scale(1,.75)}
+62%,80%{transform:translate(calc(var(--dx,0px) * .9),4px) rotate(calc(var(--rot,1) * -86deg)) scale(1,.75);opacity:1;filter:brightness(.55) saturate(.6)}
+100%{transform:translate(calc(var(--dx,0px) * .9),4px) rotate(calc(var(--rot,1) * -86deg)) scale(1,.75);opacity:0;filter:brightness(.45) saturate(.5)}}
+/* 샷건·소총·전기톱·화염: 크게 날아가 떨어짐 */
+.a-dieb{animation:zdb 1.7s cubic-bezier(.2,.6,.3,1) both}
+@keyframes zdb{
+0%{transform:none;filter:none;opacity:1}
+7%{transform:translate(calc(var(--dx,0px) * 1.6),calc(var(--dy,0px) * 1.4 - 7px)) rotate(calc(var(--rot,1) * 35deg));filter:brightness(1.8) sepia(.8) hue-rotate(-35deg) saturate(4)}
+22%{transform:translate(calc(var(--dx,0px) * 2.6),calc(var(--dy,0px) * 2.2 - 5px)) rotate(calc(var(--rot,1) * 100deg)) scale(1,.85);filter:brightness(.9)}
+30%{transform:translate(calc(var(--dx,0px) * 2.9),calc(var(--dy,0px) * 2.4 + 4px)) rotate(calc(var(--rot,1) * 92deg)) scale(1,.8)}
+37%{transform:translate(calc(var(--dx,0px) * 3.1),calc(var(--dy,0px) * 2.4 + 1px)) rotate(calc(var(--rot,1) * 84deg)) scale(1,.8)}
+45%,80%{transform:translate(calc(var(--dx,0px) * 3.2),calc(var(--dy,0px) * 2.4 + 4px)) rotate(calc(var(--rot,1) * 90deg)) scale(1,.8);opacity:1;filter:brightness(.5) saturate(.5)}
+100%{transform:translate(calc(var(--dx,0px) * 3.2),calc(var(--dy,0px) * 2.4 + 4px)) rotate(calc(var(--rot,1) * 90deg)) scale(1,.8);opacity:0;filter:brightness(.4) saturate(.5)}}
 </style>
 <script>
 /* ===== 설정 (필요할 때만 바꾸세요) =====
@@ -3318,23 +3361,30 @@ const DIEIMG = {};
 // 공격 전 안내: "강민재가 소방 도끼로 좀비를 공격합니다!" → 잠시 후 주사위 (모든 플레이어·AI 공격에 표시)
 let atkBusy = false, annHold = 0, myAnnT = 0, lastAnnT = -1;
 function jo(w, a, b, ro) { const c = (w || '').charCodeAt(w.length - 1) - 0xAC00; if (c < 0 || c > 11171) return b; const jong = c % 28; if (!jong) return b; if (ro && jong === 8) return b; return a; }
-function annBanner(A) {
+function annBanner(A, ok, no) {
   const def = ZE.SURV[A.sid] || { n: '생존자' };
   const tgt = Object.keys(A.tg || {}).map(t => `${t === 'A' ? '괴수' : ZBASE[t][1]} ${A.tg[t]}`).join(' · ') || '그 구역';
   const ic = EMBED_('w_' + A.wk) ? `<img src="${EMBED_('w_' + A.wk)}">` : '';
   const verb = A.molo ? '던집니다' : A.melee ? '좀비를 공격합니다' : '좀비를 사격합니다';
   let el = document.getElementById('atkAnn'); if (el) el.remove();
-  el = document.createElement('div'); el.id = 'atkAnn';
-  el.innerHTML = `<div class="aa-in"><div class="aa-ic">${ic}</div><div class="aa-t"><b>${esc(def.n)}</b>${jo(def.n, '이', '가')} <b class="w">${esc(A.wn)}</b>${A.molo ? jo(A.wn, '을', '를') : jo(A.wn, '으로', '로', true)} ${verb}!<small>🎯 ${tgt}${A.molo ? '' : ` · 🎲 ${A.dice}개 · ${A.acc}+ 명중`}</small></div></div>`;
+  el = document.createElement('div'); el.id = 'atkAnn'; if (ok) el.className = 'ask';
+  el.innerHTML = `<div class="aa-in"><div class="aa-row"><div class="aa-ic">${ic}</div><div class="aa-t"><b>${esc(def.n)}</b>${jo(def.n, '이', '가')} <b class="w">${esc(A.wn)}</b>${A.molo ? jo(A.wn, '을', '를') : jo(A.wn, '으로', '로', true)} ${verb}!<small>🎯 ${tgt}${A.molo ? '' : ` · 🎲 ${A.dice}개 · ${A.acc}+ 명중`}</small></div></div>${ok ? `<div class="aa-btn"><button class="aa-no">취소</button><button class="ok aa-ok">확인 ▶ 주사위</button></div>` : ''}</div>`;
   document.body.appendChild(el);
-  setTimeout(() => { el.classList.add('out'); }, 1050);
-  setTimeout(() => { el.remove(); }, 1260);
+  const close = cb => { if (el.dataset.c) return; el.dataset.c = 1; SND.play('click', .5); el.classList.add('out'); setTimeout(() => el.remove(), 200); cb && cb(); };
+  if (ok) {
+    el.querySelector('.aa-ok').onclick = e => { e.stopPropagation(); close(ok); };
+    el.querySelector('.aa-no').onclick = e => { e.stopPropagation(); close(no); };
+  } else {
+    setTimeout(() => { el.classList.add('out'); }, 1050);
+    setTimeout(() => { el.remove(); }, 1260);
+  }
 }
 function atkAnnounce(s, w, cell, go) {
   if (atkBusy) return; atkBusy = true;
   const tg = {}; ZE.zomAt(S, cell).forEach(z => tg[z.t] = (tg[z.t] || 0) + 1);
-  annBanner({ sid: s.id, wn: w.d.n, wk: w.c.k, dice: w.dice, acc: w.acc, melee: !!w.melee, molo: !!w.d.molotov, tg });
-  setTimeout(() => { atkBusy = false; myAnnT = performance.now(); go(); }, 1250);
+  annBanner({ sid: s.id, wn: w.d.n, wk: w.c.k, dice: w.dice, acc: w.acc, melee: !!w.melee, molo: !!w.d.molotov, tg },
+    () => { atkBusy = false; myAnnT = performance.now(); go(); },
+    () => { atkBusy = false; });
 }
 function dieImg(v, hit) {
   const k = v + (hit ? 'h' : 'n'); if (DIEIMG[k]) return DIEIMG[k];
@@ -3750,6 +3800,7 @@ function rpFeed(st) {
   RP.q.push(...items);
   RP.lastZ = clone(st.zombies || []);
   if (!RP.busy) rpRun();
+  else if (RP.idle) { RP.tok++; RP.idle = false; rpRun(); }
 }
 function rpDone() {
   if (RP.hold || RP.dying || performance.now() < (RP.holdUntil || 0)) { setTimeout(rpRun, 200); return; }
@@ -3759,7 +3810,7 @@ function rpDone() {
 function rpRun() {
   if (RP.hold || performance.now() < (RP.holdUntil || 0)) { RP.busy = true; setTimeout(rpRun, 120); return; }
   if (S && S.wait && S.wait.length) { RP.busy = true; setTimeout(rpRun, 400); return; }
-  if (!RP.q.length) { setTimeout(() => { if (RP.hold || performance.now() < (RP.holdUntil || 0) || RP.dying) return; if (!RP.q.length && RP.busy) rpDone(); else if (RP.q.length) rpRun(); }, 900); return; }
+  if (!RP.q.length) { const tk = RP.tok = (RP.tok || 0) + 1; RP.idle = true; setTimeout(() => { if (tk !== RP.tok) return; RP.idle = false; if (RP.hold || performance.now() < (RP.holdUntil || 0) || RP.dying) return; if (!RP.q.length && RP.busy) rpDone(); else if (RP.q.length) rpRun(); }, 900); return; }
   RP.busy = true;
   const it = RP.q.shift(), fast = RP.q.length > 30 ? .5 : RP.q.length > 15 ? .75 : 1;
   let wait = 0;
@@ -3794,7 +3845,7 @@ function rpRun() {
       playFx(e); wait = 700;
     } else if (e.k === 'atk') {
       const pre = 0;
-      const waitRoll = cb => { if (rollAnim || S.roll) setTimeout(() => waitRoll(cb), 120); else cb(); };
+      const waitRoll = cb => { if (rollAnim || S.roll) setTimeout(() => waitRoll(cb), 50); else cb(); };
       RP.hold = true;
       setTimeout(() => waitRoll(() => {
         const A = map.cells[e.from], B = map.cells[e.cell];
@@ -3802,11 +3853,11 @@ function rpRun() {
         RP.lunge[e.sid] = { k: e.melee ? 'lunge' : 'recoil', t0: performance.now(), dx, dy };
         const D2 = RP.dispZ || D;
         (e.kid || []).forEach(id => { const z = D2.find(q => q.id === id); if (z) { RP.anim[id] = { k: 'hit', t0: performance.now() }; } });
-        setTimeout(() => { (e.kid || []).forEach(id => { const z = (RP.dispZ || D2).find(q => q.id === id); if (z) { z.dead = true; const kx = e.from !== e.cell ? Math.sign(B.x - A.x) * 10 : (Math.random() < .5 ? -8 : 8), ky = e.from !== e.cell ? Math.sign(B.y - A.y) * 8 : 0; const heavy = /샷건|엽총|저격|소총|전기톱|화염/.test(e.w || '') || e.fire; RP.anim[id] = { k: heavy ? 'dieb' : e.melee ? 'die' : (Math.random() < .5 ? 'die' : 'diec'), t0: performance.now(), dx: kx, dy: ky }; } }); if ((e.kid || []).length) { gore(e.cell, e.kid.length, /샷건|엽총|저격|소총|전기톱/.test(e.w || '') || e.fire ? 2 : 1, kx0(e)); RP.dying = true; setTimeout(() => { RP.dying = false; }, 1300); } render(); }, 230);
-        setTimeout(() => { if (RP.dispZ) RP.dispZ = RP.dispZ.filter(z => !z.dead); render(); }, 1250);
+        setTimeout(() => { (e.kid || []).forEach(id => { const z = (RP.dispZ || D2).find(q => q.id === id); if (z) { z.dead = true; const kx = e.from !== e.cell ? Math.sign(B.x - A.x) * 10 : (Math.random() < .5 ? -8 : 8), ky = e.from !== e.cell ? Math.sign(B.y - A.y) * 8 : 0; const heavy = /샷건|엽총|저격|소총|전기톱|화염/.test(e.w || '') || e.fire; RP.anim[id] = { k: heavy ? 'dieb' : e.melee ? 'die' : (Math.random() < .5 ? 'die' : 'diec'), t0: performance.now(), dx: kx, dy: ky }; } }); if ((e.kid || []).length) { gore(e.cell, e.kid.length, /샷건|엽총|저격|소총|전기톱/.test(e.w || '') || e.fire ? 2 : 1, kx0(e)); RP.dying = true; setTimeout(() => { RP.dying = false; }, 1800); } render(); }, 200);
+        setTimeout(() => { if (RP.dispZ) RP.dispZ = RP.dispZ.filter(z => !z.dead); render(); }, 1850);
         playFx(e); render();
         RP.hold = false; RP.holdUntil = performance.now() + (e.kid && e.kid.length ? 1300 : 700);
-      }), 150);
+      }), 30);
       wait = 150;
     }
     render();
