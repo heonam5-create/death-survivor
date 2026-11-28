@@ -135,7 +135,8 @@ input[type=range]{width:100%;accent-color:var(--acc);height:32px}
     <div class="hero">
       <div class="boardpic"><canvas id="heroCv"></canvas></div>
       <h1>바둑 한판</h1>
-      <p>한국기원 바둑규칙 그대로 · 9급부터 9단까지</p>
+      <p>한국기원 바둑규칙 그대로 · 9급부터 9단까지 · 🧠 KataGo 신경망</p>
+      <p style="font-size:12px;opacity:.6">버전 2.0 (신경망 전 단계)</p>
       <div class="menu">
         <button class="btn big hidden" id="resume"><span class="dot dot1"></span><span><b>두던 대국 이어 두기</b><small>저장된 AI 대국으로 돌아가요</small></span></button>
         <button class="btn big pri" id="mAI"><span class="dot dot1"></span><span><b>AI와 대국</b><small style="color:#3b2a12">난이도 9급 ~ 9단 · 19 / 13 / 9줄 · 접바둑</small></span></button>
@@ -1242,15 +1243,18 @@ function startAI(o) {
   openGame();
   G.talkAt = -99; setTimeout(function () { aiTalk('start', true); }, 500);
   saveAI();
-  if (useKG()) {
-    G.aiBusy = true; status('KataGo 신경망을 불러오는 중… (판 크기별 처음 한 번)');
-    var gg = G;
-    ai('preload', { kgUrl: kgUrlFor(G.n) }).then(function (r) {
-      if (G !== gg) return; G.aiBusy = false;
-      if (!r.ok) { toast('KataGo를 불러오지 못해 기본 AI로 둡니다.'); G.kgWarned = 1; }
-      renderGame(); maybeAI();
-    });
-  } else maybeAI();
+  kgPreload();
+}
+function kgPreload() {
+  if (!useKG()) { maybeAI(); return; }
+  var gg = G; G.aiBusy = true; G.kgState = 'loading'; renderGame();
+  toast('KataGo 신경망을 불러오는 중… 🧠', 60000);
+  ai('preload', { kgUrl: kgUrlFor(G.n) }).then(function (r) {
+    if (G !== gg) return; G.aiBusy = false;
+    if (r.ok) { G.kgState = 'ok'; toast('KataGo 신경망 연결 완료 ✓', 1800); }
+    else { G.kgState = 'fail'; G.kgWarned = 1; toast('신경망을 불러오지 못해 기본 AI로 둡니다.', 3000); }
+    renderGame(); maybeAI();
+  });
 }
 function saveAI() { if (G && G.mode === 'ai') store.set('aiGame', { n: G.n, komi: G.komi, handicap: G.handicap, my: G.my, level: G.level, setup: G.setup, moves: G.moves, names: G.names, phase: G.phase, result: G.result }); }
 function resumeAI() {
@@ -1258,7 +1262,7 @@ function resumeAI() {
   newGame({ mode: 'ai', n: s.n, komi: s.komi, handicap: 0, my: s.my, level: s.level, names: s.names });
   G.setup = s.setup; G.moves = s.moves; rebuild();
   if (s.phase === 'end') { G.phase = 'end'; G.result = s.result; }
-  openGame(); maybeAI();
+  openGame(); kgPreload();
 }
 
 /* ---------- 대국 화면 ---------- */
@@ -1308,7 +1312,8 @@ function maybeAI() {
   var oppPassed = G.moves.length && G.moves[G.moves.length - 1] === 0;
   ai('genmove', { n: G.n, setup: G.setup, moves: G.moves, toPlay: G.toPlay, level: G.level, komi: G.komi, moveNo: G.moves.length, oppPassed: oppPassed, kgUrl: useKG() ? kgUrlFor(G.n) : '' }).then(function (r) {
     if (G !== gid) return;
-    if (r.kgFail && !G.kgWarned) { G.kgWarned = 1; toast('KataGo 신경망을 불러오지 못해 기본 AI로 둡니다.'); }
+    if (r.kg) G.kgState = 'ok';
+    if (r.kgFail && !G.kgWarned) { G.kgState = 'fail'; G.kgWarned = 1; toast('KataGo 신경망을 불러오지 못해 기본 AI로 둡니다.'); }
     // 사람처럼: 쉬운 수는 빨리, 싸움은 오래
     var mn = G.moves.length, base = r.hard ? 1300 + Math.random() * 2200 : 500 + Math.random() * 1400;
     if (mn < 6) base = 400 + Math.random() * 900;
@@ -1388,7 +1393,9 @@ function renderGame() {
     el.querySelector('.st').setAttribute('style', stoneIcon(c));
     el.querySelector('.nm').textContent = G.names[c - 1];
     var extra = c === 2 ? ' · 덤 ' + G.komi : '';
-    el.querySelector('.sub').textContent = '따낸 돌 ' + b.caps[c] + extra;
+    var kgTag = '';
+    if (G.mode === 'ai' && c !== G.my) kgTag = G.kgState === 'ok' ? ' · 🧠 신경망' : G.kgState === 'loading' ? ' · 신경망 준비 중' : G.kgState === 'fail' ? ' · 기본 AI' : '';
+    el.querySelector('.sub').textContent = '따낸 돌 ' + b.caps[c] + extra + kgTag;
   });
   var last = G.moves.length ? G.moves[G.moves.length - 1] : 0;
   view.opts = { last: last, dead: G.phase !== 'play' ? G.dead : null, owner: G.phase === 'score' || (G.phase === 'end' && G.result && G.result.score) ? scoreNow().owner : (G.estimate || null) };
@@ -1397,7 +1404,8 @@ function renderGame() {
   var st = '';
   if (G.phase === 'play') {
     var who = G.toPlay === 1 ? '흑' : '백';
-    if (G.mode === 'ai' && G.toPlay !== G.my) st = '<b>' + who + '</b> AI 생각 중 <span class="thinking"><i></i><i></i><i></i></span>';
+    if (G.mode === 'ai' && G.kgState === 'loading') st = '<b>KataGo 신경망을 불러오는 중…</b> <span class="thinking"><i></i><i></i><i></i></span>';
+    else if (G.mode === 'ai' && G.toPlay !== G.my) st = '<b>' + who + '</b> AI 생각 중 <span class="thinking"><i></i><i></i><i></i></span>';
     else if (G.mode === 'online' && !net.started) st = net.msg || '상대를 기다리는 중…';
     else if (G.mode === 'online' && G.toPlay !== net.myColor) st = '<b>' + who + '</b> 상대 차례 <span class="thinking"><i></i><i></i><i></i></span>';
     else st = '<b>' + who + '</b> 내 차례' + (G.passes ? ' — 상대가 넘겼어요. 나도 넘기면 계가해요.' : '');
