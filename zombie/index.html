@@ -426,6 +426,13 @@ button.pri{background:linear-gradient(#e11d48,#9f1239);box-shadow:0 3px 0 #4c051
 img.pxi{height:24px;width:auto;image-rendering:pixelated;filter:drop-shadow(0 2px 0 #000);vertical-align:middle}
 img.pxs{height:11px;width:auto;image-rendering:pixelated;vertical-align:-1px}
 button:disabled img.pxi{filter:grayscale(.7) brightness(.6)}
+
+.fx.pop.zatk{background:#1c0a0aee;border-color:#b91c1c;color:#fecaca;font-size:13px}
+.fx.pop .hl{font-size:11px;letter-spacing:1px;color:#ef4444;margin-top:2px}.fx.pop .hl span{color:#ef444433}
+
+.thr.dl{animation:thrb 1s ease-in-out infinite}@keyframes thrb{50%{opacity:.45}}
+.thrw{margin:6px 0;padding:7px 10px;border-radius:10px;background:#451a03cc;border:1px solid #b45309;color:#fde68a;font-size:12.5px;line-height:1.4}
+.thrw.dl{background:#450a0acc;border-color:#ef4444;color:#fecaca;animation:thrb 1.2s ease-in-out infinite}
 </style>
 <script>
 /* ===== 설정 (필요할 때만 바꾸세요) =====
@@ -980,7 +987,7 @@ function dealWounds(st, ss, n, src, why, dmgEach) {
     if (hasSkill(s, 'tough') && !toughUsed[s.id]) { toughUsed[s.id] = true; w--; log(st, `${sname(s)}: 강인함으로 부상 1 무시`); }
     if (w <= 0) continue;
     s.wounds += w;
-    fx(st, { k: 'hurt', cell: s.cell, sid: s.id, n: w, ff: src === 'ff' });
+    fx(st, { k: 'hurt', cell: s.cell, sid: s.id, n: w, ff: src === 'ff', left: Math.max(0, hpLeft(s)), max: healthMax(s), i, of: n });
     log(st, `${sname(s)} 부상 ${w} (${why})`, 'hurt');
     if (s.wounds >= healthMax(s)) {
       s.dead = true; s.wounds = healthMax(s);
@@ -2690,6 +2697,9 @@ function boardSVG() {
   S.survivors.forEach(x => { if (!x.dead && !x.escaped) (sc[x.cell] = sc[x.cell] || []).push(x); });
   for (const k in sc) {
     const c = map.cells[k]; const arr = sc[k];
+    const thr = threatAt(+k), hpSum = arr.reduce((t, x) => t + ZE.hpLeft(x), 0), minHp = Math.min(...arr.map(x => ZE.hpLeft(x)));
+    if (thr) { const deadly = thr >= minHp && arr.length === 1 || thr >= hpSum; const bx = c.x * CS + 86, by = c.y * CS + 58;
+      o += `<g class="thr${deadly ? ' dl' : ''}"><rect x="${bx - 15}" y="${by - 9}" width="30" height="16" rx="5" fill="${deadly ? '#991b1b' : '#78350f'}" stroke="#fff8" stroke-width="1"/><text x="${bx}" y="${by + 3}" font-size="10" text-anchor="middle" fill="#fff" font-weight="900">⚠${thr}</text></g>`; }
     const per = Math.min(4, arr.length), kk = tokK();
     arr.forEach((x, i) => {
       const L = RP.lunge[x.id];
@@ -2728,6 +2738,18 @@ function autoZoom() {
   const cell = CS * scaleBase();
   ui.zoom = 1;
   ui.zoomFor = S.mission;
+}
+function ensureVisible(cellI) {
+  const bw = $('.boardwrap'); if (!bw || gestureOn) return;
+  const p = cellPt(cellI); if (!p) return; const r = bw.getBoundingClientRect();
+  if (p.x < r.left + 20 || p.x > r.right - 20 || p.y < r.top + 20 || p.y > r.bottom - 20) centerOn(cellI);
+}
+// 다음 좀비 단계에 이 구역 생존자가 받을 수 있는 공격 수 (같은 구역 좀비 + 옆 구역 러너, 확실히 보이는 것만)
+function threatAt(cell) {
+  if (!S || !S.zombies || S.phase !== 'players') return 0;
+  const map = ZE.getMap(S.mission); let n = S.zombies.filter(z => z.cell === cell).length;
+  ZE.neighbors(map, cell).forEach(nb => { if (!ZE.edgeOpen(S, map, cell, nb) || ZE.survAt(S, nb).length) return; n += S.zombies.filter(z => z.cell === nb && z.t === 'R').length; });
+  return n;
 }
 function centerOn(cellI) {
   const bw = $('.boardwrap'); if (!bw || ui.zoom <= 1.01) return;
@@ -2953,6 +2975,8 @@ function bottom() {
       <div class="sksm">${s.skills.map(k => ZE.SKILLS[k].n).join(' · ')}</div>
       <div class="bar"><i style="width:${next ? Math.min(100, (s.ap - ZE.LEVELS[lv].ap) / (next.ap - ZE.LEVELS[lv].ap) * 100) : 100}%;background:${lvlColor(s.ap)}"></i></div></div>
     <div class="dots"><span>행동</span><div>${dots}</div></div></div>`;
+  { const thr = threatAt(s.cell), mates = S.survivors.filter(x => !x.dead && !x.escaped && x.cell === s.cell); const hp = ZE.hpLeft(s);
+    if (thr) h += `<div class="thrw ${thr >= mates.reduce((t, x) => t + ZE.hpLeft(x), 0) || (mates.length === 1 && thr >= hp) ? 'dl' : ''}">⚠ 좀비 단계에 최대 <b>${thr}번</b> 물릴 수 있어요 (좀비 1마리당 부상 1 · 남은 체력 ${hp})${thr >= hp ? ' — <b>이대로면 쓰러질 수 있어요!</b> 처치하거나 피하세요' : ''}</div>`; }
   h += `<div class="coach">${coach(s)}</div>`;
   h += invHTML(s, true);
   if (s.pending.length || s.pendSkill.length) return h;
@@ -3387,7 +3411,8 @@ function playFx(e) {
     const p = cellPt(e.cell, 48, 70); if (!p) return;
     const def = ZE.SURV[e.sid];
     fxEl('', p.x, p.y, 'hurtflash', 600);
-    fxEl(`<small style="color:${def.color}">${def.n}</small>${e.ff ? '😵 아군 오사!' : '🩸 으악!'} <b>-${e.n}❤</b>`, p.x, p.y + 34, 'pop hurt', 1900);
+    const hearts = e.max ? '<small class="hl">' + '❤'.repeat(e.left) + '<span>' + '❤'.repeat(Math.max(0, e.max - e.left)) + '</span></small>' : '';
+    fxEl(`<small style="color:${def.color}">${def.n}</small>${e.ff ? '😵 아군 오사!' : '🩸 으악!'} <b>-${e.n}❤</b>${hearts}`, p.x + ((e.i || 0) % 3 - 1) * 26 * (e.of > 1 ? 1 : 0), p.y + 34 + (e.i || 0) * 8, 'pop hurt', 2200);
     const sv = S.survivors.find(x => x.id === e.sid);
     if (sv && sv.owner === me.pid) { const v = document.createElement('div'); v.className = 'redvig'; document.body.appendChild(v); setTimeout(() => v.remove(), 700); }
   }
@@ -3450,11 +3475,13 @@ function rpRun() {
       SND.play('walk', .25); SND.play(pickR(ZGROAN), .3, .2);
       wait = 700;
     } else if (e.k === 'zatk') {
+      ensureVisible(e.cell);
       e.ids.forEach(id => RP.anim[id] = { k: 'bite', t0: now(), dx: 0, dy: 16 });
-      wait = 380;
+      const p = cellPt(e.cell, 48, 20); if (p) fxEl(`🧟 좀비 <b>${e.ids.length}</b>마리 공격!<small>${e.ids.length > 1 ? '좀비 1마리당 부상 1' : '부상 1'}</small>`, p.x, p.y, 'pop zatk', 1900);
+      wait = 650;
     } else if (e.k === 'hurt') {
       const sv = S.survivors.find(x => x.id === e.sid); if (sv) RP.lunge[e.sid] = { k: 'shake', t0: now(), dx: 4, dy: 0 };
-      playFx(e); wait = 520;
+      playFx(e); wait = 700;
     } else if (e.k === 'atk') {
       const pre = 0;
       const waitRoll = cb => { if (rollAnim || S.roll) setTimeout(() => waitRoll(cb), 120); else cb(); };
@@ -3501,7 +3528,8 @@ Net.on('state', st => {
   if (newRound) setTimeout(() => showBanner('🧟 좀비가 몰려왔어요!', 'z'), 0);
   if (prev && S.phase === 'over' && prev.phase !== 'over') setTimeout(() => showBanner(S.result.win ? '🏆 승리!' : '☠️ 패배…', S.result.win ? 'w' : 'z'), 0);
   if (lastRollT < 0) lastRollT = S.lastRoll ? S.lastRoll.t : 0;
-  else if (S.lastRoll && S.lastRoll.t !== lastRollT) { if (!hadRoll) {
+  else if (S.lastRoll && S.lastRoll.t !== lastRollT) { {
+      if (hadRoll) diceSeen['l' + S.lastRoll.t] = performance.now() - 1500; // 이미 굴린 주사위: 바로 결과 보여주기
       rollAnim = true; clearTimeout(rollTO);
       const sv = S.survivors.find(x => x.id === S.lastRoll.sid), mineR = sv && sv.owner === me.pid;
       rollMine = !!mineR;
