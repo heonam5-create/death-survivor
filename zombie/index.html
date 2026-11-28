@@ -439,8 +439,8 @@ button:disabled img.pxi{filter:grayscale(.7) brightness(.6)}
 .tankrow button{flex:none;white-space:nowrap}.tankrow button.on{background:#1e3a8a;border-color:#60a5fa;color:#fff}
 .askbox small{color:#fca5a5}
 
-.fx.splint{background:#6b3f1d;box-shadow:1px 1px 0 #1a0f06;rotate:var(--r);animation:gore .75s cubic-bezier(.2,.6,.4,1) forwards}
-.fx.dpuff{width:46px;height:30px;border-radius:50%;background:radial-gradient(ellipse,#d6c7a8aa,#8a7a5a55 50%,#0000 72%);transform:translate(-50%,-50%);animation:dpuff .7s ease-out forwards}
+.fx.splint{background:#4a3527;box-shadow:1px 1px 0 #0d0906;filter:brightness(.92) saturate(.8);rotate:var(--r);animation:gore .75s cubic-bezier(.2,.6,.4,1) forwards}
+.fx.dpuff{width:46px;height:30px;border-radius:50%;background:radial-gradient(ellipse,#6f6656aa,#4a443866 50%,#0000 72%);transform:translate(-50%,-50%);animation:dpuff .7s ease-out forwards}
 @keyframes dpuff{0%{scale:.4;opacity:1}100%{scale:1.8;opacity:0}}
 .boardwrap.dshake{animation:dshk .32s linear}
 @keyframes dshk{20%{translate:-3px 1px}40%{translate:3px -1px}60%{translate:-2px 0}80%{translate:2px 1px}}
@@ -517,6 +517,41 @@ button:disabled img.pxi{filter:grayscale(.7) brightness(.6)}
 37%{transform:translate(calc(var(--dx,0px) * 3.1),calc(var(--dy,0px) * 2.4 + 1px)) rotate(calc(var(--rot,1) * 84deg)) scale(1,.8)}
 45%,80%{transform:translate(calc(var(--dx,0px) * 3.2),calc(var(--dy,0px) * 2.4 + 4px)) rotate(calc(var(--rot,1) * 90deg)) scale(1,.8);opacity:1;filter:brightness(.5) saturate(.5)}
 100%{transform:translate(calc(var(--dx,0px) * 3.2),calc(var(--dy,0px) * 2.4 + 4px)) rotate(calc(var(--rot,1) * 90deg)) scale(1,.8);opacity:0;filter:brightness(.4) saturate(.5)}}
+/* ---- 좀비 차례 / 생존자 차례 구분 ---- */
+#game.zturn .top{background:linear-gradient(#3a0d0b,#1c0907);box-shadow:inset 0 -2px 0 #8f2a20}
+#game.zturn .boardwrap{box-shadow:inset 0 0 0 2px #8f2a20,inset 0 0 40px #8f2a2088;animation:zvig 1.6s ease-in-out infinite}
+@keyframes zvig{50%{box-shadow:inset 0 0 0 2px #b5362a,inset 0 0 60px #b5362acc}}
+.top .ztag{color:#f3b4a6;letter-spacing:.5px}
+.top .zst{font-size:11px;font-weight:800;color:#1a0907;background:#d0806e;border-radius:6px;padding:1px 6px;animation:zstp 1s ease-in-out infinite}
+@keyframes zstp{50%{opacity:.6}}
+.top .ptag{font-size:10px;font-weight:900;color:#cfe0c4;background:#2f4a2c;border:1px solid #58874e;border-radius:6px;padding:1px 5px;vertical-align:1px}
+.zsteps{display:flex;gap:6px;margin:6px 0}
+.zsteps div{flex:1;text-align:center;padding:6px 4px;border-radius:9px;background:#1f1714;border:1px solid #3a2a22;color:#8a7a68;font-size:12px;transition:all .2s}
+.zsteps div small{display:block;font-size:10px;margin-top:2px}
+.zsteps div.on{background:linear-gradient(#5a1a14,#2e0e0b);border-color:#c0473a;color:#fde2d8;box-shadow:0 0 12px #b5362a66;transform:scale(1.04)}
+#phB{position:fixed;inset:0;z-index:9400;display:flex;align-items:center;justify-content:center;pointer-events:none;background:radial-gradient(#0000 30%,#000a)}
+#phB.pb-z{background:radial-gradient(#3a0d0b55 20%,#000c)}
+#phB .pb-in{min-width:240px;max-width:88vw;text-align:center;padding:16px 22px;border-radius:14px;animation:pbin .45s cubic-bezier(.2,1.3,.4,1) both}
+#phB.pb-z .pb-in{background:linear-gradient(#3a0f0c,#1a0806);border:2px solid #8f2a20;box-shadow:0 10px 40px #000,0 0 30px #8f2a2066}
+#phB.pb-p .pb-in{background:linear-gradient(#1e2a1c,#10170f);border:2px solid #58874e;box-shadow:0 10px 40px #000,0 0 24px #58874e55}
+#phB .pb-t{font-size:30px;font-weight:900;letter-spacing:1px;text-shadow:0 3px 0 #000}
+#phB.pb-z .pb-t{color:#f0a493}#phB.pb-p .pb-t{color:#cfe6c2}
+#phB .pb-s{font-size:13px;color:#d8c9b4;margin-top:4px}
+#phB .pb-steps{margin-top:10px;display:flex;gap:6px;justify-content:center;align-items:center;color:#8a5a4e;font-size:12px}
+#phB .pb-steps span{background:#2a110e;border:1px solid #6b2a20;border-radius:7px;padding:3px 8px;color:#f0c9bc;font-weight:800}
+#phB .pbd{margin-top:8px;font-size:13px;color:#f3c98b;background:#2a1a0c;border:1px solid #6b4a22;border-radius:8px;padding:5px 8px}
+#phB .pbd.l{color:#fff;background:#6b1510;border-color:#e05a4a;animation:pbl .7s ease-in-out infinite}
+@keyframes pbl{50%{box-shadow:0 0 14px #e05a4a}}
+#phB.out .pb-in{animation:pbout .3s ease-in both}
+@keyframes pbin{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+@keyframes pbout{to{opacity:0;transform:scale(1.08)}}
+#stB{position:fixed;left:50%;top:60px;transform:translateX(-50%);z-index:9300;pointer-events:none;text-align:center;padding:7px 16px;border-radius:10px;background:linear-gradient(#4a1410f2,#220907f2);border:1.5px solid #b5362a;box-shadow:0 6px 18px #000c;animation:stin .3s ease-out both}
+#stB b{display:block;font-size:17px;color:#fbd3c7;font-weight:900}
+#stB small{font-size:11.5px;color:#d9b9ab}
+#stB.out{animation:stout .25s ease-in both}
+@keyframes stin{from{opacity:0;transform:translate(-50%,-10px)}to{opacity:1;transform:translateX(-50%)}}
+@keyframes stout{to{opacity:0;transform:translate(-50%,-8px)}}
+.zoom .zpb{font-size:15px;opacity:.55}.zoom .zpb.on{opacity:1;border-color:#8f2a20;background:#2a0f0cdd}
 </style>
 <script>
 /* ===== 설정 (필요할 때만 바꾸세요) =====
@@ -988,9 +1023,10 @@ function activate(st, ids, why) {
   step(st, map, ids);
   if (st.result) return;
   const runners = ids.filter(id => { const z = st.zombies.find(z => z.id === id); return z && z.t === 'R'; });
-  if (runners.length) { log(st, `🏃 러너는 행동이 2번! 러너 ${runners.length}마리가 한 번 더 움직여요`, 'z'); step(st, map, runners); }
+  if (runners.length) { log(st, `🏃 러너는 행동이 2번! 러너 ${runners.length}마리가 한 번 더 움직여요`, 'z'); step(st, map, runners, true); }
 }
-function step(st, map, ids) {
+function step(st, map, ids, run) {
+  step.a = 0;
   const set = {}; ids.forEach(id => set[id] = true);
   const zs = st.zombies.filter(z => set[z.id]);
   // 1) 공격
@@ -1002,6 +1038,7 @@ function step(st, map, ids) {
     if (!ss.length) continue;
     const group = byCell[cell];
     group.forEach(z => attacked[z.id] = true);
+    if (!step.a) { step.a = 1; fx(st, { k: 'zstep', s: 'atk' }); }
     fx(st, { k: 'zatk', cell: +cell, ids: group.map(z => z.id) });
     dealWounds(st, ss, group.length, 'zombie', `${group.length}마리 좀비의 공격`);
     if (st.result) return;
@@ -1028,6 +1065,7 @@ function step(st, map, ids) {
     const seen = dest.filter(d => d[2]).length;
     log(st, `🧟 좀비 ${dest.length}마리 이동 — ${seen ? (seen === dest.length ? '생존자를 보고 다가와요' : `${seen}마리는 생존자를 보고, 나머지는 소음을 따라 와요`) : '생존자가 안 보여서 가장 시끄러운 곳(소음)으로 가요'}`, 'z');
   }
+  if (dest.length) fx(st, { k: 'zstep', s: run ? 'run' : 'move', n: dest.length });
   if (dest.length) fx(st, { k: 'zmove', moves: dest.map(([z, c]) => [z.id, z.cell, c]), see: dest.some(d => d[2]) });
   dest.forEach(([z, c]) => z.cell = c);
 }
@@ -1057,6 +1095,35 @@ function zombieSteps(st, map, cell, cache) {
   });
   // 가장 가까운 목표 우선(동점 소음끼리는 거리 무관 → 모두 분산이지만, 도달 불가 제외)
   return steps;
+}
+// 다음 좀비 단계 예측(화면 표시용, 상태 변경 없음): 공격할 구역·부상 수, 이동 경로
+function predictZ(st) {
+  const map = getMap(st.mission), att = {}, mv = {}, cache = {}, byCell = {};
+  st.zombies.forEach(z => (byCell[z.cell] = byCell[z.cell] || []).push(z));
+  for (const k in byCell) {
+    const c = +k, g = byCell[k];
+    if (survAt(st, c).length) { att[c] = (att[c] || 0) + g.length + g.filter(z => z.t === 'R').length; continue; }
+    const steps = zombieSteps(st, map, c, cache); if (!steps.length) continue;
+    const byT = {}; g.forEach(z => (byT[z.t] = byT[z.t] || []).push(z));
+    for (const t in byT) byT[t].forEach((z, i) => { const to = steps[i % steps.length], key = c + '>' + to; mv[key] = (mv[key] || 0) + 1; if (t === 'R' && survAt(st, to).length) att[to] = (att[to] || 0) + 1; });
+  }
+  const hits = {};
+  for (const k in att) {
+    const ss = survAt(st, +k).filter(s => !s.dead && !s.escaped); if (!ss.length) continue;
+    const w = {}, tu = {}; ss.forEach(s => { w[s.id] = s.wounds || 0; hits[s.id] = 0; });
+    const hp = s => healthMax(s) - w[s.id];
+    for (let i = 0; i < att[k]; i++) {
+      const alive = ss.filter(s => hp(s) > 0); if (!alive.length) break;
+      alive.sort((a, b) => hp(b) - hp(a));
+      const tk = alive.filter(x => x.tank && (hp(x) > 1 || !alive.some(y => !y.tank && hp(y) > 1)));
+      if (tk.length) { alive.splice(alive.indexOf(tk[0]), 1); alive.unshift(tk[0]); }
+      const s = alive[0];
+      if (hasSkill(s, 'tough') && !tu[s.id]) { tu[s.id] = 1; continue; }
+      w[s.id]++; hits[s.id]++;
+    }
+  }
+  const danger = st.survivors.filter(s => hits[s.id]).map(s => ({ sid: s.id, dmg: hits[s.id], hp: hpLeft(s), lethal: hits[s.id] >= hpLeft(s) }));
+  return { att, mv: Object.keys(mv).map(k => { const [f, t] = k.split('>').map(Number); return [f, t, mv[k]]; }), danger };
 }
 // 부상 분배: 체력이 가장 많이 남은 생존자부터 (강인함 적용)
 function dealWounds(st, ss, n, src, why, dmgEach) {
@@ -1656,12 +1723,14 @@ function advance(st) {
 function zombiePhase(st) {
   const map = getMap(st.mission);
   st.phase = 'zombies';
+  fx(st, { k: 'zph', s: 'start', round: st.round, n: st.zombies.length, danger: predictZ(st).danger });
   log(st, `── ${st.round}라운드 좀비 단계 ──`, 'sys');
   log(st, `🧟 모든 좀비가 깨어나요: 생존자와 같은 구역이면 공격, 아니면 1칸 이동`, 'z');
   activate(st, st.zombies.map(z => z.id));
   if (st.result) return;
   // 스폰: 시작 스폰부터 시계방향(목록 순서)
   const order = map.spawns.map((s, i) => i).sort((a, b) => (map.spawns[b].start ? 1 : 0) - (map.spawns[a].start ? 1 : 0));
+  fx(st, { k: 'zstep', s: 'spawn' });
   log(st, `🃏 스폰 단계: 시작 스폰부터 시계방향으로 좀비 카드를 1장씩 뽑아요 (가장 강한 생존자 레벨 기준)`, 'z');
   for (const i of order) {
     if (st.spawnActive[i] !== true) continue;
@@ -1683,6 +1752,7 @@ function zombiePhase(st) {
     Object.assign(s, { used: 0, freeUsed: {}, done: false, searched: false, sprintUsed: false, chargeUsed: false, kidSlip: false, hitRun: false, reorg: false });
   });
   st.first = (st.first + 1) % st.order.length;
+  fx(st, { k: 'zph', s: 'end', round: st.round + 1 });
   st.turn = 0; st.round++; st.active = null; st.phase = 'players';
   log(st, `── ${st.round}라운드 시작: ${pname(st, curPlayer(st))}님 차례 ──`, 'sys');
   advance(st);
@@ -1697,7 +1767,7 @@ const API = {
   levelOf, getMap, visible, edgeOpen, neighbors, createLobby, addPlayer, setOnline, apply,
   curPlayer, survAt, zomAt, noiseAt, hasSkill, maxActions, actionsLeft, freePool, freeAvail, canSpend, healthMax, hpLeft,
   weaponInfo, rangedTargets, moveTargets, chargeTargets, adjDoors, doorTool, doorLocked, canSearch, hoboBlock,
-  objectivesDone, dangerLevel, pname, sname, hasFreeLeft,
+  objectivesDone, dangerLevel, pname, sname, hasFreeLeft, predictZ,
 };
 if (typeof module !== 'undefined' && module.exports) module.exports = API;
 else root.ZE = API;
@@ -2237,7 +2307,7 @@ const SND = (() => {
   return {
     play, synth, get muted() { return muted; },
     toggle() { muted = !muted; store('zsv-mute', muted); if (!muted) { unlock(); play('click'); } },
-    preload() { if (ctx) ['dice', 'shake', 'pistol', 'melee', 'door', 'door_bash', 'door_pry', 'card', 'zg1', 'zdie1', 'zatk1', 'walk', 'bell', 'click'].forEach(get); },
+    preload() { if (ctx) ['dice', 'shake', 'pistol', 'melee', 'door', 'door_bash', 'door_pry', 'card', 'zg1', 'zdie1', 'zatk1', 'walk', 'bell', 'click', 'zstep1', 'zstep2', 'zrun'].forEach(get); },
   };
 })();
 /* ---------- 배경음악 (브라우저에서 직접 만드는 공포 앰비언트) ---------- */
@@ -2390,7 +2460,7 @@ function toast(m, err) {
 const isHost = () => S && S.host === me.pid;
 const pl = pid => S.players.find(p => p.id === pid) || { name: '?', color: '#888', on: false };
 function canControl() {
-  if (!S || S.phase !== 'players') return false;
+  if (!S || S.phase !== 'players' || RP.zph) return false;
   const cp = ZE.curPlayer(S);
   return cp === me.pid || (isHost() && !pl(cp).on);
 }
@@ -2835,6 +2905,8 @@ function boardSVG() {
   <defs><radialGradient id="glow"><stop offset="0" stop-color="#e8c66a" stop-opacity=".7"/><stop offset="1" stop-color="#e8c66a" stop-opacity="0"/></radialGradient>
   <filter id="grade" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values=".62 .3 .08 0 .02  .2 .66 .1 0 .01  .16 .26 .5 0 0  0 0 0 1 0"/><feComponentTransfer><feFuncR type="linear" slope=".92"/><feFuncG type="linear" slope=".9"/><feFuncB type="linear" slope=".85"/></feComponentTransfer></filter>
   <filter id="rough"><feTurbulence baseFrequency=".9" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.5"/></filter>
+  <marker id="zar" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#c0392b"/></marker>
+  <marker id="zar2" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="3.4" markerHeight="3.4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#e05a4a"/></marker>
   <filter id="ds"><feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#000" flood-opacity=".8"/></filter></defs>
   <rect x="-4" y="-4" width="${W + 8}" height="${H + 8}" fill="#0b0b0b"/>`;
   const BG = bgUrl(S.mission);
@@ -2903,6 +2975,20 @@ function boardSVG() {
     if (!S.noise[k]) continue;
     const c = map.cells[k];
     o += `<g><circle cx="${c.x * CS + 48}" cy="${c.y * CS + 14}" r="11" fill="#f59e0b" stroke="#000" stroke-width="2"/><text x="${c.x * CS + 48}" y="${c.y * CS + 19}" font-size="12" text-anchor="middle">📢</text>${S.noise[k] > 1 ? `<text x="${c.x * CS + 62}" y="${c.y * CS + 12}" font-size="11" font-weight="900" fill="#fde68a" stroke="#000" stroke-width="3" paint-order="stroke">${S.noise[k]}</text>` : ''}</g>`;
+  }
+  // 좀비 이동 경로: 생존자 차례엔 다음 이동 예측(점선), 좀비 차례엔 방금 이동(실선)
+  {
+    const arrow = (f, t, n, live, age) => {
+      const A = map.cells[f], B = map.cells[t]; if (!A || !B) return '';
+      const ax = A.x * CS + 48, ay = A.y * CS + 52, bx = B.x * CS + 48, by = B.y * CS + 52, L = Math.hypot(bx - ax, by - ay) || 1, ux = (bx - ax) / L, uy = (by - ay) / L;
+      const x1 = ax + ux * 22, y1 = ay + uy * 22, x2 = bx - ux * 24, y2 = by - uy * 24, mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+      const op = live ? Math.max(0, 1 - age / 2600) : .62;
+      return `<g opacity="${op.toFixed(2)}" style="pointer-events:none"><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#000" stroke-width="${live ? 7 : 5}" stroke-linecap="round" opacity=".6"/><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${live ? '#e05a4a' : '#c0392b'}" stroke-width="${live ? 4 : 2.6}" stroke-linecap="round" ${live ? '' : 'stroke-dasharray="6 5"'} marker-end="url(#${live ? 'zar2' : 'zar'})">${live ? '' : '<animate attributeName="stroke-dashoffset" values="22;0" dur="1.1s" repeatCount="indefinite"/>'}</line>${n > 1 ? `<g transform="translate(${mx} ${my})"><circle r="7" fill="#1a0f0c" stroke="${live ? '#e05a4a' : '#8f2a20'}" stroke-width="1.5"/><text y="3.5" font-size="9" text-anchor="middle" fill="#f3d6c8" font-weight="900">${n}</text></g>` : ''}</g>`;
+    };
+    const P = pred();
+    if (P && ui.zpath !== false) P.mv.forEach(([f, t, n]) => { o += arrow(f, t, n, false, 0); });
+    const nowT = performance.now();
+    (RP.trails || []).forEach(tr => { const age = nowT - tr.t0; if (age < 2600) o += arrow(tr.f, tr.t, tr.n, true, age); });
   }
   // 좀비 (종류별로 묶어서)
   const zc = {}, now = performance.now();
@@ -3011,12 +3097,17 @@ function spawnNear(cell) {
   map.spawns.forEach((sp, i) => { if (S.spawnActive[i] !== true) return; if (sp.cell === cell) r = Math.max(r, 2); else if (ZE.neighbors(map, cell).some(nb => nb === sp.cell && ZE.edgeOpen(S, map, cell, nb))) r = Math.max(r, 1); });
   return r;
 }
-function threatAt(cell) {
-  if (!S || !S.zombies || S.phase !== 'players') return 0;
-  const map = ZE.getMap(S.mission); let n = S.zombies.filter(z => z.cell === cell).length;
-  ZE.neighbors(map, cell).forEach(nb => { if (!ZE.edgeOpen(S, map, cell, nb) || ZE.survAt(S, nb).length) return; n += S.zombies.filter(z => z.cell === nb && z.t === 'R').length; });
-  return n;
+let PRED = null, PREDk = '';
+function pred() {
+  if (!S || !S.zombies || S.phase !== 'players' || RP.zph) return null;
+  const k = (S.logN || 0) + '|' + (S.fxSeq || 0) + '|' + S.zombies.length + '|' + S.survivors.map(x => x.cell + '/' + x.wounds + (x.tank ? 't' : '') + (x.dead ? 'd' : '')).join(',') + JSON.stringify(S.noise) + JSON.stringify(S.doors);
+  if (k !== PREDk) { PREDk = k; try { PRED = ZE.predictZ(S); } catch (e) { PRED = null; } }
+  return PRED;
 }
+function threatAt(cell) {
+  const P = pred(); return P ? (P.att[cell] || 0) : 0;
+}
+function dangerOf(sid) { const P = pred(); return P ? P.danger.find(d => d.sid === sid) : null; }
 function centerOn(cellI) {
   const bw = $('.boardwrap'); if (!bw || ui.zoom <= 1.01) return;
   const map = ZE.getMap(S.mission), c = map.cells[cellI]; if (!c) return;
@@ -3122,13 +3213,14 @@ function renderGame() {
   const bw = $('.boardwrap'), sx = bw ? bw.scrollLeft : 0, sy = bw ? bw.scrollTop : 0;
   const bt = $('.bottom'), bs = bt ? bt.scrollTop : 0;
   const lvl = ZE.dangerLevel(S);
-  const cp = S.phase === 'players' ? ZE.curPlayer(S) : null;
+  const cp = S.phase === 'players' && !RP.zph ? ZE.curPlayer(S) : null;
   const box = boardBox();
-  app.innerHTML = `<div id="game" class="${isLand() ? 'land' : ''}">
+  const zt = RP.zph || S.phase === 'zombies' || (S.phase === 'over' && RP.busy && RP.zseen);
+  app.innerHTML = `<div id="game" class="${isLand() ? 'land' : ''} ${zt ? 'zturn' : ''}">
     <div class="top">
       <b class="rnd">R${S.round}</b>
       <span class="pill" style="background:${ZE.LEVELS[lvl].color}">${ZE.LEVELS[lvl].name}</span>
-      <span class="grow who">${S.phase === 'over' ? '게임 종료' : cp ? `${pl(cp).ai ? '🤖 ' : ''}<b style="color:${pl(cp).color}">${esc(pl(cp).name)}</b> 차례${pl(cp).on ? '' : ' (오프라인)'}` : '<b style="color:#f87171">🧟 좀비 차례</b>'}</span>
+      <span class="grow who">${S.phase === 'over' && !zt ? '게임 종료' : zt ? `<b class="ztag">🧟 좀비 차례</b>${RP.zstep ? ` <span class="zst">${{ atk: '공격 중', move: '이동 중', run: '러너 추가 행동', spawn: '새 좀비 등장' }[RP.zstep]}</span>` : ''}` : cp ? `<span class="ptag">생존자</span> ${pl(cp).ai ? '🤖 ' : ''}<b style="color:${pl(cp).color}">${esc(pl(cp).name)}</b> 차례${pl(cp).on ? '' : ' (오프라인)'}` : '<b style="color:#f87171">🧟 좀비 차례</b>'}</span>
       <span class="net" title="${esc(statusText())}">${statusText().slice(0, 2)}</span>
       <button class="ib" data-a="music">${BGM.on ? '🎵' : '<s>🎵</s>'}</button>
       <button class="ib" data-a="mute">${SND.muted ? '🔇' : '🔊'}</button>
@@ -3137,7 +3229,7 @@ function renderGame() {
     </div>
     <div class="main">
       <div class="bcol">${S.phase === 'players' || S.phase === 'zombies' ? missionHUD() : ''}<div class="boardwrap" style="height:${isLand() ? box.h : Math.min(box.h, Math.round((ZE.getMap(S.mission).H * CS + 8) * scaleBase()) + 2)}px">${boardSVG()}
-        <div class="zoom"><button data-a="zoom" data-z="1">＋</button><button data-a="zoom" data-z="-1">－</button>${ui.zoom > 1.01 ? '<button data-a="zoom" data-z="0" style="font-size:12px">전체</button>' : ''}</div>
+        <div class="zoom"><button data-a="zoom" data-z="1">＋</button><button data-a="zoom" data-z="-1">－</button>${ui.zoom > 1.01 ? '<button data-a="zoom" data-z="0" style="font-size:12px">전체</button>' : ''}${S.phase === 'players' ? `<button class="zpb ${ui.zpath === false ? '' : 'on'}" data-a="zpath" title="좀비 이동 예상 경로">👣</button>` : ''}</div>
         ${cellInfo()}
       </div></div>
       <div class="bottom">${bottom()}</div>
@@ -3208,6 +3300,9 @@ function bottom() {
   const now = performance.now();
   const fd = RP.feed.length ? RP.feed : (S.log || []).slice(-4).map(l => ({ m: l.m, k: l.k, t: 0 }));
   const ticker = `<div class="feed" data-a="view" data-v="log">${fd.slice(-4).reverse().map((f, i) => `<div class="fl k-${f.k || ''} ${i === 0 && f.t ? 'new' : ''} o${i}" ${i === 0 && f.t ? `style="animation-delay:${-(now - f.t) | 0}ms"` : ''}>${esc(f.m)}</div>`).join('')}</div>`;
+  if (S.phase === 'over' && RP.busy) {
+    return h + ticker + `<div class="zsteps">${[['atk', '① 공격', '같은 구역 생존자를 물어요'], ['move', '② 이동', '1칸씩 다가와요'], ['spawn', '③ 스폰', '새 좀비 등장']].map(([k, t, d]) => `<div class="${RP.zstep === k || (RP.zstep === 'run' && k === 'move') ? 'on' : ''}"><b>${t}</b><small>${d}</small></div>`).join('')}</div>`;
+  }
   if (S.phase === 'over') {
     return h + `<div class="card" style="text-align:center"><div style="font-size:24px;font-weight:900">${S.result.win ? '🏆 승리!' : '☠️ 패배'}</div><div class="dim">${esc(S.result.why)}</div>
       ${isHost() ? '<button class="pri" style="margin-top:10px" data-a="restart">대기실로 (다시 하기)</button>' : '<div class="dim" style="margin-top:8px">방장이 새 게임을 열 수 있어요.</div>'}</div>`;
@@ -3215,8 +3310,9 @@ function bottom() {
   const ctl = canControl();
   const s = activeS();
   if (!ctl) {
-    const cpp = S.phase === 'players' ? ZE.curPlayer(S) : null;
+    const cpp = S.phase === 'players' && !RP.zph ? ZE.curPlayer(S) : null;
     h += ticker;
+    if (!cpp) { const st = RP.zstep; h += `<div class="zsteps">${[['atk', '① 공격', '같은 구역 생존자를 물어요'], ['move', '② 이동', '1칸씩 다가와요'], ['spawn', '③ 스폰', '새 좀비 등장']].map(([k, t, d]) => `<div class="${st === k || (st === 'run' && k === 'move') ? 'on' : ''}"><b>${t}</b><small>${d}</small></div>`).join('')}</div>`; }
     h += `<div class="wait">${cpp ? (pl(cpp).ai ? '🤖 AI 동료가 플레이 중…' : `⏳ ${esc(pl(cpp).name)}님이 플레이 중…`) : '🧟 좀비가 움직이는 중…'}</div>`;
     h += `<div class="coach">${cpp ? '기다리는 동안 지도를 보며 작전을 세워 보세요. 내 차례가 되면 알림이 와요. 레벨업 스킬 선택은 언제든 할 수 있어요.' : '좀비가 같은 칸 생존자를 공격하고, 가장 시끄러운 곳으로 움직여요.'}</div>`;
     S.survivors.filter(x => x.owner === me.pid && !x.dead).forEach(x => { h += `<div class="mine"><img class="hd" src="${EMBED_('head_' + x.id)}"><b style="color:${ZE.SURV[x.id].color}">${ZE.SURV[x.id].n}</b> <span class="dim">소지품</span></div>${invHTML(x, false)}`; });
@@ -3246,7 +3342,9 @@ function bottom() {
     const spn = spawnNear(s.cell);
     if (spn) h += `<div class="thrw sp">☠ ${spn === 2 ? '스폰 구역 위에 있어요' : '스폰 구역 바로 옆이에요'} — 좀비 단계 끝에 좀비가 나오는데, '돌진' 카드나 러너면 나오자마자 공격해요. 가능하면 벗어나세요</div>`;
     if (mates.length > 1) h += `<div class="tankrow"><button class="sm ${s.tank ? 'on' : ''}" data-a="tank" data-sid="${s.id}">🛡 ${s.tank ? '부상 먼저 받는 중' : '부상 먼저 받기'}</button><span class="dim">같은 구역에서 물리면 누가 부상을 받을지 정해요 (룰북: 플레이어가 선택). 지정 안 하면 체력 많은 사람부터</span></div>`;
-    if (thr) h += `<div class="thrw ${thr >= mates.reduce((t, x) => t + ZE.hpLeft(x), 0) || (mates.length === 1 && thr >= hp) ? 'dl' : ''}">⚠ 좀비 단계에 최대 <b>${thr}번</b> 물릴 수 있어요 (좀비 1마리당 부상 1 · 남은 체력 ${hp})${thr >= hp ? ' — <b>이대로면 쓰러질 수 있어요!</b> 처치하거나 피하세요' : ''}</div>`; }
+    const dg = dangerOf(s.id);
+    if (dg && dg.lethal) h += `<div class="thrw dl">☠ <b>위험! 이대로 턴을 끝내면 좀비 차례에 쓰러져요</b><br>예상 부상 <b>${dg.dmg}</b> · 남은 체력 <b>${hp}</b> — 좀비를 처치하거나 이 구역을 벗어나세요</div>`;
+    else if (thr) h += `<div class="thrw">⚠ 좀비 차례에 이 구역에서 <b>${thr}번</b> 물려요${dg ? ` (${esc(def.n)} 예상 부상 ${dg.dmg} · 남은 체력 ${hp})` : ''} — 좀비 1마리당 부상 1</div>`; }
   h += `<div class="coach">${coach(s)}</div>`;
   h += invHTML(s, true);
   if (s.pending.length || s.pendSkill.length) return h;
@@ -3507,6 +3605,26 @@ function modals() {
 }
 function briefKey() { return (Net.code || '') + ':' + S.mission + ':' + (S.log[0] ? S.log[0].m : '') + ':' + (S.survivors || []).map(x => x.id).join(''); }
 let banner = null, bannerT = null;
+function phaseBanner(kind, e) {
+  let el = document.getElementById('phB'); if (el) el.remove();
+  el = document.createElement('div'); el.id = 'phB'; el.className = 'pb-' + kind;
+  if (kind === 'z') {
+    const dl = (e.danger || []).map(d => `<div class="pbd ${d.lethal ? 'l' : ''}">${d.lethal ? '☠' : '⚠'} <b>${esc(ZE.SURV[d.sid].n)}</b> 부상 ${d.dmg} 예상 · 체력 ${d.hp}${d.lethal ? ' — 위험!' : ''}</div>`).join('');
+    el.innerHTML = `<div class="pb-in"><div class="pb-t">🧟 좀비 차례</div><div class="pb-s">${e.round}라운드 · 좀비 ${e.n}마리가 움직여요</div><div class="pb-steps"><span>① 공격</span>→<span>② 이동</span>→<span>③ 스폰</span></div>${dl}</div>`;
+  } else el.innerHTML = `<div class="pb-in"><div class="pb-t">👤 생존자 차례</div><div class="pb-s">${e.round}라운드 시작 — 행동하세요</div></div>`;
+  document.body.appendChild(el);
+  const life = kind === 'z' ? 1900 + (e.danger || []).length * 300 : 1350;
+  setTimeout(() => el.classList.add('out'), life); setTimeout(() => el.remove(), life + 300);
+}
+function stepBanner(e) {
+  let el = document.getElementById('stB'); if (el) el.remove();
+  el = document.createElement('div'); el.id = 'stB';
+  const T = { atk: ['① 좀비 공격', '같은 구역에 있는 생존자를 물어요'], move: ['② 좀비 이동', `${e.n}마리가 1칸씩 다가와요`], run: ['🏃 러너 추가 행동', `러너 ${e.n}마리가 한 번 더 움직여요`], spawn: ['③ 스폰', '스폰 지점에서 새 좀비가 나와요'] }[e.s] || ['', ''];
+  el.innerHTML = `<b>${T[0]}</b><small>${T[1]}</small>`;
+  const bw = $('.boardwrap'); if (bw) { const r = bw.getBoundingClientRect(); el.style.top = (r.top + 8) + 'px'; }
+  document.body.appendChild(el);
+  setTimeout(() => el.classList.add('out'), 1250); setTimeout(() => el.remove(), 1500);
+}
 function showBanner(t, c) { if (RP.busy) { RP.after.push(() => showBanner0(t, c)); return; } showBanner0(t, c); }
 function showBanner0(t, c) { banner = { t, c }; clearTimeout(bannerT); render(); bannerT = setTimeout(() => { banner = null; render(); }, 1800); }
 function helpModal() {
@@ -3604,12 +3722,15 @@ document.addEventListener('click', e => {
     }
     case 'askyes': { const q = ui.ask; ui.ask = null; if (q) act(q.op, q.a); render(); break; }
     case 'askno': ui.ask = null; render(); break;
+    case 'zpath': ui.zpath = ui.zpath === false; toast(ui.zpath === false ? '좀비 예상 경로 숨김' : '좀비 예상 경로 표시: 점선 화살표 = 다음 좀비 차례에 움직일 방향'); render(); break;
     case 'tank': act('tank', { sid: D.sid }); break;
     case 'trade': act('trade', { with: D.w }); break;
     case 'trade_done': ui.sel = null; act('trade_done'); break;
     case 'end': {
       const s = activeS();
-      if (s && ZE.actionsLeft(s) > 0 && !confirmBox(`행동이 ${ZE.actionsLeft(s)}번 남았어요. 턴을 끝낼까요?`)) return;
+      const dg = s && dangerOf(s.id), al = s ? ZE.actionsLeft(s) : 0;
+      if (dg && dg.lethal) { ui.ask = { msg: `<b style="color:#f87171;font-size:17px">☠ ${esc(ZE.SURV[s.id].n)}${jo(ZE.SURV[s.id].n, '이', '가')} 쓰러질 위험!</b><br>이대로면 좀비 차례에 <b>부상 ${dg.dmg}</b>을 받아요 (남은 체력 <b>${dg.hp}</b>).${al ? `<br>행동이 <b>${al}번</b> 남았어요 — 좀비를 처치하거나 벗어나세요.` : ''}`, yes: '그래도 턴 종료', op: 'end', a: {} }; ui.mode = 'move'; render(); break; }
+      if (s && al > 0 && !confirmBox(`행동이 ${al}번 남았어요. 턴을 끝낼까요?`)) return;
       ui.mode = 'move'; ui.sel = null; act('end'); break;
     }
     case 'skill': act('skill', { sid: D.sid, i: +D.i }); break;
@@ -3726,7 +3847,7 @@ function playFx(e) {
       const b = fxEl('', p.x, p.y, 'splint', 800);
       b.style.setProperty('--tx', Math.cos(a) * d + 'px'); b.style.setProperty('--ty', Math.sin(a) * d * .75 + 'px'); b.style.setProperty('--fy', (6 + Math.random() * 10) + 'px'); b.style.setProperty('--r', (Math.random() * 360 | 0) + 'deg');
       b.style.width = (2 + Math.random() * 6 | 0) + 'px'; b.style.height = (2 + Math.random() * 2 | 0) + 'px';
-      if (Math.random() < .3) b.style.background = '#a16207';
+      const r = Math.random(); b.style.background = r < .35 ? '#4a3527' : r < .6 ? '#5e4634' : r < .8 ? '#2f241b' : r < .93 ? '#6d5d4a' : '#7a2f22';
     }
     if (e.noisy) { const bw = $('.boardwrap'); if (bw) { bw.classList.remove('dshake'); void bw.offsetWidth; bw.classList.add('dshake'); } }
     return;
@@ -3804,7 +3925,7 @@ function rpFeed(st) {
 }
 function rpDone() {
   if (RP.hold || RP.dying || performance.now() < (RP.holdUntil || 0)) { setTimeout(rpRun, 200); return; }
-  RP.busy = false; RP.dispZ = null; RP.anim = {}; RP.lunge = {}; narr(''); render();
+  RP.busy = false; RP.zph = false; RP.zseen = false; RP.zstep = null; RP.dispZ = null; RP.anim = {}; RP.lunge = {}; narr(''); render();
   const a = RP.after; RP.after = []; a.forEach(f => f());
 }
 function rpRun() {
@@ -3819,7 +3940,7 @@ function rpRun() {
     sfxLines([l]);
     RP.feed.push({ m: l.m.replace(/^──\s*|\s*──$/g, ''), k: l.k, t: performance.now() }); if (RP.feed.length > 8) RP.feed.shift();
     if (zph || l.k === 'hurt' || l.k === 'bad' || l.k === 'good' || /🛡|💨|이동|탐색|문을|획득/.test(l.m)) narr(l.m.replace(/^──\s*|\s*──$/g, ''), l.k);
-    wait = zph ? 1300 : l.k === 'hurt' || l.k === 'bad' ? 800 : 350;
+    wait = zph ? (RP.zph ? 450 : 1300) : l.k === 'hurt' || l.k === 'bad' ? 800 : 350;
     render();
   } else {
     const e = it.e, now = () => performance.now(), map = ZE.getMap(S.mission);
@@ -3829,10 +3950,22 @@ function rpRun() {
       const p = cellPt(e.cell); if (p) { fxEl('', p.x, p.y, 'spawnfog', 900); const cnt = {}; e.zs.forEach(z => cnt[z.t] = (cnt[z.t] || 0) + 1); fxEl('🃏 ' + Object.keys(cnt).map(t => `<b style="color:${t === 'W' ? '#a3c47f' : ZBASE[t][0]}">${t === 'A' ? '괴수' : ZBASE[t][1]} ×${cnt[t]}</b>`).join(' ') + ' 등장', p.x, p.y - 30, 'pop spawn', 1700); }
       SND.play(pickR(['zid1', 'zid2', 'zid3']), .4);
       wait = 750;
+    } else if (e.k === 'zph') {
+      if (e.s === 'start') { RP.zph = true; RP.zseen = true; RP.zstep = null; phaseBanner('z', e); SND.play(pickR(ZGROAN), .5, .1); wait = 2100; }
+      else { RP.zph = false; RP.zstep = null; RP.trails = []; phaseBanner('p', e); SND.play('bell', .35); wait = 1500; }
+    } else if (e.k === 'zstep') {
+      RP.zstep = e.s; stepBanner(e); wait = 950;
     } else if (e.k === 'zmove') {
+      const grp = {}; e.moves.forEach(([id, f, t]) => { const k = f + '>' + t; grp[k] = (grp[k] || 0) + 1; });
+      RP.trails = Object.keys(grp).map(k => { const [f, t] = k.split('>').map(Number); return { f, t, n: grp[k], t0: now() }; });
+      { const hit = e.moves.find(([id, f, t]) => S.survivors.some(x => !x.dead && (x.cell === t || ZE.neighbors(map, t).includes(x.cell)))); if (hit) ensureVisible(hit[2]); }
+      const tick = () => { if ((RP.trails || []).some(tr => now() - tr.t0 < 2600)) { render(); setTimeout(tick, 130); } }; setTimeout(tick, 130);
       e.moves.forEach(([id, f, t]) => { const z = D.find(q => q.id === id); if (!z) return; const A = map.cells[f], B = map.cells[t]; z.cell = t; RP.anim[id] = { k: 'mv', t0: now(), dx: (A.x - B.x) * CS, dy: (A.y - B.y) * CS }; });
-      SND.play('walk', .25); SND.play(pickR(ZGROAN), .3, .2);
-      wait = 700;
+      { const nm = e.moves.length, run = RP.zstep === 'run';
+        SND.play(run ? 'zrun' : pickR(['zstep1', 'zstep2']), Math.min(.9, .45 + nm * .05), .08);
+        if (nm >= 4 && !run) setTimeout(() => SND.play(pickR(['zstep1', 'zstep2']), .35, .12), 170);
+        SND.play(pickR(ZGROAN), .28, .2); }
+      wait = 1150;
     } else if (e.k === 'door') {
       playFx(e); wait = e.noisy ? 650 : 500;
     } else if (e.k === 'zatk') {
@@ -3886,7 +4019,6 @@ Net.on('state', st => {
   if (prev && S.active && prev.active !== S.active) { const a = S.survivors.find(x => x.id === S.active); if (a) setTimeout(() => centerOn(a.cell), 30); }
   if (prev && S.phase === 'players' && prev.phase === 'zombies') SND.play('bell', .35);
   const newRound = prev && prev.round && S.round > prev.round && S.phase !== 'over';
-  if (newRound) setTimeout(() => showBanner('🧟 좀비가 몰려왔어요!', 'z'), 0);
   if (prev && S.phase === 'over' && prev.phase !== 'over') setTimeout(() => showBanner(S.result.win ? '🏆 승리!' : '☠️ 패배…', S.result.win ? 'w' : 'z'), 0);
   if (lastAnnT < 0) lastAnnT = S.atkAnn ? S.atkAnn.t : 0;
   else if (S.atkAnn && S.atkAnn.t !== lastAnnT) { lastAnnT = S.atkAnn.t; if (performance.now() - myAnnT > 2500) { annBanner(S.atkAnn); annHold = performance.now() + 1200; } }
