@@ -1916,7 +1916,7 @@ function init() {
   $('#lnNext').onclick = lnNext;
   $('#lnRetry').onclick = lnStep;
   $('#lnHint').onclick = lnHint;
-  $('#lnCount').textContent = LESSONS.length + '단원 · 기초 → 응용 → 고수 · 직접 두며 배우기';
+  $('#lnCount').textContent = '기초부터 고수까지 ' + LESSONS.length + '단원';
   $('#resume').onclick = resumeAI;
   $$('.goHome').forEach(function (b) { b.onclick = function () { if (G && G.mode === 'online' && G.phase === 'play' && net.started) { ask('대국을 나갈까요?', leaveGame); return; } leaveGame(); }; });
   $$('.goSet').forEach(function (b) { b.onclick = settingsSheet; });
